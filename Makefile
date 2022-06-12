@@ -1,5 +1,6 @@
 NAME = ircserv
-SRCS = # to store paths of all the source files (each path must be written explicitly)
+SRCS = src/Socket.cpp
+HEADERS_DIR = include
 
 MAIN = main.cpp
 
@@ -25,7 +26,7 @@ ERASE = \33[2K
 all: $(NAME)
 
 $(NAME): $(ALL_OBJS_DIRS) $(OBJS) $(MAIN)
-	@$(CC) $(FLAGS) $(MAIN) $(OBJS) -o $(NAME)
+	@$(CC) $(FLAGS) -I${HEADERS_DIR} $(MAIN) $(OBJS) -o $(NAME)
 	@echo "\n$(MAGENTA)$(NAME) $(GREEN)compiled$(RESET)"
 
 $(ALL_OBJS_DIRS): $(OBJS_DIR)
@@ -35,7 +36,7 @@ $(OBJS_DIR):
 	@mkdir -p $(OBJS_DIR)
 
 $(OBJS_DIR)/%.o:%.cpp
-	@$(CC) $(FLAGS) -c $< -o $@ -MMD
+	@$(CC) $(FLAGS) -I${HEADERS_DIR} -c $< -o $@ -MMD
 	@printf "$(ERASE)$(RED)>> $(YELLOW)[$@]$(GREEN)$(RESET)\r"
 
 include $(wildcard $(D_FILES))

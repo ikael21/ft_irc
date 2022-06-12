@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# others directories and files
+.vscode
+ircserv
+ircserv.dSYM
+objs
