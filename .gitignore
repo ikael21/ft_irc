@@ -156,3 +156,8 @@ fabric.properties
 
 # Ignore code-workspaces
 *.code-workspace
+
+# Other unnecessary files
+ircserv
+*.dSYM
+objs
