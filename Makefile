@@ -1,15 +1,17 @@
 NAME = ircserv
-SRCS = # to store paths of all the source files (each path must be written explicitly)
+SRCS = src/Channel.cpp
 
-MAIN = main.cpp
+MAIN = main_ch.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))
 D_FILES = $(patsubst %.cpp,$(OBJS_DIR)/%.d, $(SRCS))
 OBJS_DIR = objs
+INCS_DIR = ./includes
 ALL_OBJS_DIRS = $(sort $(dir $(OBJS)))
 
 CC = clang++ -g
-FLAGS = -Wall -Wextra -Werror -std=c++98
+IFLAGS = -I$(INCS_DIR)
+FLAGS = -Wall -Wextra -Werror -std=c++98 $(IFLAGS)
 
 #colors for beauty
 YELLOW = \033[33;1m
