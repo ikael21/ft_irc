@@ -10,3 +10,21 @@ together to form a network.
 
 ## Basic code style rules
 [Google C++ code style guide](https://google.github.io/styleguide/cppguide.html#Formatting) (only **Formatting** part)
+
+## References
+- [RFC 1459 RUS](https://www.lissyara.su/doc/rfc/rfc1459/)
+- [RFC 2813](https://datatracker.ietf.org/doc/html/rfc2813) (LAST ONE)
+
+## Commands
+- `PASS <password>`
+- `NICK <nickname>`
+- `USER <username> <hostname> <servername> <realname>`
+- `PRIVMSG <receiver> {,<receiver>} <text to be sent>`
+- `NOTICE <nickname> <text>`
+- `JOIN <channel>{,<channel>} [<key>{,<key>}]`
+- `INVITE <nickname> <channel>`
+- `TOPIC <channel> [<topic>]`
+- `KICK <channel> <user> [<comment>]`
+- `PING <server>`
+- `PONG <daemon>`
+- `TIME <server>`
