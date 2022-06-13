@@ -1,17 +1,16 @@
 NAME = ircserv
-SRCS = src/Channel.cpp
+SRCS = src/Socket.cpp src/Channel.cpp
+HEADERS_DIR = include
 
-MAIN = main_ch.cpp
+MAIN = main.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))
 D_FILES = $(patsubst %.cpp,$(OBJS_DIR)/%.d, $(SRCS))
 OBJS_DIR = objs
-INCS_DIR = ./includes
 ALL_OBJS_DIRS = $(sort $(dir $(OBJS)))
 
 CC = clang++ -g
-IFLAGS = -I$(INCS_DIR)
-FLAGS = -Wall -Wextra -Werror -std=c++98 $(IFLAGS)
+FLAGS = -Wall -Wextra -Werror -std=c++98
 
 #colors for beauty
 YELLOW = \033[33;1m
@@ -27,7 +26,7 @@ ERASE = \33[2K
 all: $(NAME)
 
 $(NAME): $(ALL_OBJS_DIRS) $(OBJS) $(MAIN)
-	@$(CC) $(FLAGS) $(MAIN) $(OBJS) -o $(NAME)
+	@$(CC) $(FLAGS) -I${HEADERS_DIR} $(MAIN) $(OBJS) -o $(NAME)
 	@echo "\n$(MAGENTA)$(NAME) $(GREEN)compiled$(RESET)"
 
 $(ALL_OBJS_DIRS): $(OBJS_DIR)
@@ -37,7 +36,7 @@ $(OBJS_DIR):
 	@mkdir -p $(OBJS_DIR)
 
 $(OBJS_DIR)/%.o:%.cpp
-	@$(CC) $(FLAGS) -c $< -o $@ -MMD
+	@$(CC) $(FLAGS) -I${HEADERS_DIR} -c $< -o $@ -MMD
 	@printf "$(ERASE)$(RED)>> $(YELLOW)[$@]$(GREEN)$(RESET)\r"
 
 include $(wildcard $(D_FILES))

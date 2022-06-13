@@ -1,8 +1,13 @@
 #ifndef CHANNEL_HPP
-#define CHANNEL_HPP
+# define CHANNEL_HPP
 
-#include <string>
-#include <vector>
+# include <string>
+# include <vector>
+# include <algorithm>
+# include <stdexcept>
+# include <iostream>
+
+# define FORBIDDEN_CHANNEL_NAME_SYMBOLS "\t\n "
 
 class Channel
 {
@@ -14,6 +19,7 @@ private:
     bool        _isPrivate;
     std::string _mode;
 
+    /* may be in this case we need to use ptrs to objects User */
     std::vector<std::string> _users;
     std::vector<std::string> _invited;
 
@@ -25,13 +31,14 @@ public:
 
     ~Channel();
 
-    bool isPrivate() { return this->_isPrivate; }
+    bool isPrivate() { return _isPrivate; }
 
     void addUser(std::string user);
     void removeUser(std::string user);
 
-    bool userInChannel(std::string user);
-    bool isInvited(std::string user);
+    std::vector<std::string> getUsers() { return _users; }
+
+    bool userOnChannel(std::string user);
 
     void setName(std::string name);
     std::string getName() { return _name; }
@@ -42,6 +49,8 @@ public:
     void setMode(std::string mode);
     std::string getMode() { return _mode; }
 
+    void addToInviteList(std::string user);
+    bool isInvited(std::string user);
 };
 
 #endif

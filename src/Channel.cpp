@@ -1,28 +1,19 @@
-#include "Channel.hpp"
-#include "algorithm"
-#include "iostream"
 
+#include "Channel.hpp"
 
 Channel :: Channel(std::string name, std::string user) :
     _name(name), _operator(user) {}
 
 Channel :: ~Channel() {}
 
-
 void Channel :: _log(std::string message) {
     std::cout << "Channel " << _name << ": " << message << std::endl;
 }
 
 
-bool Channel :: userInChannel(std::string user) {
+bool Channel :: userOnChannel(std::string user) {
     return std::find(_users.begin(), _users.end(), user) != _users.end();
 }
-
-
-bool Channel :: isInvited(std::string user) {
-    return std::find(_invited.begin(), _invited.end(), user) != _invited.end();
-}
-
 
 void  Channel :: addUser(std::string user) {
 
@@ -31,7 +22,7 @@ void  Channel :: addUser(std::string user) {
         return;
     }
 
-    if (userInChannel(user)) {
+    if (userOnChannel(user)) {
         _log("User " + user + " already in channel");
         return;
     }
@@ -42,7 +33,7 @@ void  Channel :: addUser(std::string user) {
 
 void Channel :: removeUser(std::string user) {
     
-    if (!userInChannel(user)) {
+    if (!userOnChannel(user)) {
         _log("User " + user + " not in the channel");
         return;
     }
@@ -53,10 +44,32 @@ void Channel :: removeUser(std::string user) {
 }
 
 void Channel :: setName(std::string name) { 
+    
+    if (name.empty() && name[0] != '#')
+        throw std::invalid_argument("Channel name must starts with '#' symbol");
+
+    if (name.find_first_of(FORBIDDEN_CHANNEL_NAME_SYMBOLS) != std::string::npos) {
+        throw std::invalid_argument("Channel name constains forbidden symbols");
+    }
+
     _name = name;
 }
 
 void Channel :: setTopic(std::string topic) { _topic = topic; }
 
-/** need to resolve */
+
+bool Channel :: isInvited(std::string user) {
+    return std::find(_invited.begin(), _invited.end(), user) != _invited.end();
+}
+
+
+void Channel :: addToInviteList(std::string user) {
+    if (!isInvited(user)) {
+        _invited.push_back(user);
+        _log("User " + user + " added to invite list");
+    }
+}
+
+/* Need to read more about channel MODEs and whitch we need to implement */
+//TODO
 void Channel :: setMode(std::string mode) { _mode = mode; }
