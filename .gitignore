@@ -159,5 +159,5 @@ fabric.properties
 
 # Other unnecessary files
 ircserv
-ircserv.dSYM
+*.dSYM
 objs
