@@ -5,6 +5,11 @@
 #include "exceptions.hpp"
 #include "utils.h"
 
+/**
+ * TODO:
+ * exceptions handler prints incorrect messages
+**/
+
 
 /**
  * 1. Checks if number of given arguments is valid,
