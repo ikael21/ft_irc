@@ -1,17 +1,25 @@
 NAME = ircserv
 HEADERS_DIR = include
-
-SRCS = src/IrcServer.cpp \
-       src/utils/assert_result.cpp
-
 MAIN = main.cpp
+
+SRCS = src/IrcServer.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))
 D_FILES = $(patsubst %.cpp,$(OBJS_DIR)/%.d, $(SRCS))
 OBJS_DIR = objs
 ALL_OBJS_DIRS = $(sort $(dir $(OBJS)))
 
-CC = clang++ -g
+INCLUDES = -I$(HEADERS_DIR)
+
+OS = $(shell uname)
+ifeq ($(OS), Linux)
+  INCLUDES += -I/usr/include/kqueue
+  CC =g++
+else
+  CC = clang++
+endif
+
+CC += -g
 FLAGS = -Wall -Wextra -Werror -std=c++98
 
 #colors for beauty
@@ -28,7 +36,7 @@ ERASE = \33[2K
 all: $(NAME)
 
 $(NAME): $(ALL_OBJS_DIRS) $(OBJS) $(MAIN)
-	@$(CC) $(FLAGS) -I${HEADERS_DIR} $(MAIN) $(OBJS) -o $(NAME)
+	@$(CC) $(FLAGS) $(INCLUDES) $(MAIN) $(OBJS) -o $(NAME)
 	@echo "\n$(MAGENTA)$(NAME) $(GREEN)compiled$(RESET)"
 
 $(ALL_OBJS_DIRS): $(OBJS_DIR)
@@ -38,7 +46,7 @@ $(OBJS_DIR):
 	@mkdir -p $(OBJS_DIR)
 
 $(OBJS_DIR)/%.o:%.cpp
-	@$(CC) $(FLAGS) -I${HEADERS_DIR} -c $< -o $@ -MMD
+	@$(CC) $(FLAGS) $(INCLUDES) -c $< -o $@ -MMD
 	@printf "$(ERASE)$(RED)>> $(YELLOW)[$@]$(GREEN)$(RESET)\r"
 
 include $(wildcard $(D_FILES))
