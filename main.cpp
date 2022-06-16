@@ -5,11 +5,6 @@
 #include "exceptions.hpp"
 #include "utils.h"
 
-/**
- * TODO:
- * exceptions handler prints incorrect messages
-**/
-
 
 /**
  * 1. Checks if number of given arguments is valid,
@@ -18,17 +13,16 @@
  * and is in range 0...65,535
  */
 static void validate_arguments(int argc, char* argv[]) {
-
-  const std::exception& e = InvalidArgument();
+  const InvalidArgument& e = InvalidArgument();
   const int number_of_args = 3;
-  assert_result(argc != number_of_args, e);
+  throw_if_true(argc != number_of_args, e);
 
   const char* digits = "0123456789";
   const int max_port_length = 5;
   std::string port(argv[1]);
-  assert_result(port.find_first_not_of(digits) != std::string::npos, e);
-  assert_result(port.length() > max_port_length, e);
-  assert_result(atoi(port.c_str()) > USHRT_MAX, e);
+  throw_if_true(port.find_first_not_of(digits) != std::string::npos, e);
+  throw_if_true(port.length() > max_port_length, e);
+  throw_if_true(atoi(port.c_str()) > USHRT_MAX, e);
 }
 
 
