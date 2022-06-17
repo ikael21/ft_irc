@@ -34,8 +34,8 @@ public:
 
 private:
 
-  typedef typename std::vector<struct kevent> t_changelist;
-  typedef typename std::vector<struct kevent> t_eventlist;
+  typedef std::vector<struct kevent> t_changelist;
+  typedef std::vector<struct kevent> t_eventlist;
 
 
   IrcServer(const IrcServer&);

@@ -78,7 +78,7 @@ void irc::IrcServer::run() {
 
   _initialize_kqueue();
   _add_read_event(_socket, changes);
-  _events.assign(changes.begin(), changes.end());
+  _events.reserve(changes.size());
   while (true) {
     int events_num = kevent(_kq,
         changes.data(), static_cast<int>(changes.size()),
@@ -94,6 +94,20 @@ void irc::IrcServer::run() {
       NOTE:
       change size of events according to
       new assigned changes and old relevant events
+
+      size_t old_size = _events.size();
+      _events.reserve(old_size + changes.size());
+
+      NOTE:
+      Decrease capacity of _events
+
+      Also I can implement own class that will be similar to std::vector.
+      But it will not initialize the allocated memory with calling constructors.
+      It would have minimum set of methods to manipulate the allocation :
+        * allocate(size_t capacity);
+        * deallocate();
+        * reserve(size_t new_capacity);
+        * data(), to get the pointer to allocated memory
     */
   }
 }
