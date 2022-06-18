@@ -10,6 +10,7 @@ irc::IrcServer::IrcServer(const char* port, const char* password)
     : _password(password) {
   _create_socket();
   _initialize_socket(static_cast<irc::port_type>(atoi(port)));
+  _initialize_kqueue();
 }
 
 
@@ -76,7 +77,6 @@ void irc::IrcServer::run() {
   struct timespec* timeout = NULL; // wait indefinitely
   t_changelist changes;
 
-  _initialize_kqueue();
   _add_read_event(_socket, changes);
   _events.reserve(changes.size());
   while (true) {
@@ -101,13 +101,6 @@ void irc::IrcServer::run() {
       NOTE:
       Decrease capacity of _events
 
-      Also I can implement own class that will be similar to std::vector.
-      But it will not initialize the allocated memory with calling constructors.
-      It would have minimum set of methods to manipulate the allocation :
-        * allocate(size_t capacity);
-        * deallocate();
-        * reserve(size_t new_capacity);
-        * data(), to get the pointer to allocated memory
     */
   }
 }

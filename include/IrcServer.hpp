@@ -11,7 +11,7 @@
 # include <arpa/inet.h>
 # include <fcntl.h>
 # include <unistd.h>
-# include <vector>
+# include "EventsVector.hpp"
 # include "exceptions.hpp"
 # include "utils.h"
 
@@ -34,8 +34,8 @@ public:
 
 private:
 
-  typedef std::vector<struct kevent> t_changelist;
-  typedef std::vector<struct kevent> t_eventlist;
+  typedef irc::EventsVector<struct kevent> t_changelist;
+  typedef irc::EventsVector<struct kevent> t_eventlist;
 
 
   IrcServer(const IrcServer&);
@@ -61,6 +61,6 @@ private:
 };
 
 
-}
+} // namespace irc
 
 #endif // IRC_SERVER_H_

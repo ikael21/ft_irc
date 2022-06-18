@@ -36,7 +36,7 @@ ERASE = \33[2K
 all: $(NAME)
 
 $(NAME): $(ALL_OBJS_DIRS) $(OBJS) $(MAIN)
-	@$(CC) $(FLAGS) $(INCLUDES) $(MAIN) $(OBJS) -o $(NAME)
+	@$(CC) $(FLAGS) $(INCLUDES) $(MAIN) $(OBJS) -o $(NAME) -O3
 	@echo "\n$(MAGENTA)$(NAME) $(GREEN)compiled$(RESET)"
 
 $(ALL_OBJS_DIRS): $(OBJS_DIR)
@@ -46,7 +46,7 @@ $(OBJS_DIR):
 	@mkdir -p $(OBJS_DIR)
 
 $(OBJS_DIR)/%.o:%.cpp
-	@$(CC) $(FLAGS) $(INCLUDES) -c $< -o $@ -MMD
+	@$(CC) $(FLAGS) $(INCLUDES) -c $< -o $@ -MMD -O3
 	@printf "$(ERASE)$(RED)>> $(YELLOW)[$@]$(GREEN)$(RESET)\r"
 
 include $(wildcard $(D_FILES))
