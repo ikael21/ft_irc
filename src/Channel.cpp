@@ -60,7 +60,7 @@ void Channel :: removeUser(std::string username) {
   _log("User " + username + " remove from channel");
 }
 
-std::vector<std::string> Channel :: getUsers() {
+std::vector<std::string> Channel :: getVisibleUsers() {
 
   std::vector<std::string> users;
 

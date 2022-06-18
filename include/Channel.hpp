@@ -60,13 +60,13 @@ private:
   std::string _key;
   size_t      _limit_users;
 
-  std::vector<t_channel_mode> _modes;
 
   /* may be in this case we need to use ptrs to objects User */
   std::vector<std::string> _users;
   std::vector<std::string> _invited;
 
-  std::map<std::string, std::vector<t_user_mode> >  _user_mode;
+  std::vector<t_channel_mode>                      _modes;
+  std::map<std::string, std::vector<t_user_mode> > _user_mode;
 
   std::string _log_message(std::string message);
   void _log(std::string message);
@@ -85,7 +85,8 @@ public:
     void addUser(std::string username);
     void removeUser(std::string username);
 
-    std::vector<std::string> getUsers();
+    std::vector<std::string> getUsers() { return _users; }
+    std::vector<std::string> getVisibleUsers();
 
     bool userOnChannel(std::string username);
 

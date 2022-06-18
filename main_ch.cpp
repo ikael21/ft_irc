@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 
   channel->addUser("User4");
 
-  assert(channel->getUsers().size() == 2L);
+  assert(channel->getVisibleUsers().size() == 2L);
   channel->removeUserMode("User1", "i");
   assert(channel->getUsers().size() == 3L);
 
