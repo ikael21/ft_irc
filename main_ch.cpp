@@ -1,34 +1,60 @@
 
 #include <iostream>
+#include <assert.h>
 #include "Channel.hpp"
 
 int main(int argc, char **argv) {
 
-    if (argc != 1) {
-        std::cout << "Usage: " << argv[0] << std::endl;
-        return (1);
-    }
+  if (argc != 1) {
+    std::cout << "Usage: " << argv[0] << std::endl;
+    return (1);
+  }
 
-    Channel *channel = new Channel();
-    
+  Channel *channel = new Channel();
 
-    channel->setName("#ch1");
+  channel->setName("#ch1");
 
-    channel->addUser("User1");
-    channel->addUser("User2");
-    channel->addUser("User3");
+  channel->addUser("User1");
+  channel->addUser("User2");
+  channel->addUser("User3");
 
-    channel->removeUser("User2");
+  assert(channel->getUsers().size() == 3L);
 
-    std::cout << channel->userOnChannel("User1") << std::endl;
+  channel->removeUser("User2");
+  assert(channel->getUsers().size() == 2L);
 
-    std::vector<std::string> users = channel->getUsers();
+  std::cout << "User1 on channel: " << channel->userOnChannel("User1") << std::endl;
+  assert(channel->userOnChannel("User1"));
 
-    for (size_t i = 0; i < users.size(); ++i) {
-        std::cout << users[i] << ", " << std::endl;
-    }
+  std::cout << "Channel #ch1 is private: " << channel->isPrivate() << std::endl;
+  assert(channel->isPrivate() == false);
 
-    std::cout << std::endl;
+  channel->addChannelMode("p");
+  std::cout << "Channel #ch1 is private: " << channel->isPrivate() << std::endl;
+  assert(channel->isPrivate() == true);
 
-    return (0);
+  channel->addUser("User4");
+  assert(channel->getUsers().size() == 2L);
+
+  channel->setName("#ch2");
+  assert(channel->getName() == "#ch2");
+  std::cout << "Users on channel " << channel->getUsers().size() << std::endl;
+
+  channel->addModeToUser("User1", "io");
+  assert(channel->userIsOper("User1") == true);
+  std::cout << "User1 is oper: " << channel->userIsOper("User1") << std::endl;
+  std::cout << "Users on channel " << channel->getUsers().size() << std::endl;
+
+
+  channel->removeChannelMode("p");
+  std::cout << "Channel #ch2 is private: " << channel->isPrivate() << std::endl;
+  assert(channel->isPrivate() == false);
+
+  channel->addUser("User4");
+
+  assert(channel->getUsers().size() == 2L);
+  channel->removeUserMode("User1", "i");
+  assert(channel->getUsers().size() == 3L);
+
+  return (0);
 }

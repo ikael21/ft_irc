@@ -1,8 +1,8 @@
 NAME = ircserv
-SRCS = src/Socket.cpp src/Channel.cpp
+SRCS = src/Socket.cpp src/Channel.cpp src/User.cpp
 HEADERS_DIR = include
 
-MAIN = main.cpp
+MAIN = main_ch.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))
 D_FILES = $(patsubst %.cpp,$(OBJS_DIR)/%.d, $(SRCS))
