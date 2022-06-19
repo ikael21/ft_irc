@@ -14,7 +14,7 @@ INCLUDES = -I$(HEADERS_DIR)
 OS = $(shell uname)
 ifeq ($(OS), Linux)
   INCLUDES += -I/usr/include/kqueue
-  CC =g++
+  CC = g++
 else
   CC = clang++
 endif
