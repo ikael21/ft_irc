@@ -1,6 +1,11 @@
 NAME = ircserv
-SRCS = src/Socket.cpp src/Channel.cpp src/User.cpp
+
 HEADERS_DIR = include
+
+SRCS = src/IrcServer.cpp \
+       src/utils/assert_result.cpp \
+       src/Channel.cpp \
+       src/User.cpp
 
 MAIN = main.cpp
 
