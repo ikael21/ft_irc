@@ -22,9 +22,12 @@ together to form a network.
 - `PRIVMSG <receiver> {,<receiver>} <text to be sent>`
 - `NOTICE <nickname> <text>`
 - `JOIN <channel>{,<channel>} [<key>{,<key>}]`
+- `LIST [<channel>{,<channel>} [<server>]]`
+- `NAMES [<channel>{,<channel>}]`
 - `INVITE <nickname> <channel>`
 - `TOPIC <channel> [<topic>]`
 - `KICK <channel> <user> [<comment>]`
 - `PING <server>`
 - `PONG <daemon>`
 - `TIME <server>`
+- `USERS [<server>]`
