@@ -22,59 +22,55 @@ void Channel :: _log(std::string message) {
 }
 
 
-bool Channel :: userOnChannel(const std::string& username) {
-  return std::find(_users.begin(), _users.end(), username) != _users.end();
+bool Channel :: userOnChannel(User& user) {
+  return std::find(_users.begin(), _users.end(), &user) != _users.end();
 }
 
-void Channel :: addUser(std::string username) {
+void Channel :: addUser(User &user) {
 
-    if (_users.size() == _limit_users) {
-        _log("Channel is full");
-        return;
-    }
-
-    if (isPrivate() && !isInvited(username)) {
-        _log("User " + username + " not in the invited list");
-        return;
-    }
-
-    if (userOnChannel(username)) {
-        _log("User " + username + " already in channel");
-        return;
-    }
-
-    _users.push_back(username);
-    _user_mode[username] = std::vector<t_user_mode>();
-
-    _log("User " + username + " added to channel");
-}
-
-void Channel :: removeUser(std::string username) {
-
-  if (!userOnChannel(username)) {
-    _log("User " + username + " not in the channel");
+  if (_users.size() == _limit_users) {
+    _log("Channel is full");
     return;
   }
 
-  _users.erase(std::find(_users.begin(), _users.end(), username));
-  _user_mode.erase(username);
-  _log("User " + username + " remove from channel");
+  if (isPrivate() && !isInvited(user)) {
+    _log("User " + user.getUsername() + " not in the invited list");
+    return;
+  }
+
+  if (userOnChannel(user)) {
+    _log("User " + user.getUsername() + " already in channel");
+    return;
+  }
+
+  _users.push_back(&user);
+  // _user_mode[username] = std::vector<t_user_mode>();
+
+  _log("User " +  user.getUsername() + " added to channel");
 }
 
-std::vector<std::string> Channel :: getVisibleUsers() {
+void Channel :: removeUser(User &user) {
 
-  std::vector<std::string> users;
+  if (!userOnChannel(user)) {
+    _log("User " + user.getUsername() + " not in the channel");
+    return;
+  }
+
+  _users.erase(std::find(_users.begin(), _users.end(), &user));
+  // _user_mode.erase(username);
+  _log("User " +  user.getUsername() + " remove from channel");
+}
+
+std::vector<User *> Channel :: getVisibleUsers() {
+
+  std::vector<User *> users;
 
   for (size_t i = 0; i < _users.size(); ++i) {
 
-    if (_userHaveMode(_users[i], U_INVISIBLE))
+    if (_userHaveMode(*_users[i], U_INVISIBLE))
       continue;
 
-    if (_userHaveMode(_users[i], U_OPERATOR)) {
-      users.push_back("@" + _users[i]);
-    } else {
-      users.push_back(_users[i]);
-    }
+    users.push_back(_users[i]);
   }
 
   return users;
@@ -95,17 +91,17 @@ void Channel :: setName(std::string name) {
 void Channel :: setTopic(std::string topic) { _topic = topic; }
 
 
-bool Channel :: isInvited(const std::string& username) {
-  return std::find(_invited.begin(), _invited.end(), username) != _invited.end();
+bool Channel :: isInvited(User& user) {
+  return std::find(_invited.begin(), _invited.end(), &user) != _invited.end();
 }
 
 
-void Channel :: addToInviteList(std::string username) {
-  if (!isInvited(username)) {
-    _invited.push_back(username);
-    _log("User " + username + " added to invite list");
+void Channel :: addToInviteList(User& user) {
+  if (!isInvited(user)) {
+    _invited.push_back(&user);
+    _log("User " + user.getUsername() + " added to invite list");
   } else {
-    _log("User " + username + " already invited");
+    _log("User " + user.getUsername() + " already invited");
   }
 }
 
@@ -145,16 +141,16 @@ bool Channel :: haveMode(t_channel_mode mode) {
 }
 
 
-bool Channel ::_userHaveMode(const std::string& username, t_user_mode mode) {
-  return std::find(_user_mode[username].begin(), _user_mode[username].end(), mode) != _user_mode[username].end();
+bool Channel ::_userHaveMode(User& user, t_user_mode mode) {
+  return std::find(_user_mode[&user].begin(), _user_mode[&user].end(), mode) != _user_mode[&user].end();
 }
 
-void Channel :: addModeToUser(const std::string& username, const std::string& mode) {
+void Channel :: addModeToUser(User& user, const std::string& mode) {
 
   std::vector<t_user_mode> modes(USER_MODES, USER_MODES + sizeof(USER_MODES) / sizeof(USER_MODES[0]));
 
-  if (!userOnChannel(username)) {
-    _log("User " + username + " is not on channel");
+  if (!userOnChannel(user)) {
+    _log("User " + user.getUsername() + " is not on channel");
     return;
   }
 
@@ -166,33 +162,33 @@ void Channel :: addModeToUser(const std::string& username, const std::string& mo
       throw std::invalid_argument(_log_message("Invalid mode '" + mode + "' for user"));
     }
 
-    if (!_userHaveMode(username, cur_mode)) {
-      _user_mode[username].push_back(cur_mode);
+    if (!_userHaveMode(user, cur_mode)) {
+      _user_mode[&user].push_back(cur_mode);
     }
   }
 }
 
-void Channel :: removeUserMode(const std::string& username, const std::string& mode) {
+void Channel :: removeUserMode(User& user, const std::string& mode) {
 
-  if (!userOnChannel(username)) {
-    _log("User " + username + " is not on channel");
+  if (!userOnChannel(user)) {
+    _log("User " + user.getUsername() + " is not on channel");
     return;
   }
 
-  std::vector<t_user_mode> modes = _user_mode[username];
+  std::vector<t_user_mode> modes = _user_mode[&user];
 
   for (size_t i = 0; i < mode.size(); ++i) {
     t_user_mode cur_mode = static_cast<t_user_mode>(mode[i]);
-    _user_mode[username].erase(std::find(_user_mode[username].begin(), _user_mode[username].end(), cur_mode));
+    _user_mode[&user].erase(std::find(_user_mode[&user].begin(), _user_mode[&user].end(), cur_mode));
   }
 }
 
-bool Channel :: userIsOper(const std::string& username) {
+bool Channel :: userIsOper(User& user) {
 
-  if (!userOnChannel(username)) {
-    _log("User " + username + " is not on channel");
+  if (!userOnChannel(user)) {
+    _log("User " + user.getUsername() + " is not on channel");
     return false;
   }
 
-  return _userHaveMode(username, U_OPERATOR);
+  return _userHaveMode(user, U_OPERATOR);
 }

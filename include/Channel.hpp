@@ -8,6 +8,8 @@
 # include <stdexcept>
 # include <iostream>
 
+# include "User.hpp"
+
 /* Список доступных режимов канала:
  *   o - брать/давать привилегии операторов канала
  *   p - флаг приватности канала;
@@ -59,13 +61,13 @@ class Channel
 
   bool isPrivate();
 
-  void addUser(std::string username);
-  void removeUser(std::string username);
+  void addUser(User& user);
+  void removeUser(User& user);
 
-  std::vector<std::string> getUsers() { return _users; }
-  std::vector<std::string> getVisibleUsers();
+  std::vector<User *> getUsers() { return _users; }
+  std::vector<User *> getVisibleUsers();
 
-  bool userOnChannel(const std::string& username);
+  bool userOnChannel(User& user);
 
   void setName(std::string channelName);
   std::string getName() { return _name; }
@@ -79,8 +81,8 @@ class Channel
   std::vector<t_channel_mode> getChannelModes() { return _modes; }
   bool haveMode(t_channel_mode mode);
 
-  void addToInviteList(std::string username);
-  bool isInvited(const std::string& username);
+  void addToInviteList(User& user);
+  bool isInvited(User& user);
 
   void setKey(std::string key);
   std::string getKey() { return _key; }
@@ -88,10 +90,10 @@ class Channel
   void setLimitUsers(int limit);
   int getLimitUsers() { return _limit_users; }
 
-  void addModeToUser(const std::string& username, const std::string& mode);
-  void removeUserMode(const std::string& username, const std::string& mode);
+  void addModeToUser(User& user, const std::string& mode);
+  void removeUserMode(User& user, const std::string& mode);
 
-  bool userIsOper(const std::string& username);
+  bool userIsOper(User& user);
 
  private:
   std::string _name;
@@ -100,18 +102,17 @@ class Channel
   std::string _key;
   size_t      _limit_users;
 
-  /* may be in this case we need to use ptrs to objects User */
-  std::vector<std::string> _users;
-  std::vector<std::string> _invited;
+  std::vector<User *> _users;
+  std::vector<User *> _invited;
 
-  std::vector<t_channel_mode>                      _modes;
-  std::map<std::string, std::vector<t_user_mode> > _user_mode;
+  std::vector<t_channel_mode>                 _modes;
+  std::map<User *, std::vector<t_user_mode> > _user_mode;
 
   std::string _log_message(std::string message);
   void _log(std::string message);
 
-  bool _userHaveMode(const std::string& username, t_user_mode mode);
-  void _changeChannelMode(const std::string& mode, bool remove);
+  bool _userHaveMode(User& user, t_user_mode mode);
+  void _changeChannelMode(const std::string& user, bool remove);
 };
 
 #endif

@@ -15,7 +15,7 @@ class User {
   void setFD(int fd) { _fd = fd; }
   int getFD() { return _fd; }
 
-  void setUsername(int username) { _username = username; }
+  void setUsername(std::string username) { _username = username; }
   std::string getUsername() { return _username; }
 
   void setHostname(int hostname) { _hostname = hostname; }
