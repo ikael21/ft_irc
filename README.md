@@ -31,3 +31,10 @@ together to form a network.
 - `PONG <daemon>`
 - `TIME <server>`
 - `USERS [<server>]`
+
+For `Linux` please install [libkqueue](https://github.com/mheily/libkqueue).
+
+```bash
+sudo apt update
+sudo apt install libkqueue-dev
+```

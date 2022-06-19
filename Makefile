@@ -5,11 +5,11 @@ HEADERS_DIR = include
 SRCS = src/IrcServer.cpp \
        src/Channel.cpp \
        src/User.cpp \
-       src/Errors.cpp
+       src/errors.cpp
 
 MAIN = main.cpp
 
-SRCS = src/IrcServer.cpp
+# SRCS = src/IrcServer.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))
 D_FILES = $(patsubst %.cpp,$(OBJS_DIR)/%.d, $(SRCS))
@@ -21,6 +21,7 @@ INCLUDES = -I$(HEADERS_DIR)
 OS = $(shell uname)
 ifeq ($(OS), Linux)
   INCLUDES += -I/usr/include/kqueue
+	LDFLAGS += -lkqueue
   CC = g++
 else
   CC = clang++
@@ -43,7 +44,7 @@ ERASE = \33[2K
 all: $(NAME)
 
 $(NAME): $(ALL_OBJS_DIRS) $(OBJS) $(MAIN)
-	@$(CC) $(FLAGS) $(INCLUDES) $(MAIN) $(OBJS) -o $(NAME) -O3
+	@$(CC) $(FLAGS) $(INCLUDES) $(MAIN) $(OBJS) -o $(NAME) -O3 $(LDFLAGS)
 	@echo "\n$(MAGENTA)$(NAME) $(GREEN)compiled$(RESET)"
 
 $(ALL_OBJS_DIRS): $(OBJS_DIR)

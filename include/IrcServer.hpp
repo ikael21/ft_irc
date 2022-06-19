@@ -11,6 +11,7 @@
 # include <arpa/inet.h>
 # include <fcntl.h>
 # include <unistd.h>
+# include <stdlib.h>
 # include "EventsVector.hpp"
 # include "exceptions.hpp"
 # include "utils.h"
