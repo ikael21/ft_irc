@@ -8,8 +8,6 @@
 # include <stdexcept>
 # include <iostream>
 
-# include "User.hpp"
-
 /* Список доступных режимов канала:
  *   o - брать/давать привилегии операторов канала
  *   p - флаг приватности канала;
@@ -53,13 +51,54 @@ typedef enum    s_user_mode {
 
 class Channel
 {
-private:
+ public:
+  Channel();
+  Channel(std::string channelName, std::string username);
+
+  ~Channel();
+
+  bool isPrivate();
+
+  void addUser(std::string username);
+  void removeUser(std::string username);
+
+  std::vector<std::string> getUsers() { return _users; }
+  std::vector<std::string> getVisibleUsers();
+
+  bool userOnChannel(const std::string& username);
+
+  void setName(std::string channelName);
+  std::string getName() { return _name; }
+
+  void setTopic(std::string topic);
+  std::string getTopic() { return _topic; }
+
+  void addChannelMode(const std::string& mode);
+  void removeChannelMode(const std::string& mode);
+
+  std::vector<t_channel_mode> getChannelModes() { return _modes; }
+  bool haveMode(t_channel_mode mode);
+
+  void addToInviteList(std::string username);
+  bool isInvited(const std::string& username);
+
+  void setKey(std::string key);
+  std::string getKey() { return _key; }
+
+  void setLimitUsers(int limit);
+  int getLimitUsers() { return _limit_users; }
+
+  void addModeToUser(const std::string& username, const std::string& mode);
+  void removeUserMode(const std::string& username, const std::string& mode);
+
+  bool userIsOper(const std::string& username);
+
+ private:
   std::string _name;
   std::string _operator;
   std::string _topic;
   std::string _key;
   size_t      _limit_users;
-
 
   /* may be in this case we need to use ptrs to objects User */
   std::vector<std::string> _users;
@@ -71,50 +110,8 @@ private:
   std::string _log_message(std::string message);
   void _log(std::string message);
 
-  bool _userHaveMode(std::string username, t_user_mode);
-  void _changeChannelMode(std::string mode, bool remove);
-
-public:
-    Channel();
-    Channel(std::string channelName, std::string username);
-
-    ~Channel();
-
-    bool isPrivate();
-
-    void addUser(std::string username);
-    void removeUser(std::string username);
-
-    std::vector<std::string> getUsers() { return _users; }
-    std::vector<std::string> getVisibleUsers();
-
-    bool userOnChannel(std::string username);
-
-    void setName(std::string channelName);
-    std::string getName() { return _name; }
-
-    void setTopic(std::string topic);
-    std::string getTopic() { return _topic; }
-
-    void addChannelMode(std::string mode);
-    void removeChannelMode(std::string mode);
-
-    std::vector<t_channel_mode> getChannelModes() { return _modes; }
-    bool haveMode(t_channel_mode mode);
-
-    void addToInviteList(std::string username);
-    bool isInvited(std::string username);
-
-    void setKey(std::string key);
-    std::string getKey() { return _key; }
-
-    void setLimitUsers(int limit);
-    int getLimitUsers() { return _limit_users; }
-
-    void addModeToUser(std::string username, std::string mode);
-    void removeUserMode(std::string username, std::string mode);
-
-    bool userIsOper(std::string username);
+  bool _userHaveMode(const std::string& username, t_user_mode mode);
+  void _changeChannelMode(const std::string& mode, bool remove);
 };
 
 #endif

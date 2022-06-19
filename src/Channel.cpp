@@ -12,6 +12,7 @@ Channel :: Channel(std::string name, std::string user) :
 
 Channel :: ~Channel() {}
 
+
 std::string Channel ::_log_message(std::string message) {
   return "Channel " + _name + ": " + message;
 }
@@ -21,7 +22,7 @@ void Channel :: _log(std::string message) {
 }
 
 
-bool Channel :: userOnChannel(std::string username) {
+bool Channel :: userOnChannel(const std::string& username) {
   return std::find(_users.begin(), _users.end(), username) != _users.end();
 }
 
@@ -94,7 +95,7 @@ void Channel :: setName(std::string name) {
 void Channel :: setTopic(std::string topic) { _topic = topic; }
 
 
-bool Channel :: isInvited(std::string username) {
+bool Channel :: isInvited(const std::string& username) {
   return std::find(_invited.begin(), _invited.end(), username) != _invited.end();
 }
 
@@ -108,26 +109,28 @@ void Channel :: addToInviteList(std::string username) {
   }
 }
 
-void Channel :: addChannelMode(std::string mode) { _changeChannelMode(mode, false); }
-void Channel :: removeChannelMode(std::string mode) { _changeChannelMode(mode, true); }
+void Channel :: addChannelMode(const std::string& mode) { _changeChannelMode(mode, false); }
+void Channel :: removeChannelMode(const std::string& mode) { _changeChannelMode(mode, true); }
 
-void Channel :: _changeChannelMode(std::string mode, bool remove) {
+void Channel :: _changeChannelMode(const std::string& mode, bool remove) {
 
   std::vector<t_channel_mode> all_mode(CHANNEL_MODES, CHANNEL_MODES + sizeof(CHANNEL_MODES) / sizeof(CHANNEL_MODES[0]));
 
   for (size_t i = 0; i < mode.size(); ++i) {
 
-    if (std::find(all_mode.begin(), all_mode.end(), (t_channel_mode)mode[i]) == all_mode.end()) {
+    t_channel_mode cur_mode = static_cast<t_channel_mode>(mode[i]);
+
+    if (std::find(all_mode.begin(), all_mode.end(), cur_mode) == all_mode.end()) {
       throw std::invalid_argument(_log_message("Invalid mode '" + mode + "' for channel"));
     }
 
-    bool alreadyHave = haveMode((t_channel_mode)mode[i]);
+    bool alreadyHave = haveMode(cur_mode);
 
     if (remove && alreadyHave) {
-      _modes.erase(std::find(_modes.begin(), _modes.end(), (t_channel_mode)mode[i]));
+      _modes.erase(std::find(_modes.begin(), _modes.end(), cur_mode));
     }
     else if (!remove && !alreadyHave) {
-      _modes.push_back((t_channel_mode)mode[i]);
+      _modes.push_back(cur_mode);
     }
 
   }
@@ -142,11 +145,11 @@ bool Channel :: haveMode(t_channel_mode mode) {
 }
 
 
-bool Channel ::_userHaveMode(std::string username, t_user_mode mode) {
+bool Channel ::_userHaveMode(const std::string& username, t_user_mode mode) {
   return std::find(_user_mode[username].begin(), _user_mode[username].end(), mode) != _user_mode[username].end();
 }
 
-void Channel :: addModeToUser(std::string username, std::string mode) {
+void Channel :: addModeToUser(const std::string& username, const std::string& mode) {
 
   std::vector<t_user_mode> modes(USER_MODES, USER_MODES + sizeof(USER_MODES) / sizeof(USER_MODES[0]));
 
@@ -157,17 +160,19 @@ void Channel :: addModeToUser(std::string username, std::string mode) {
 
   for (size_t i = 0; i < mode.size(); ++i) {
 
-    if (std::find(modes.begin(), modes.end(), (t_user_mode)mode[i]) == modes.end()) {
+    t_user_mode cur_mode = static_cast<t_user_mode>(mode[i]);
+
+    if (std::find(modes.begin(), modes.end(), cur_mode) == modes.end()) {
       throw std::invalid_argument(_log_message("Invalid mode '" + mode + "' for user"));
     }
 
-    if (!_userHaveMode(username, (t_user_mode)mode[i])) {
-      _user_mode[username].push_back((t_user_mode)mode[i]);
+    if (!_userHaveMode(username, cur_mode)) {
+      _user_mode[username].push_back(cur_mode);
     }
   }
 }
 
-void Channel :: removeUserMode(std::string username, std::string mode) {
+void Channel :: removeUserMode(const std::string& username, const std::string& mode) {
 
   if (!userOnChannel(username)) {
     _log("User " + username + " is not on channel");
@@ -177,11 +182,12 @@ void Channel :: removeUserMode(std::string username, std::string mode) {
   std::vector<t_user_mode> modes = _user_mode[username];
 
   for (size_t i = 0; i < mode.size(); ++i) {
-    _user_mode[username].erase(std::find(_user_mode[username].begin(), _user_mode[username].end(), (t_user_mode)mode[i]));
+    t_user_mode cur_mode = static_cast<t_user_mode>(mode[i]);
+    _user_mode[username].erase(std::find(_user_mode[username].begin(), _user_mode[username].end(), cur_mode));
   }
 }
 
-bool Channel :: userIsOper(std::string username) {
+bool Channel :: userIsOper(const std::string& username) {
 
   if (!userOnChannel(username)) {
     _log("User " + username + " is not on channel");

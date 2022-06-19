@@ -7,17 +7,7 @@
 
 class User {
 
-private:
-  int         _fd;
-  std::string _username;
-  std::string _hostname;
-  std::string _servername;
-  std::string _realname;
-
-  std::string _afkMessage;
-  std::string _quitMessage;
-
-public:
+ public:
   User();
   User(int fd, std::string username, std::string hostname, std::string servername, std::string realname);
   ~User();
@@ -45,6 +35,15 @@ public:
 
   friend bool operator==(const User& left, const User& right);
 
+ private:
+  int         _fd;
+  std::string _username;
+  std::string _hostname;
+  std::string _servername;
+  std::string _realname;
+
+  std::string _afkMessage;
+  std::string _quitMessage;
 };
 
 # endif
