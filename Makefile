@@ -5,7 +5,8 @@ HEADERS_DIR = include
 SRCS = src/IrcServer.cpp \
        src/utils/assert_result.cpp \
        src/Channel.cpp \
-       src/User.cpp
+       src/User.cpp \
+			 src/Errors.cpp
 
 MAIN = main.cpp
 

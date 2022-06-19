@@ -30,3 +30,4 @@ together to form a network.
 - `PING <server>`
 - `PONG <daemon>`
 - `TIME <server>`
+- `USERS [<server>]`
