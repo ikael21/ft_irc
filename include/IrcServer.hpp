@@ -11,6 +11,7 @@
 # include <arpa/inet.h>
 # include <fcntl.h>
 # include <unistd.h>
+# include "EventsVector.hpp"
 # include "exceptions.hpp"
 # include "utils.h"
 
@@ -33,17 +34,24 @@ public:
 
 private:
 
+  typedef irc::EventsVector<struct kevent> t_changelist;
+  typedef irc::EventsVector<struct kevent> t_eventlist;
+
+
   IrcServer(const IrcServer&);
   IrcServer& operator=(const IrcServer&);
 
   void _create_socket();
   void _initialize_socket(port_type port);
+  void _initialize_kqueue();
+  void _add_read_event(int fd, t_changelist& changelist);
+  void _add_write_event(int fd, t_changelist& changelist);
 
 
   const std::string _password;
   int               _socket;
   int               _kq;
-  struct kevent     _event_set;
+  t_eventlist       _events;
 
 
   static const char*  DEFAULT_IP;
@@ -53,6 +61,6 @@ private:
 };
 
 
-}
+} // namespace irc
 
 #endif // IRC_SERVER_H_

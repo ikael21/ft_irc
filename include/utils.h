@@ -1,13 +1,13 @@
 #ifndef UTILS_H_
 # define UTILS_H_
-# include <exception>
 
 
 /**
  * throws an exception if result equals true
 **/
-void  assert_result(const bool result,
-                    const std::exception& e);
+template<class Exception>
+void  throw_if_true(bool result, const Exception& e)
+{ if (result) throw e; }
 
 
 #endif // UTILS_H_
