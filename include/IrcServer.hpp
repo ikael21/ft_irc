@@ -48,7 +48,6 @@ private:
   void _initialize_socket(port_type port);
   void _initialize_kqueue();
   void _add_read_event(int fd, t_changelist& changelist);
-  void _add_read_event(const User& new_user, t_changelist& changelist);
   void _add_write_event(int fd, t_changelist& changelist);
   void _add_new_user() {}
   void _read_handler() {}
