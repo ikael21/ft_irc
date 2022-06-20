@@ -9,11 +9,12 @@ class User {
 
  public:
   User();
+  User(int fd) : _fd(fd) {}
   User(int fd, std::string username, std::string hostname, std::string servername, std::string realname);
   ~User();
 
   void setFD(int fd) { _fd = fd; }
-  int getFD() { return _fd; }
+  int getFD() const { return _fd; }
 
   void setUsername(std::string username) { _username = username; }
   std::string getUsername() { return _username; }
