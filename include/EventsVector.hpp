@@ -9,6 +9,14 @@ namespace irc {
 template<class T>
 class EventsVector {
 
+private:
+
+  typedef typename std::vector<T>              internal_vector;
+  typedef typename internal_vector::iterator   iterator;
+  typedef typename internal_vector::pointer    pointer;
+  typedef typename internal_vector::reference  reference;
+  typedef typename internal_vector::size_type  size_type;
+
 public:
 
   EventsVector() {}
@@ -16,8 +24,8 @@ public:
   EventsVector(const EventsVector& other)
   : _events(other._events) {}
 
-  template<class InputIt>
-  EventsVector(InputIt _first, InputIt _last)
+  template<class InputIterator>
+  EventsVector(InputIterator _first, InputIterator _last)
   : _events(_first, _last) {}
 
   ~EventsVector() {}
@@ -30,44 +38,38 @@ public:
   }
 
 
-  template<class InputIt>
-  void assign(InputIt _first, InputIt _last)
+  template<class InputIterator>
+  void assign(InputIterator _first, InputIterator _last)
   { _events.assign(_first, _last); }
 
 
-  typename std::vector<T>::iterator
-  begin() { return _events.begin(); }
-
-  typename std::vector<T>::iterator
-  end() { return _events.end(); }
+  iterator begin() { return _events.begin(); }
+  iterator end() { return _events.end(); }
 
 
-  T& operator[](size_t pos) { return _events[pos]; }
+  reference operator[](size_type pos) { return _events[pos]; }
 
 
-  void push_back(const T& value)
-  { _events.push_back(value); }
+  void push_back(const reference value) { _events.push_back(value); }
 
-  void reserve(size_t new_cap)
-  { _events.reserve(new_cap); }
+  void reserve(size_type new_cap) { _events.reserve(new_cap); }
 
 
   void shrink_to_fit() {
-    std::vector<T> _new(_events.begin(), _events.end());
+    internal_vector _new(_events.begin(), _events.end());
     _events.swap(_new);
   }
 
 
-  size_t size() const
-  { return _events.size(); }
+  size_type size() const { return _events.size(); }
 
+  void clear() { _events.clear(); }
 
-  T* data()
-  { return _events.data(); }
+  pointer data() { return _events.data(); }
 
 private:
 
-  std::vector<T> _events;
+  internal_vector _events;
 
 };
 

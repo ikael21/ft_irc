@@ -13,16 +13,15 @@
  * and is in range 0...65,535
  */
 static void validate_arguments(int argc, char* argv[]) {
-  const InvalidArgument& e = InvalidArgument();
   const int number_of_args = 3;
-  throw_if_true(argc != number_of_args, e);
+  throw_if_true<InvalidArgument>(argc != number_of_args);
 
   const char* digits = "0123456789";
   const int max_port_length = 5;
   std::string port(argv[1]);
-  throw_if_true(port.find_first_not_of(digits) != std::string::npos, e);
-  throw_if_true(port.length() > max_port_length, e);
-  throw_if_true(atoi(port.c_str()) > USHRT_MAX, e);
+  throw_if_true<InvalidArgument>(port.find_first_not_of(digits) != std::string::npos);
+  throw_if_true<InvalidArgument>(port.length() > max_port_length);
+  throw_if_true<InvalidArgument>(atoi(port.c_str()) > USHRT_MAX);
 }
 
 

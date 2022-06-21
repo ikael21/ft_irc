@@ -36,9 +36,9 @@ public:
 
 private:
 
-  typedef irc::EventsVector<struct kevent> t_changelist;
-  typedef irc::EventsVector<struct kevent> t_eventlist;
-  typedef std::vector<User>                t_userslist;
+  typedef irc::EventsVector<struct kevent>  t_changelist;
+  typedef irc::EventsVector<struct kevent>  t_eventlist;
+  typedef std::vector<User>                 t_userlist;
 
 
   IrcServer(const IrcServer&);
@@ -47,19 +47,22 @@ private:
   void _create_socket();
   void _initialize_socket(port_type port);
   void _initialize_kqueue();
-  void _add_read_event(int fd, t_changelist& changelist);
-  void _add_write_event(int fd, t_changelist& changelist);
-  void _add_new_user() {}
-  void _read_handler() {}
-  void _write_handler() {}
+  int  _wait_for_events(t_changelist &changes);
+
+  void _add_read_event(int fd, t_changelist &changes);
+  void _add_write_event(int fd, t_changelist &changes);
+
+  void _accept_handler(t_changelist& changes);
+  void _read_handler();
+  void _write_handler();
 
 
   const std::string _password;
   int               _socket;
   int               _kq;
   t_eventlist       _events;
-  t_userslist       _users;
-
+  size_t            _enabled_events_num;
+  t_userlist        _users;
 
   static const char*  DEFAULT_IP;
   static const int8_t MAX_QUEUE;
