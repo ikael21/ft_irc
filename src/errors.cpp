@@ -144,16 +144,19 @@ std::string RPL_TOPIC(std::string channel, std::string topic) { return channel +
 // 341
 std::string RPL_INVITING(std::string channel, std::string nick) { return channel + " " + nick; }
 
-// 352
+/* 352
+ * WHO nickname
+ *:irc.example.org 352 go0h * aks E95F141D.8FD662D8.36133820.IP irc.example.org go0h H :0 aaa
+ */
 std::string RPL_WHOREPLY(
     std::string channel,
-    std::string user,
-    std::string host,
-    std::string server,
+    std::string username,
+    std::string hostname,
+    std::string servername,
     std::string nick,
     std::string hopcount,
     std::string realname) {
-  return (channel + " " + user + " " + host + " " + server + " " + \
+  return (channel + " " + username + " " + hostname + " " + servername + " " + \
     nick + " <H|G>[*][@|+] :" + hopcount + " " + realname);
 }
 
