@@ -1,5 +1,5 @@
 #include "IrcServer.hpp"
-
+#include "Command.hpp"
 
 const char* irc::IrcServer::DEFAULT_IP = "127.0.0.1";
 const irc::int8_t irc::IrcServer::MAX_QUEUE = 128;
@@ -32,6 +32,7 @@ void irc::IrcServer::_create_socket() {
 
   res = fcntl(_socket, F_SETFL, O_NONBLOCK);
   throw_if_true<TcpSocketError>(_socket == -1);
+  res ^= 1;
 }
 
 
@@ -114,9 +115,24 @@ void irc::IrcServer::_read_handler() {
   std::cout << "Read event just happend." << std::endl;
 }
 
-
 void irc::IrcServer::_write_handler() {
   std::cout << "Write event just happend." << std::endl;
+}
+
+
+/** JUST FOR CHECK */
+void irc::IrcServer::_rw_handler(struct kevent event) {
+
+  int fd = event.ident;
+
+  for (std::vector<User>::iterator it = _users.begin(); it != _users.end(); ++it) {
+    if (*it == fd) {
+      std::string res = it->receiveMsg();
+      Command cmd = Command(*this, *it, res);
+      cmd.excecute();
+      break;
+    }
+  }
 }
 
 
@@ -137,10 +153,12 @@ void irc::IrcServer::run() {
         _accept_handler(changes);
       }
       else if (_events[i].filter == EVFILT_READ) {
-        _read_handler();
+        _rw_handler(_events[i]);
+        // _read_handler();
       }
       else if (_events[i].filter == EVFILT_WRITE) {
-        _write_handler();
+        _rw_handler(_events[i]);
+        // _write_handler(_events[i]);
       }
     }
 
@@ -148,4 +166,8 @@ void irc::IrcServer::run() {
     _events.reserve(_enabled_events_num);
 
   }
+}
+
+bool irc::IrcServer::isCorrectPassword(std::string pass) {
+  return _password == pass;
 }

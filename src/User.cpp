@@ -6,7 +6,10 @@
 #include "User.hpp"
 
 User :: User(): _status(AUTHENTICATION) {};
+
+
 User :: User(int fd) : _fd(fd), _status(AUTHENTICATION) {}
+
 
 User :: User(int fd, std::string username, std::string hostname, std::string servername, std::string realname)
   : _fd(fd),
@@ -16,15 +19,19 @@ User :: User(int fd, std::string username, std::string hostname, std::string ser
     _servername(servername),
     _realname(realname) {}
 
+
 User :: ~User() {}
+
 
 bool operator==(const User& left, const User& right) {
   return left._username == right._username;
 }
 
+
 bool operator==(const User& left, const int fd) {
   return left._fd == fd;
 }
+
 
 std::string User :: receiveMsg() {
   char    buff[BUFFER_SIZE + 1];
@@ -50,9 +57,11 @@ std::string User :: receiveMsg() {
   return message;
 }
 
+
 void User :: sendMsgToUser(User& user, std::string message) {
-  sendMsg(user.getFD(), message);
+  sendMsg(user.getFD(), message + END_OF_MESSAGE);
 }
+
 
 void User :: sendMsg(int fd, std::string message) {
   send(fd, message.c_str(), message.size(), 0);

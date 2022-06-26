@@ -34,6 +34,8 @@ public:
 
   void run();
 
+  bool isCorrectPassword(std::string pass);
+
 private:
 
   typedef irc::EventsVector<struct kevent>  t_changelist;
@@ -55,6 +57,9 @@ private:
   void _accept_handler(t_changelist& changes);
   void _read_handler();
   void _write_handler();
+
+  /** JUST FOR CHECK */
+  void _rw_handler(struct kevent);
 
 
   const std::string _password;

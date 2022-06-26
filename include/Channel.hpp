@@ -1,5 +1,5 @@
-#ifndef CHANNEL_HPP
-# define CHANNEL_HPP
+#ifndef CHANNEL_HPP_
+# define CHANNEL_HPP_
 
 # include <string>
 # include <vector>

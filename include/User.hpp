@@ -1,6 +1,6 @@
 
-#ifndef USER_HPP
-# define USER_HPP
+#ifndef USER_HPP_
+# define USER_HPP_
 
 # define BUFFER_SIZE     1024
 # define END_OF_MESSAGE  "\n"
@@ -8,13 +8,13 @@
 # include <string>
 # include <vector>
 
-class User {
+typedef enum    s_user_status {
+  AUTHENTICATION,
+  REGISTRATION,
+  ONLINE
+}               t_user_status;
 
-  typedef enum    s_user_status {
-    AUTHENTICATION,
-    REGISTRATION,
-    ONLINE
-  }               t_user_status;
+class User {
 
  public:
   User();
@@ -45,6 +45,9 @@ class User {
 
   void setQuitMessage(std::string message) { _quitMessage = message; }
   std::string getQuitMessage() { return _quitMessage; }
+
+  void setStatus(t_user_status status) { _status = status; }
+  t_user_status getStatus() { return _status; }
 
   friend bool operator==(const User& left, const User& right);
   friend bool operator==(const User& left, const int fd);
