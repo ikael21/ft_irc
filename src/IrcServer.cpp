@@ -59,19 +59,43 @@ void irc::IrcServer::_initialize_kqueue() {
 }
 
 
-void irc::IrcServer::_add_read_event(int fd, t_changelist& changes) {
-  struct kevent event;
-  EV_SET(&event, fd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, NULL);
-  changes.push_back(event);
-  _enabled_events_num++;
+User* irc::IrcServer::_find_or_create_user(int fd) {
+  for (size_t i = 0; i < _users.size(); ++i) {
+    if (_users[i].getFD() == fd)
+      return &_users[i];
+  }
+  _users.push_back(User(fd));
+  return &(*(_users.end() - 1));
 }
 
 
-void irc::IrcServer::_add_write_event(int fd, t_changelist& changes) {
+void irc::IrcServer::_add_read_event(int fd,
+                                     t_changelist& changes,
+                                     uint16_t flags) {
+
+  User* user = _find_or_create_user(fd);
   struct kevent event;
-  EV_SET(&event, fd, EVFILT_WRITE, EV_ADD | EV_CLEAR, 0, 0, NULL);
+  EV_SET(&event, fd, EVFILT_READ, flags, 0, 0, (void*)user);
   changes.push_back(event);
-  _enabled_events_num++;
+
+  // keep track of enabled events
+  bool is_disabled = (flags & EV_DISABLE) || (flags & EV_DELETE);
+  if (!is_disabled)
+    _enabled_events_num++;
+}
+
+
+void irc::IrcServer::_add_write_event(int fd,
+                                      t_changelist& changes,
+                                      uint16_t flags) {
+  struct kevent event;
+  EV_SET(&event, fd, EVFILT_WRITE, flags, 0, 0, NULL);
+  changes.push_back(event);
+
+  // keep track of enabled events
+  bool is_disabled = (flags & EV_DISABLE) || (flags & EV_DELETE);
+  if (!is_disabled)
+    _enabled_events_num++;
 }
 
 
@@ -84,35 +108,44 @@ void irc::IrcServer::_accept_handler(t_changelist& changes) {
   int res = fcntl(new_fd, F_SETFL, O_NONBLOCK);
   throw_if_true<ErrnoBase>(res == -1);
 
-  struct kevent event[2];
-  EV_SET(&event[0], new_fd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, NULL);
-  EV_SET(&event[1], new_fd, EVFILT_WRITE, EV_ADD | EV_CLEAR | EV_DISABLE, 0, 0, NULL);
-
-  changes.push_back(event[0]);
-  changes.push_back(event[1]);
+  _add_read_event(new_fd, changes, EV_ADD | EV_CLEAR);
+  _add_write_event(new_fd, changes, EV_ADD | EV_CLEAR | EV_DISABLE);
 
   _users.push_back(User(new_fd));
-  _enabled_events_num++; // write disabled for now
 }
 
 
 int irc::IrcServer::_wait_for_events(t_changelist& changes) {
   struct timespec* timeout = NULL; // wait indefinitely
-
   int changes_num = static_cast<int>(changes.size());
   int events_num = static_cast<int>(_enabled_events_num);
   int new_events_num = kevent(_kq,
                               changes.data(), changes_num,
                               _events.data(), events_num,
                               timeout);
-
   throw_if_true<ErrnoBase>(new_events_num == -1);
   return new_events_num;
 }
 
 
-void irc::IrcServer::_read_handler() {
-  std::cout << "Read event just happend." << std::endl;
+void irc::IrcServer::_read_handler(User& user, const t_event& event) {
+  // event.data -> количество байт, которое можно считать без блокировки
+  char* buffer = new char[event.data + 1];
+  ssize_t n_recv = recv(user.getFD(), (void*)buffer, event.data, 0);
+  buffer[n_recv] = '\0';
+
+  std::cout << std::string(buffer) << std::endl;
+  delete [] buffer;
+
+  /*
+    можно изменить на что-то такое:
+
+    user.receiveMsg(event.data);
+    внутри можно вызвать доп. метод для парсинга полученной части сообщения
+
+    user.message_status();
+    проверка получения сообщения (в процессе, получено)
+  */
 }
 
 void irc::IrcServer::_write_handler() {
@@ -138,7 +171,7 @@ void irc::IrcServer::_rw_handler(struct kevent event) {
 
 void irc::IrcServer::run() {
   t_changelist changes;
-  _add_read_event(_socket, changes); // accept new connections
+  _add_read_event(_socket, changes, EV_ADD | EV_CLEAR); // accept new connections
   _events.reserve(_enabled_events_num);
 
   while (true) {
@@ -155,6 +188,9 @@ void irc::IrcServer::run() {
       else if (_events[i].filter == EVFILT_READ) {
         _rw_handler(_events[i]);
         // _read_handler();
+
+        // передаю конктретного юзера и событие для этого юзера
+        // _read_handler(*(User*)_events[i].udata, _events[i]);
       }
       else if (_events[i].filter == EVFILT_WRITE) {
         _rw_handler(_events[i]);
@@ -163,6 +199,7 @@ void irc::IrcServer::run() {
     }
 
     // reserve correct memory size for new events
+    _events.clear();
     _events.reserve(_enabled_events_num);
 
   }
