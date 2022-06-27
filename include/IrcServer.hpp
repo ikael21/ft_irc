@@ -12,6 +12,7 @@
 # include <fcntl.h>
 # include <unistd.h>
 # include <stdlib.h>
+# include <vector>
 # include "EventsVector.hpp"
 # include "User.hpp"
 # include "exceptions.hpp"
@@ -36,9 +37,10 @@ public:
 
 private:
 
-  typedef irc::EventsVector<struct kevent>  t_changelist;
-  typedef irc::EventsVector<struct kevent>  t_eventlist;
-  typedef std::vector<User>                 t_userlist;
+  typedef struct kevent         t_event;
+  typedef std::vector<t_event>  t_changelist;
+  typedef irc::EventsVector     t_eventlist;
+  typedef std::vector<User>     t_userlist;
 
 
   IrcServer(const IrcServer&);
@@ -49,12 +51,14 @@ private:
   void _initialize_kqueue();
   int  _wait_for_events(t_changelist &changes);
 
-  void _add_read_event(int fd, t_changelist &changes);
-  void _add_write_event(int fd, t_changelist &changes);
+  void _add_read_event(int fd, t_changelist &changes, uint16_t flags);
+  void _add_write_event(int fd, t_changelist &changes, uint16_t flags);
 
   void _accept_handler(t_changelist& changes);
-  void _read_handler();
+  void _read_handler(User& user, const t_event& event);
   void _write_handler();
+
+  User* _find_or_create_user(int fd);
 
 
   const std::string _password;
