@@ -53,17 +53,21 @@ private:
   void _initialize_kqueue();
   int  _wait_for_events(t_changelist &changes);
 
-  void _add_read_event(int fd, t_changelist &changes, uint16_t flags);
-  void _add_write_event(int fd, t_changelist &changes, uint16_t flags);
+  void _add_read_event(int fd, t_changelist &changes);
+  void _add_write_event(int fd, t_changelist &changes);
+  void _disable_event(int fd, t_changelist& changes, int type);
 
+  void _execute_handler(t_event& event, t_changelist& changes);
   void _accept_handler(t_changelist& changes);
   void _read_handler(User& user, const t_event& event);
   void _write_handler();
+  void _delete_client(User& user);
 
   /** JUST FOR CHECK */
   void _rw_handler(struct kevent);
 
-  User* _find_or_create_user(int fd);
+  User& _find_or_create_user(int fd);
+  bool  _authenticate_user(User& user);
 
 
   const std::string _password;
