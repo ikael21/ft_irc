@@ -1,7 +1,7 @@
 #include "Command.hpp"
 #include "IrcServer.hpp"
 #include "User.hpp"
-#include "utils.h"
+#include "utils.hpp"
 #include "errors.hpp"
 #include "commands.hpp"
 

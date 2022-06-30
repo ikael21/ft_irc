@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include "IrcServer.hpp"
 #include "exceptions.hpp"
-#include "utils.h"
+#include "utils.hpp"
 
 
 /**
