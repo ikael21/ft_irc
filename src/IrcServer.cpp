@@ -6,6 +6,9 @@ const irc::int8_t irc::IrcServer::MAX_QUEUE = 128;
 const int irc::IrcServer::INVALID_FD = -1;
 
 
+typedef void (irc::IrcServer::*handler)(struct kevent& event);
+
+
 irc::IrcServer::IrcServer(const char* port, const char* password)
     : _password(password), _enabled_events_num(0) {
   _create_socket();
@@ -59,12 +62,12 @@ void irc::IrcServer::_initialize_kqueue() {
 
 
 User& irc::IrcServer::_find_or_create_user(int fd) {
-  for (size_t i = 0; i < _users.size(); ++i) {
-    if (_users[i].getFD() == fd)
-      return _users[i];
+  for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
+    if (i->getFD() == fd)
+      return *i;
   }
   _users.push_back(User(fd));
-  return *(_users.end() - 1);
+  return _users.back();
 }
 
 
@@ -96,7 +99,17 @@ void irc::IrcServer::_disable_event(int fd,
     _enabled_events_num--;
 }
 
+// type (third arg) is either EVFILT_WRITE or EVFILT_READ
+void irc::IrcServer::_enable_event(int fd,
+                                    t_changelist& changes,
+                                    int type) {
+  t_event event;
+  EV_SET(&event, fd, type, EV_ENABLE, 0, 0, NULL);
+  changes.push_back(event);
+  _enabled_events_num++;
+}
 
+// not implemented yet
 bool irc::IrcServer::_authenticate_user(User& user) {
   // check given password from user
   (void)user;
@@ -128,19 +141,23 @@ int irc::IrcServer::_wait_for_events(t_changelist& changes) {
   struct timespec* timeout = NULL; // wait indefinitely
   int changes_num = static_cast<int>(changes.size());
   int events_num = static_cast<int>(_enabled_events_num);
+
+  t_event* changes_arr = list_to_array<t_event>(changes);
   int new_events_num = kevent(_kq,
-                              changes.data(), changes_num,
+                              changes_arr, changes_num,
                               _events.data(), events_num,
                               timeout);
+  delete [] changes_arr;
   throw_if_true<ErrnoBase>(new_events_num == -1);
   return new_events_num;
 }
 
 
-void irc::IrcServer::_read_handler(User& user, const t_event& event) {
+void irc::IrcServer::_read_handler(t_event& event) {
   // event.data -> количество байт, которое можно считать без блокировки
   char* buffer = new char[event.data + 1];
-  ssize_t n_recv = recv(user.getFD(), (void*)buffer, event.data, 0);
+  User* user = (User*)event.udata;
+  ssize_t n_recv = recv(user->getFD(), (void*)buffer, event.data, 0);
   buffer[n_recv] = '\0';
 
   std::cout << std::string(buffer) << std::endl;
@@ -157,33 +174,27 @@ void irc::IrcServer::_read_handler(User& user, const t_event& event) {
   */
 }
 
-void irc::IrcServer::_write_handler() {
+void irc::IrcServer::_write_handler(t_event& event) {
   std::cout << "Write event just happend." << std::endl;
+  (void)event;
 }
 
 
 /** JUST FOR CHECK */
 void irc::IrcServer::_rw_handler(struct kevent event) {
-
-  int fd = event.ident;
-
-  for (std::vector<User>::iterator it = _users.begin(); it != _users.end(); ++it) {
-    if (*it == fd) {
-      std::string res = it->receiveMsg();
-      Command cmd = Command(*this, *it, res);
-      cmd.excecute();
-      break;
-    }
-  }
+  User& user = _find_or_create_user(event.ident);
+  std::string res = user.receiveMsg();
+  Command cmd = Command(*this, user, res);
+  cmd.excecute();
 }
 
 
-void irc::IrcServer::_delete_client(User& user) {
-  int fd = user.getFD();
-  size_t i = 0;
-  while (i < _users.size() && fd != _users[i].getFD())
-    i++;
-  _users.erase(_users.begin() + i);
+void irc::IrcServer::_delete_client(t_event& event) {
+  int fd = ((User*)event.udata)->getFD();
+  t_userlist::iterator it = _users.begin();
+  while (it != _users.end() && it->getFD() != fd)
+    ++it;
+  _users.erase(it);
   close(fd);
   std::cout << "Client(FD: " << fd << ") just left..." << std::endl;
 }
@@ -191,29 +202,29 @@ void irc::IrcServer::_delete_client(User& user) {
 
 void irc::IrcServer::_execute_handler(t_event& event,
                                       t_changelist& changes) {
-  bool conditions[] = {
+  static const int conditions_num = 4;
+  const bool conditions[] = {
     static_cast<int>(event.ident) == _socket, // accept new client
-    event.flags & EV_EOF,                     // delete left client
-    event.filter == EVFILT_READ,              // client send to server
-    event.filter == EVFILT_WRITE              // server send to client
+    event.flags & EV_EOF,                     // delete client that left
+    event.filter == EVFILT_READ,              // server may get something from client
+    event.filter == EVFILT_WRITE              // server may send something to client
   };
 
-  if (conditions[0]) {
-    _accept_handler(changes);
-  }
-  else if (conditions[1]) {
-    _delete_client(*(User*)event.udata);
-  }
-  else if (conditions[2]) {
-    //_rw_handler(_events[i]);
-    // передаю конкретного юзера и событие для этого юзера
-    _read_handler(*(User*)event.udata, event);
-  }
-  else if (conditions[3]) {
-    _rw_handler(event);
-    // _write_handler(_events[i]);
-  }
+  static const handler event_handlers[] = {
+    NULL,
+    &IrcServer::_delete_client,
+    &IrcServer::_read_handler,
+    &IrcServer::_write_handler
+  };
+
+  if (conditions[0])
+    return _accept_handler(changes);
+
+  for (int i = 1; i < conditions_num; ++i)
+    if (conditions[i])
+      return (this->*event_handlers[i])(event);
 }
+
 
 void irc::IrcServer::run() {
   t_changelist changes;
@@ -231,7 +242,6 @@ void irc::IrcServer::run() {
       _execute_handler(_events[i], changes);
 
     // reserve correct memory size for new events
-    _events.clear();
     _events.reserve(_enabled_events_num);
 
   }

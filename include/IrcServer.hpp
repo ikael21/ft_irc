@@ -13,10 +13,11 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <vector>
+# include <list>
 # include "EventsVector.hpp"
 # include "User.hpp"
 # include "exceptions.hpp"
-# include "utils.h"
+# include "utils.hpp"
 
 
 namespace irc {
@@ -39,10 +40,10 @@ public:
 
 private:
 
-  typedef struct kevent         t_event;
-  typedef std::vector<t_event>  t_changelist;
-  typedef irc::EventsVector     t_eventlist;
-  typedef std::vector<User>     t_userlist;
+  typedef struct kevent       t_event;
+  typedef std::list<t_event>  t_changelist;
+  typedef irc::EventsVector   t_eventlist;
+  typedef std::list<User>     t_userlist;
 
 
   IrcServer(const IrcServer&);
@@ -53,15 +54,16 @@ private:
   void _initialize_kqueue();
   int  _wait_for_events(t_changelist &changes);
 
-  void _add_read_event(int fd, t_changelist &changes);
-  void _add_write_event(int fd, t_changelist &changes);
+  void _add_read_event(int fd, t_changelist& changes);
+  void _add_write_event(int fd, t_changelist& changes);
+  void _enable_event(int fd, t_changelist& changes, int type);
   void _disable_event(int fd, t_changelist& changes, int type);
 
   void _execute_handler(t_event& event, t_changelist& changes);
   void _accept_handler(t_changelist& changes);
-  void _read_handler(User& user, const t_event& event);
-  void _write_handler();
-  void _delete_client(User& user);
+  void _read_handler(t_event& event);
+  void _write_handler(t_event& event);
+  void _delete_client(t_event& event);
 
   /** JUST FOR CHECK */
   void _rw_handler(struct kevent);
