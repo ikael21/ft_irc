@@ -1,5 +1,5 @@
-#ifndef UTILS_H_
-# define UTILS_H_
+#ifndef UTILS_HPP_
+# define UTILS_HPP_
 
 #include <string>
 #include <sstream>
@@ -36,4 +36,4 @@ T* list_to_array(const std::list<T>& list) {
 
 std::vector<std::string> split(const std::string &str, char delimeter);
 
-#endif // UTILS_H_
+#endif // UTILS_HPP_

@@ -155,13 +155,10 @@ int irc::IrcServer::_wait_for_events(t_changelist& changes) {
 
 void irc::IrcServer::_read_handler(t_event& event) {
   // event.data -> количество байт, которое можно считать без блокировки
-  char* buffer = new char[event.data + 1];
   User* user = (User*)event.udata;
-  ssize_t n_recv = recv(user->getFD(), (void*)buffer, event.data, 0);
-  buffer[n_recv] = '\0';
-
-  std::cout << std::string(buffer) << std::endl;
-  delete [] buffer;
+  std::string msg = user->receiveMsg(event.data);
+  Command command = Command(*this, *user, msg);
+  command.excecute();
 
   /*
     можно изменить на что-то такое:
@@ -177,15 +174,6 @@ void irc::IrcServer::_read_handler(t_event& event) {
 void irc::IrcServer::_write_handler(t_event& event) {
   std::cout << "Write event just happend." << std::endl;
   (void)event;
-}
-
-
-/** JUST FOR CHECK */
-void irc::IrcServer::_rw_handler(struct kevent event) {
-  User& user = _find_or_create_user(event.ident);
-  std::string res = user.receiveMsg();
-  Command cmd = Command(*this, user, res);
-  cmd.excecute();
 }
 
 
@@ -205,7 +193,7 @@ void irc::IrcServer::_execute_handler(t_event& event,
   static const int conditions_num = 4;
   const bool conditions[] = {
     static_cast<int>(event.ident) == _socket, // accept new client
-    event.flags & EV_EOF,                     // delete client that left
+    static_cast<bool>(event.flags & EV_EOF),  // delete client that left
     event.filter == EVFILT_READ,              // server may get something from client
     event.filter == EVFILT_WRITE              // server may send something to client
   };

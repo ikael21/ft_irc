@@ -33,11 +33,10 @@ bool operator==(const User& left, const int fd) {
 }
 
 
-std::string User :: receiveMsg() {
-  char    buff[BUFFER_SIZE + 1];
-  ssize_t size;
+std::string User :: receiveMsg(ssize_t size) {
+  char    buff[size + 1];
 
-  size = recv(_fd, buff, BUFFER_SIZE, 0);
+  size = recv(_fd, buff, size, 0);
 
   if (size == -1)
     return "";
