@@ -155,20 +155,13 @@ int irc::IrcServer::_wait_for_events(t_changelist& changes) {
 
 void irc::IrcServer::_read_handler(t_event& event) {
   // event.data -> количество байт, которое можно считать без блокировки
-  User* user = (User*)event.udata;
-  std::string msg = user->receiveMsg(event.data);
-  Command command = Command(*this, *user, msg);
-  command.excecute();
+  User* user = static_cast<User*>(event.udata);
+  user->receive(event.data);
 
-  /*
-    можно изменить на что-то такое:
-
-    user.receiveMsg(event.data);
-    внутри можно вызвать доп. метод для парсинга полученной части сообщения
-
-    user.message_status();
-    проверка получения сообщения (в процессе, получено)
-  */
+  while (user->hasNextMsg()) {
+    Command command = Command(*this, *user, user->getNextMsg());
+    command.excecute();
+  }
 }
 
 void irc::IrcServer::_write_handler(t_event& event) {

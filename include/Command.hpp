@@ -21,6 +21,7 @@ class Command {
 
   Command(irc::IrcServer& server, User& user, std::string command);
 
+  std::string getFullMessage() { return _full_message; }
   std::string getCommandName() { return _command.func_name; }
   std::vector<std::string> getArguments() { return _arguments; }
   size_t numArgs() { return _arguments.size(); }
@@ -35,6 +36,7 @@ class Command {
   irc::IrcServer&           _server;
   User&                     _user;
 
+  std::string               _full_message;
   std::string               _command_name;
   t_command_struct          _command;
   std::vector<std::string>  _arguments;

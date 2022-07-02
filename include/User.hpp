@@ -52,7 +52,10 @@ class User {
   friend bool operator==(const User& left, const User& right);
   friend bool operator==(const User& left, const int fd);
 
-  std::string receiveMsg(ssize_t size);
+  void receive(ssize_t size);
+  bool hasNextMsg();
+  std::string getNextMsg();
+
   void sendMsg(int fd, std::string message);
   void sendMsgToUser(User& user, std::string message);
 

@@ -33,27 +33,27 @@ bool operator==(const User& left, const int fd) {
 }
 
 
-std::string User :: receiveMsg(ssize_t size) {
-  char    buff[size + 1];
+void User :: receive(ssize_t size) {
+  char* buff = new char[size + 1];
 
   size = recv(_fd, buff, size, 0);
-
-  if (size == -1)
-    return "";
   buff[size] = '\0';
 
   _buffer += buff;
+  delete [] buff;
+}
 
-  size_t eof = _buffer.find(END_OF_MESSAGE);
+bool User :: hasNextMsg() {
+  return _buffer.find(END_OF_MESSAGE) != std::string::npos;
+}
 
-  if (_buffer.find(END_OF_MESSAGE) == std::string::npos) {
-    return "";
-  }
+std::string User :: getNextMsg() {
 
-  std::string message = _buffer.substr(0, eof);
-  _buffer.erase(0, eof + strlen(END_OF_MESSAGE));
+  size_t eol = _buffer.find(END_OF_MESSAGE);
+  std::string line = _buffer.substr(0, eol);
 
-  return message;
+  _buffer.erase(0, eol + strlen(END_OF_MESSAGE));
+  return line;
 }
 
 

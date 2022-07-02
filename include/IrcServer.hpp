@@ -38,6 +38,19 @@ public:
 
   bool isCorrectPassword(std::string pass);
 
+  /* Propose to create next methods
+
+  std::vector<User*> getUsers();
+  std::vector<Channel*> getChannels();
+
+  void sendToUser(User& from, User& to, std::string msg);
+  void sendToUser(User& from, std::string to_nick, std::string msg);
+
+  void sendToChannel(User& from, Channel& to, std::string msg);
+  void sendToChannel(User& from, std::string to_channel, std::string msg);
+
+  */
+
 private:
 
   typedef struct kevent       t_event;
@@ -64,9 +77,6 @@ private:
   void _read_handler(t_event& event);
   void _write_handler(t_event& event);
   void _delete_client(t_event& event);
-
-  /** JUST FOR CHECK */
-  void _rw_handler(struct kevent);
 
   User& _find_or_create_user(int fd);
   bool  _authenticate_user(User& user);

@@ -9,3 +9,7 @@
 void PASS(Command *command);
 
 void NICK(Command *command);
+
+void USER(Command *command);
+
+void PRIVMSG(Command *command);
