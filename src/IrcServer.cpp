@@ -183,13 +183,12 @@ void irc::IrcServer::_delete_client(t_event& event) {
 
 void irc::IrcServer::_execute_handler(t_event& event,
                                       t_changelist& changes) {
-  static const int conditions_num = 4;
-  const bool conditions[] = {
-    static_cast<int>(event.ident) == _socket, // accept new client
-    static_cast<bool>(event.flags & EV_EOF),  // delete client that left
-    event.filter == EVFILT_READ,              // server may get something from client
-    event.filter == EVFILT_WRITE              // server may send something to client
-  };
+  static const int conds_num = 4;
+  static bool conds[conds_num];
+  conds[0] = static_cast<int>(event.ident) == _socket; // accept new client
+  conds[1] = event.flags & EV_EOF;                     // delete client that left
+  conds[3] = event.filter == EVFILT_WRITE;             // server may send something to client
+  conds[2] = event.filter == EVFILT_READ;              // server may get something from client
 
   static const handler event_handlers[] = {
     NULL,
@@ -198,11 +197,12 @@ void irc::IrcServer::_execute_handler(t_event& event,
     &IrcServer::_write_handler
   };
 
-  if (conditions[0])
+  if (conds[0])
     return _accept_handler(changes);
 
-  for (int i = 1; i < conditions_num; ++i)
-    if (conditions[i])
+  // based on the rest conditions call the suitable handler
+  for (int i = 1; i < conds_num; ++i)
+    if (conds[i])
       return (this->*event_handlers[i])(event);
 }
 
@@ -227,6 +227,7 @@ void irc::IrcServer::run() {
 
   }
 }
+
 
 bool irc::IrcServer::isCorrectPassword(std::string pass) {
   return _password == pass;
