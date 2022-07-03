@@ -68,6 +68,7 @@ private:
   void _create_socket();
   void _initialize_socket(port_type port);
   void _initialize_kqueue();
+
   int  _wait_for_events(t_changelist &changes);
 
   void _add_read_event(int fd, t_changelist& changes);
@@ -83,7 +84,6 @@ private:
 
   User& _find_or_create_user(int fd);
   bool  _authenticate_user(User& user);
-
 
   const std::string _password;
   int               _socket;
