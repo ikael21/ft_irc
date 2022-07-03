@@ -8,7 +8,7 @@
 User :: User(): _status(AUTHENTICATION) {};
 
 
-User :: User(int fd) : _fd(fd), _status(AUTHENTICATION) {}
+User :: User(int fd) : _fd(fd), _status(AUTHENTICATION), _nick("*") {}
 
 
 User :: User(int fd, std::string username, std::string hostname, std::string servername, std::string realname)
@@ -17,7 +17,8 @@ User :: User(int fd, std::string username, std::string hostname, std::string ser
     _username(username),
     _hostname(hostname),
     _servername(servername),
-    _realname(realname) {}
+    _realname(realname),
+    _nick("*") {}
 
 
 User :: ~User() {}
@@ -64,4 +65,12 @@ void User :: sendMsgToUser(User& user, std::string message) {
 
 void User :: sendMsg(int fd, std::string message) {
   send(fd, message.c_str(), message.size(), 0);
+}
+
+/**
+ * @brief Prefix of User's message that must be sent to other users/channels
+ * :nick!username@hostname(?)
+ */
+std::string User :: getPrefixMessage() {
+  return ":" + _nick + "!" + _username + "@" + _hostname;
 }

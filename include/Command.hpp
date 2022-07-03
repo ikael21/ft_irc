@@ -7,6 +7,7 @@
 
 # include "IrcServer.hpp"
 # include "User.hpp"
+# include "errors.hpp"
 
 class Command {
 
@@ -31,6 +32,14 @@ class Command {
 
   void excecute();
 
+  void reply(t_irc_error err_code,
+              std::string a1 = "",
+              std::string a2 = "",
+              std::string a3 = "",
+              std::string a4 = "",
+              std::string a5 = "",
+              std::string a6 = "",
+              std::string a7 = "");
 
  private:
   irc::IrcServer&           _server;

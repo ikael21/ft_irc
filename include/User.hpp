@@ -59,6 +59,10 @@ class User {
   void sendMsg(int fd, std::string message);
   void sendMsgToUser(User& user, std::string message);
 
+  std::string getPrefixMessage();
+
+  bool isAway() { return !_afkMessage.empty(); }
+
  private:
   int            _fd;
   t_user_status _status;

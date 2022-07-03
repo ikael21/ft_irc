@@ -1,47 +1,49 @@
+#include <sstream>
+
 #include "commands.hpp"
 #include "utils.hpp"
 
 void PRIVMSG(Command *command) {
 
   User& user = command->getUser();
+  std::vector<std::string> args = command->getArguments();
   std::vector<std::string> recipients;
-  std::string cmd = command->getFullMessage();
-  size_t i = command->getCommandName().length();
+  std::string message;
 
-  for ( ; i < cmd.length(); ++i) {
-    if (cmd[i] != ' ')
-      break;
-  }
-  if (i == cmd.length())
-    return user.sendMsgToUser(user, irc_error(ERR_NORECIPIENT, command->getCommandName()));
+  if (args.empty())
+    return command->reply(ERR_NORECIPIENT, command->getCommandName());
 
-  cmd = cmd.erase(0, i);
-  i = cmd.find(' ');
-  if (i == std::string::npos)
-    return user.sendMsgToUser(user, irc_error(ERR_NOTEXTTOSEND));
+  args = split(args[0], ' ', 1);
+  recipients = split(args[0], ',');
 
-  recipients = split(cmd.substr(0, i), ',');
-  cmd = cmd.erase(0, i);
+  std::cout << args.size() << std::endl;
+  if (recipients.empty())
+    return command->reply(ERR_NORECIPIENT, command->getCommandName());
 
-  for (i = 0; i < cmd.length(); ++i) {
-    if (cmd[i] != ' ')
-      break;
-  }
+  if (args.size() < 2)
+    return command->reply(ERR_NOTEXTTOSEND);
 
-  if (i == cmd.length())
-    return user.sendMsgToUser(user, irc_error(ERR_NOTEXTTOSEND));
+  message = args[1];
 
-  cmd = cmd.substr(i);
-  if (cmd[0] == ':')
-    cmd.erase(0, 1);
+  if (message[0] == ':')
+    message.erase(0, 1);
 
-  if (!cmd.length())
-    return user.sendMsgToUser(user, irc_error(ERR_NOTEXTTOSEND));
+  std::cout << message << std::endl;
+
+  if (!message.length())
+    return command->reply(ERR_NOTEXTTOSEND);
 
   //TODO
   // 1. Send to all recipients
+  // 2. Check if recipient Exists     - ERR_NOSUCHNICK
+  // 3. Check if User on channel      - ERR_CANNOTSENDTOCHAN
+  // 4. Check if recipient duplicates - ERR_TOOMANYTARGETS
+  // 5. Check if User Away            - RPL_AWAY
 
-  std::string message = command->getCommandName() + " " + user.getNick() + " :" + cmd;
+  std::stringstream fullmessage;
 
-  std::cout << "Need to send message: '" + message;
+  fullmessage << user.getPrefixMessage() << " " << \
+    command->getCommandName() << " " << user.getNick() << " :" << message;
+
+  std::cout << "Need to send message: '" + fullmessage.str() << std::endl;
 }

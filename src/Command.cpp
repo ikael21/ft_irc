@@ -10,7 +10,8 @@ Command :: t_command_struct command_arr[] = {
   { "PASS",    &PASS,    1L },
   { "NICK",    &NICK,    0L },
   { "USER",    &USER,    4L },
-  { "PRIVMSG", &PRIVMSG, 0L }
+  { "PRIVMSG", &PRIVMSG, 0L },
+  { "AWAY",    &AWAY,    0L }
 };
 
 
@@ -20,9 +21,10 @@ Command :: Command(irc::IrcServer &server, User& user, std::string command)
   bzero(&_command, sizeof(t_command_struct));
 
   // std::replace(command.begin(), command.end(), '\t', ' ');
-  _arguments = split(command, ' ');
+  _arguments = split(command, ' ', 1);
 
-  if (_arguments.size()) {
+  if (!_arguments.empty()) {
+
     _command_name = _arguments[0];
     std::transform(_command_name.begin(), _command_name.end(), _command_name.begin(), toupper);
 
@@ -32,33 +34,50 @@ Command :: Command(irc::IrcServer &server, User& user, std::string command)
         break;
       }
     }
-
     _arguments.erase(_arguments.begin());
+
+    if (_command.min_args && !_arguments.empty()) {
+      _arguments = split(_arguments[1], ' ', _command.min_args + 1);
+    }
   }
 }
 
-// all messages send from User class, but I think that it must be sent
-// from IrcServer class because in start of message should be info about the server
+
 void Command :: excecute() {
 
   // check if User Registered
   if (_user.getStatus() != ONLINE) {
     if (_user.getStatus() == AUTHENTICATION && _command_name != "PASS") {
-      return _user.sendMsgToUser(_user, irc_error(ERR_NOTREGISTERED));
+      return reply(ERR_NOTREGISTERED);
     } else if (_user.getStatus() == REGISTRATION &&  \
         (_command_name != "NICK" && _command_name != "USER")) {
-      return _user.sendMsgToUser(_user, irc_error(ERR_NOTREGISTERED));
+      return reply(ERR_NOTREGISTERED);
     }
   }
 
   // basic checks
   if (_command_name.size() != 0L && _command.func == NULL) {
-    return _user.sendMsgToUser(_user, irc_error(ERR_UNKNOWNCOMMAND, _command_name));
+    return reply(ERR_UNKNOWNCOMMAND, _command_name);
   } else if (_arguments.size() == 0L && _command.func == NULL) {
     return;
   } else if (_command.min_args > _arguments.size()) {
-    return _user.sendMsgToUser(_user, irc_error(ERR_NEEDMOREPARAMS, _command.func_name));
+    return reply(ERR_NEEDMOREPARAMS, _command.func_name);
   }
 
   _command.func(this);
+}
+
+
+void Command :: reply(t_irc_error err_code, std::string a1, std::string a2, std::string a3,
+                      std::string a4, std::string a5, std::string a6, std::string a7) {
+
+  std::stringstream msg;
+
+  // instead of 'irc.21-school.ru' must be _server.getHostname()
+  msg << ":" << "irc.21-school.ru" << " " << err_code << " "  << \
+    _user.getNick() << " " << irc_error(err_code, a1, a2, a3, a4, a5, a6, a7);
+
+  // all messages send from User class, but I think that it must be sent something like that
+  // _server.sendMsgToUser(_user, msg.str());
+  _user.sendMsgToUser(_user, msg.str());
 }
