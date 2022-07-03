@@ -1,187 +1,81 @@
 
-#ifndef ERRORS_HPP
-# define ERRORS_HPP
+#ifndef ERRORS_HPP_
+# define ERRORS_HPP_
 
 #include <string>
 
-// 401
-std::string ERR_NOSUCHNICK(std::string nick);
+typedef enum  s_irc_error {
 
-// 402
-std::string ERR_NOSUCHSERVER(std::string server);
+  /* Error-ответы */
+  ERR_NOSUCHNICK        = 401,
+  ERR_NOSUCHSERVER      = 402,
+  ERR_NOSUCHCHANNEL     = 403,
+  ERR_CANNOTSENDTOCHAN  = 404,
+  ERR_TOOMANYCHANNELS   = 405,
+  ERR_TOOMANYTARGETS    = 407,
+  ERR_NOORIGIN          = 408,
+  ERR_NORECIPIENT       = 411,
+  ERR_NOTEXTTOSEND      = 412,
+  ERR_NOTOPLEVEL        = 413,
+  ERR_WILDTOPLEVEL      = 414,
+  ERR_UNKNOWNCOMMAND    = 421,
+  ERR_FILEERROR         = 424,
+  ERR_NONICKNAMEGIVEN   = 431,
+  ERR_ERRONEUSNICKNAME  = 432,
+  ERR_NICKNAMEINUSE     = 433,
+  ERR_NICKCOLLISION     = 436,
+  ERR_NOTONCHANNEL      = 442,
+  ERR_USERONCHANNEL     = 443,
+  ERR_USERSDISABLED     = 446,
+  ERR_NOTREGISTERED     = 451,
+  ERR_NEEDMOREPARAMS    = 461,
+  ERR_ALREADYREGISTRED  = 462,
+  ERR_PASSWDMISMATCH    = 464,
+  ERR_KEYSET            = 467,
+  ERR_CHANNELISFULL     = 471,
+  ERR_UNKNOWNMODE       = 472,
+  ERR_INVITEONLYCHAN    = 473,
+  ERR_BANNEDFROMCHAN    = 474,
+  ERR_BADCHANNELKEY     = 475,
+  ERR_BADCHANMASK       = 476,
+  ERR_CHANOPRIVSNEEDED  = 482,
+  ERR_NOOPERHOST        = 491,
+  ERR_UMODEUNKNOWNFLAG  = 501,
+  ERR_USERSDONTMATCH    = 502,
 
-// 403
-std::string ERR_NOSUCHCHANNEL(std::string channel);
+  /* Отклики команд */
+  RPL_AWAY              = 301,
+  RPL_UNAWAY            = 305,
+  RPL_NOWAWAY           = 306,
+  RPL_LISTSTART         = 321,
+  RPL_LIST              = 322,
+  RPL_LISTEND           = 323,
+  RPL_CHANNELMODEIS     = 324,
+  RPL_NOTOPIC           = 331,
+  RPL_TOPIC             = 332,
+  RPL_INVITING          = 341,
+  RPL_WHOREPLY          = 352,
+  RPL_ENDOFWHO          = 315,
+  RPL_NAMREPLY          = 353,
+  RPL_ENDOFNAMES        = 366,
+  RPL_BANLIST           = 367,
+  RPL_ENDOFBANLIST      = 368,
+  RPL_YOUREOPER         = 381,
+  RPL_TIME              = 391,
+  RPL_USERSSTART        = 392,
+  RPL_USERS             = 393,
+  RPL_ENDOFUSERS        = 394,
+  RPL_NOUSERS           = 395,
+  RPL_UMODEIS           = 221
+}             t_irc_error;
 
-// 404
-std::string ERR_CANNOTSENDTOCHAN(std::string channel);
-
-// 405
-std::string ERR_TOOMANYCHANNELS(std::string channel);
-
-// 407
-std::string ERR_TOOMANYTARGETS(std::string target);
-
-// 408
-std::string ERR_NOORIGIN();
-
-// 411
-std::string ERR_NORECIPIENT(std::string command);
-
-// 412
-std::string ERR_NOTEXTTOSEND();
-
-// 413
-std::string ERR_NOTOPLEVEL(std::string mask);
-
-// 414
-std::string ERR_WILDTOPLEVEL(std::string mask);
-
-// 421
-std::string ERR_UNKNOWNCOMMAND(std::string command);
-
-// 424
-std::string ERR_FILEERROR(std::string file, std::string file_op);
-
-// 431
-std::string ERR_NONICKNAMEGIVEN();
-
-// 432
-std::string ERR_ERRONEUSNICKNAME(std::string nick);
-
-// 433
-std::string ERR_NICKNAMEINUSE(std::string nick);
-
-// 436
-std::string ERR_NICKCOLLISION(std::string nick);
-
-// 442
-std::string ERR_NOTONCHANNEL(std::string channel);
-
-// 443
-std::string ERR_USERONCHANNEL(std::string user, std::string channel);
-
-// 446
-std::string ERR_USERSDISABLED();
-
-// 461
-std::string ERR_NEEDMOREPARAMS(std::string command);
-
-// 462
-std::string ERR_ALREADYREGISTRED();
-
-// 464
-std::string ERR_PASSWDMISMATCH();
-
-// 467
-std::string ERR_KEYSET(std::string channel);
-
-// 471
-std::string ERR_CHANNELISFULL(std::string channel);
-
-// 472
-std::string ERR_UNKNOWNMODE(std::string ch);
-
-// 473
-std::string ERR_INVITEONLYCHAN(std::string channel);
-
-// 474
-std::string ERR_BANNEDFROMCHAN(std::string channel);
-
-// 475
-std::string ERR_BADCHANNELKEY(std::string channel);
-
-// 476
-std::string ERR_BADCHANMASK();
-
-// 482
-std::string ERR_CHANOPRIVSNEEDED(std::string channel);
-
-// 491
-std::string ERR_NOOPERHOST();
-
-// 501
-std::string ERR_UMODEUNKNOWNFLAG();
-
-// 502
-std::string ERR_USERSDONTMATCH();
-
-/*
- * Отклики команд
- */
-
-// 301
-std::string RPL_AWAY(std::string nick, std::string message);
-
-// 305
-std::string RPL_UNAWAY();
-
-// 306
-std::string RPL_NOWAWAY();
-
-// 321
-std::string RPL_LISTSTART();
-
-// 322
-std::string RPL_LIST(std::string channel, std::string, std::string visible, std::string topic);
-
-// 323
-std::string RPL_LISTEND();
-// 324
-std::string RPL_CHANNELMODEIS(std::string channel, std::string mode, std::string mode_params);
-// 331
-std::string RPL_NOTOPIC(std::string channel);
-
-// 332
-std::string RPL_TOPIC(std::string channel, std::string topic);
-
-// 341
-std::string RPL_INVITING(std::string channel, std::string nick);
-
-// 352
-std::string RPL_WHOREPLY(
-    std::string channel,
-    std::string user,
-    std::string host,
-    std::string server,
-    std::string nick,
-    std::string hopcount,
-    std::string realname);
-
-// 315
-std::string RPL_ENDOFWHO(std::string name);
-
-// 353
-std::string RPL_NAMREPLY(std::string channel, std::string nick);
-
-// 366
-std::string RPL_ENDOFNAMES(std::string channel);
-
-// 367
-std::string RPL_BANLIST(std::string channel, std::string banid);
-
-// 368
-std::string RPL_ENDOFBANLIST(std::string channel);
-
-// 381
-std::string RPL_YOUREOPER();
-
-// 391
-std::string RPL_TIME(std::string server, std::string string_time);
-
-// 392
-std::string RPL_USERSSTART();
-
-// 393
-std::string RPL_USERS();
-
-// 394
-std::string RPL_ENDOFUSERS();
-
-// 395
-std::string RPL_NOUSERS();
-
-// 221
-std::string RPL_UMODEIS(std::string user_mode);
+std::string irc_error(t_irc_error err_code,
+                      std::string a1 = "",
+                      std::string a2 = "",
+                      std::string a3 = "",
+                      std::string a4 = "",
+                      std::string a5 = "",
+                      std::string a6 = "",
+                      std::string a7 = "");
 
 # endif

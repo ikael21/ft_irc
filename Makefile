@@ -5,7 +5,10 @@ HEADERS_DIR = include
 SRCS = src/IrcServer.cpp \
        src/Channel.cpp \
        src/User.cpp \
-       src/errors.cpp
+       src/errors.cpp \
+       src/Command.cpp src/commands/PASS.cpp src/commands/NICK.cpp src/commands/USER.cpp src/commands/PRIVMSG.cpp \
+       src/commands/AWAY.cpp src/commands/NOTICE.cpp \
+       src/utils.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))
 D_FILES = $(patsubst %.cpp,$(OBJS_DIR)/%.d, $(SRCS))

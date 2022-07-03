@@ -12,10 +12,12 @@
 # include <fcntl.h>
 # include <unistd.h>
 # include <stdlib.h>
+# include <vector>
+# include <list>
 # include "EventsVector.hpp"
 # include "User.hpp"
 # include "exceptions.hpp"
-# include "utils.h"
+# include "utils.hpp"
 
 
 namespace irc {
@@ -34,11 +36,30 @@ public:
 
   void run();
 
+  bool isCorrectPassword(std::string pass);
+
+  /* Propose to create next methods
+
+  bool isUserOnServer(std::string nick);
+  bool isChannelOnServer(std::string channel_name);
+
+  User& getUser(std::string nick);
+  Channel& getChannel(std::string channel_name);
+  std:vector<Channel*> getChannels();
+
+  void sendToUser(User& from, User& to, std::string msg);
+  void sendToUser(User& from, std::string to_nick, std::string msg);
+
+  void sendToChannel(User& from, Channel& to, std::string msg);
+  void sendToChannel(User& from, std::string to_channel, std::string msg);
+  */
+
 private:
 
-  typedef irc::EventsVector<struct kevent> t_changelist;
-  typedef irc::EventsVector<struct kevent> t_eventlist;
-  typedef std::vector<User>                t_userslist;
+  typedef struct kevent       t_event;
+  typedef std::list<t_event>  t_changelist;
+  typedef irc::EventsVector   t_eventlist;
+  typedef std::list<User>     t_userlist;
 
 
   IrcServer(const IrcServer&);
@@ -47,19 +68,29 @@ private:
   void _create_socket();
   void _initialize_socket(port_type port);
   void _initialize_kqueue();
-  void _add_read_event(int fd, t_changelist& changelist);
-  void _add_write_event(int fd, t_changelist& changelist);
-  void _add_new_user() {}
-  void _read_handler() {}
-  void _write_handler() {}
 
+  int  _wait_for_events(t_changelist &changes);
+
+  void _add_read_event(int fd, t_changelist& changes);
+  void _add_write_event(int fd, t_changelist& changes);
+  void _enable_event(int fd, t_changelist& changes, int type);
+  void _disable_event(int fd, t_changelist& changes, int type);
+
+  void _execute_handler(t_event& event, t_changelist& changes);
+  void _accept_handler(t_changelist& changes);
+  void _read_handler(t_event& event);
+  void _write_handler(t_event& event);
+  void _delete_client(t_event& event);
+
+  User& _find_or_create_user(int fd);
+  bool  _authenticate_user(User& user);
 
   const std::string _password;
   int               _socket;
   int               _kq;
   t_eventlist       _events;
-  t_userslist       _users;
-
+  size_t            _enabled_events_num;
+  t_userlist        _users;
 
   static const char*  DEFAULT_IP;
   static const int8_t MAX_QUEUE;

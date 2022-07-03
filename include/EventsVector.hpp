@@ -1,73 +1,79 @@
 #ifndef EVENTS_VECTOR_H_
 # define EVENTS_VECTOR_H_
-# include <vector>
-
+# include <sys/types.h>
+# include <sys/event.h>
+# include <sys/time.h>
+# include <new>
 
 namespace irc {
 
 
-template<class T>
+
 class EventsVector {
+
+private:
+
+  typedef struct kevent  value_type;
+  typedef value_type*    pointer;
+  typedef value_type&    reference;
+  typedef size_t         size_type;
 
 public:
 
-  EventsVector() {}
+  EventsVector()
+  : _events(NULL), _size(0), _capacity(0) {}
+
+  EventsVector(size_type size)
+  : _events(new value_type[size]), _size(size), _capacity(size) {}
 
   EventsVector(const EventsVector& other)
-  : _events(other._events) {}
+  : _events(new value_type[other._size]),
+    _size(other._size), _capacity(other._size) {
+    for (size_type i = 0; i < _size; ++i)
+      _events[i] = other._events[i];
+  }
 
-  template<class InputIt>
-  EventsVector(InputIt _first, InputIt _last)
-  : _events(_first, _last) {}
-
-  ~EventsVector() {}
-
+  ~EventsVector() { delete [] _events; }
 
   EventsVector& operator=(const EventsVector& other) {
-    if (this != &other)
-      _events = other._events;
+    if (this != &other) {
+      delete [] _events;
+      _events = new value_type[other._size];
+      _size = other._size;
+      _capacity = other._size;
+      for (size_type i = 0; i < _size; ++i)
+        _events[i] = other._events[i];
+    }
     return *this;
   }
 
 
-  template<class InputIt>
-  void assign(InputIt _first, InputIt _last)
-  { _events.assign(_first, _last); }
-
-
-  typename std::vector<T>::iterator
-  begin() { return _events.begin(); }
-
-  typename std::vector<T>::iterator
-  end() { return _events.end(); }
-
-
-  T& operator[](size_t pos) { return _events[pos]; }
-
-
-  void push_back(const T& value)
-  { _events.push_back(value); }
-
-  void reserve(size_t new_cap)
-  { _events.reserve(new_cap); }
-
-
-  void shrink_to_fit() {
-    std::vector<T> _new(_events.begin(), _events.end());
-    _events.swap(_new);
+  void clear() {
+    delete [] _events;
+    _events = NULL;
+    _size = 0;
+    _capacity = 0;
   }
 
+  void reserve(size_type new_capacity) {
+    pointer tmp = new value_type[new_capacity];
+    _capacity = new_capacity;
+    for (size_type i = 0; i < _size; ++i)
+      tmp[i] = _events[i];
+    delete [] _events;
+    _events = tmp;
+  }
 
-  size_t size() const
-  { return _events.size(); }
-
-
-  T* data()
-  { return _events.data(); }
+  reference operator[](size_type pos) { return _events[pos]; }
+  size_type size() const { return _size; }
+  size_type capacity() const { return _capacity; }
+  pointer data() { return _events; }
 
 private:
 
-  std::vector<T> _events;
+  pointer   _events;
+  size_type _size;
+  size_type _capacity;
 
 };
 

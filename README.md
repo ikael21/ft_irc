@@ -31,6 +31,8 @@ together to form a network.
 - `PONG <daemon>`
 - `TIME <server>`
 - `USERS [<server>]`
+- `AWAY [message]`
+- `NAMES [<channel>{,<channel>}]`
 
 For `Linux` please install [libkqueue](https://github.com/mheily/libkqueue).
 

@@ -2,6 +2,12 @@
 #include <iostream>
 #include <assert.h>
 #include "Channel.hpp"
+#include "utils.hpp"
+
+void print_vector(std::vector<std::string> v) {
+  for (size_t i = 0; i < v.size(); ++i)
+    std::cout << "|" + v[i] + "|" << std::endl;
+}
 
 int main(int argc, char **argv) {
 
@@ -70,5 +76,14 @@ int main(int argc, char **argv) {
   channel.removeUser(user4);
 
   assert(channel.getUsers().size() == 0L);
+
+  std::vector<std::string> v1 = split("PRIVMSG aks aaaa", ' ');
+  print_vector(v1);
+
+  v1 = split("aks aaaa", ' ');
+  print_vector(v1);
+
+  v1 = split(std::string("PRIVMSG    aks aaaa").substr(8), ' ', 2);
+  print_vector(v1);
   return 0;
 }
