@@ -23,7 +23,7 @@ void NICK(Command *command) {
   // 2. Send to all channels that user changes his nickname
 
   // if User has Username and Nick his status - ONLINE
-  if (user.getUsername().empty()) {
+  if (user.getUsername().length()) {
     user.setStatus(ONLINE);
   }
 

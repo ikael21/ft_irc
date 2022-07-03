@@ -15,3 +15,5 @@ void USER(Command *command);
 void PRIVMSG(Command *command);
 
 void AWAY(Command *command);
+
+void NOTICE(Command *command);

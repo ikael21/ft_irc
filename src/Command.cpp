@@ -11,7 +11,8 @@ Command :: t_command_struct command_arr[] = {
   { "NICK",    &NICK,    0L },
   { "USER",    &USER,    4L },
   { "PRIVMSG", &PRIVMSG, 0L },
-  { "AWAY",    &AWAY,    0L }
+  { "AWAY",    &AWAY,    0L },
+  { "NOTICE",  &NOTICE,  0L }
 };
 
 

@@ -289,20 +289,14 @@ typedef std::string(*__f6)(std::string,std::string,std::string,std::string,std::
 typedef std::string(*__f7)(std::string,std::string,std::string,std::string,std::string,std::string,std::string);
 
 /**
- * @brief Erro
+ * @brief Error message from https://www.lissyara.su/doc/rfc/rfc1459/
  *
- * @param err_code Code
+ * @param err_code ERROR_CODE
  * @return std::string
  */
 
-std::string irc_error(t_irc_error err_code,
-                      std::string a1,
-                      std::string a2,
-                      std::string a3,
-                      std::string a4,
-                      std::string a5,
-                      std::string a6,
-                      std::string a7) {
+std::string irc_error(t_irc_error err_code, std::string a1, std::string a2, std::string a3,
+                      std::string a4, std::string a5, std::string a6, std::string a7) {
 
   t_err err_s = __get_error(err_code);
   if (err_s.fptr == NULL)

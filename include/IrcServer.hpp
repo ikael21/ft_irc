@@ -40,15 +40,18 @@ public:
 
   /* Propose to create next methods
 
-  std::vector<User*> getUsers();
-  std::vector<Channel*> getChannels();
+  bool isUserOnServer(std::string nick);
+  bool isChannelOnServer(std::string channel_name);
+
+  User& getUser(std::string nick);
+  Channel& getChannel(std::string channel_name);
+  std:vector<Channel*> getChannels();
 
   void sendToUser(User& from, User& to, std::string msg);
   void sendToUser(User& from, std::string to_nick, std::string msg);
 
   void sendToChannel(User& from, Channel& to, std::string msg);
   void sendToChannel(User& from, std::string to_channel, std::string msg);
-
   */
 
 private:

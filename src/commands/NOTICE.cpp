@@ -1,9 +1,7 @@
-#include <sstream>
-
+#include <cstring>
 #include "commands.hpp"
-#include "utils.hpp"
 
-void PRIVMSG(Command *command) {
+void NOTICE(Command *command) {
 
   User& user = command->getUser();
   std::vector<std::string> args = command->getArguments();
@@ -11,19 +9,23 @@ void PRIVMSG(Command *command) {
   std::string message;
 
   if (args.empty())
-    return command->reply(ERR_NORECIPIENT, command->getCommandName());
+    return;
 
   args = split(args[0], ' ', 1);
   recipients = split(args[0], ',');
 
   if (recipients.empty())
-    return command->reply(ERR_NORECIPIENT, command->getCommandName());
+    return;
 
   sort(recipients.begin(), recipients.end());
   recipients.erase(unique(recipients.begin(), recipients.end() ), recipients.end());
 
+  //  Check for Too many targets. The maximum is 1 for NOTICE.
+  if (recipients.size() > 1)
+    return;
+
   if (args.size() < 2)
-    return command->reply(ERR_NOTEXTTOSEND);
+    return;
 
   message = args[1];
 
@@ -31,21 +33,21 @@ void PRIVMSG(Command *command) {
     message.erase(0, 1);
 
   if (!message.length())
-    return command->reply(ERR_NOTEXTTOSEND);
+    return;
 
-  //TODO
+  // TODO
   // 1. Send to all recipients
-  // 2. Check if recipient Exists     - ERR_NOSUCHNICK
-  // 3. Check if User on channel      - ERR_CANNOTSENDTOCHAN
-  // 4. Check if recipient duplicates - ERR_TOOMANYTARGETS
-  // 5. Check if User Away            - RPL_AWAY
+  // 2. Check if recipient Exists
+  // 3. Check if User on channel
+  // 4. Check if recipient duplicates
+  // 5. Check if User Away
 
   std::stringstream fullmessage;
 
   fullmessage << user.getPrefixMessage() << " " << \
     command->getCommandName() << " " << user.getNick() << " :" << message;
 
-  std::cout << "Need to send message: '" + fullmessage.str() + "' to:" << std::endl;
+  std::cout << "Need to send message: '" + fullmessage.str() + " to:" << std::endl;
   for (size_t i = 0; i < recipients.size(); ++i) {
     std::cout << recipients[i] << std::endl;
   }
