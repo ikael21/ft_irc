@@ -33,8 +33,7 @@ void irc::IrcServer::_create_socket() {
   throw_if_true<TcpSocketError>(_socket == -1);
 
   res = fcntl(_socket, F_SETFL, O_NONBLOCK);
-  throw_if_true<TcpSocketError>(_socket == -1);
-  res ^= 1;
+  throw_if_true<TcpSocketError>(res == -1);
 }
 
 
