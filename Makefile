@@ -27,6 +27,9 @@ endif
 
 CC += -g
 FLAGS = -Wall -Wextra -Werror -std=c++98
+ifeq ($(DEBUG), 1) # enable to print more useful info from server
+  FLAGS += -D DEBUG
+endif
 
 #colors for beauty
 YELLOW = \033[33;1m

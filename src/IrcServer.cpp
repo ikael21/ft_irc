@@ -214,6 +214,11 @@ void irc::IrcServer::run() {
   while (true) {
 
     int new_events_num = _wait_for_events(changes);
+
+#ifdef DEBUG
+    std::cout << "new_events_num: " << new_events_num << std::endl;
+#endif
+
     if (!new_events_num) continue;
 
     changes.clear(); // clear old event changes
