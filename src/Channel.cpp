@@ -1,6 +1,8 @@
 
 #include "Channel.hpp"
 
+#define DEBUG_LOG(x) do { if (DEBUG) { std::cerr << x << std::endl; } } while (0)
+
 t_channel_mode CHANNEL_MODES[] = { CH_PRIVATE, CH_SECRET, CH_INVITE_ONLY, CH_TOPIC_MODIFIERS };
 t_user_mode    USER_MODES[] = { U_INVISIBLE, U_OPERATOR };
 
@@ -18,7 +20,7 @@ std::string Channel ::_log_message(std::string message) {
 }
 
 void Channel :: _log(std::string message) {
-  std::cout << _log_message(message) << std::endl;
+  DEBUG_LOG(_log_message(message));
 }
 
 
@@ -29,35 +31,29 @@ bool Channel :: userOnChannel(User& user) {
 void Channel :: addUser(User &user) {
 
   if (_users.size() == _limit_users) {
-    _log("Channel is full");
-    return;
+    return _log("Channel is full");
   }
 
   if (isPrivate() && !isInvited(user)) {
-    _log("User " + user.getUsername() + " not in the invited list");
-    return;
+    return _log("User " + user.getUsername() + " not in the invited list");
   }
 
   if (userOnChannel(user)) {
-    _log("User " + user.getUsername() + " already in channel");
-    return;
+    return _log("User " + user.getUsername() + " already in channel");
   }
 
   _users.push_back(&user);
-  // _user_mode[username] = std::vector<t_user_mode>();
-
   _log("User " +  user.getUsername() + " added to channel");
 }
 
 void Channel :: removeUser(User &user) {
 
   if (!userOnChannel(user)) {
-    _log("User " + user.getUsername() + " not in the channel");
-    return;
+    return _log("User " + user.getUsername() + " not in the channel");
   }
 
   _users.erase(std::find(_users.begin(), _users.end(), &user));
-  // _user_mode.erase(username);
+  _user_mode.erase(&user);
   _log("User " +  user.getUsername() + " remove from channel");
 }
 
@@ -78,11 +74,12 @@ std::vector<User *> Channel :: getVisibleUsers() {
 
 void Channel :: setName(std::string name) {
 
-  if (name.empty() && name[0] != '#')
-    throw std::invalid_argument(_log_message("Channel name must starts with '#' symbol"));
+  if (name.empty() && name[0] != '#') {
+    return _log("Channel name must starts with '#' symbol");
+  }
 
   if (name.find_first_of(FORBIDDEN_CHANNEL_NAME_SYMBOLS) != std::string::npos) {
-    throw std::invalid_argument(_log_message("Channel name constains forbidden symbols"));
+    return _log("Channel name constains forbidden symbols");
   }
 
   _name = name;
@@ -117,7 +114,7 @@ void Channel :: _changeChannelMode(const std::string& mode, bool remove) {
     t_channel_mode cur_mode = static_cast<t_channel_mode>(mode[i]);
 
     if (std::find(all_mode.begin(), all_mode.end(), cur_mode) == all_mode.end()) {
-      throw std::invalid_argument(_log_message("Invalid mode '" + mode + "' for channel"));
+      return _log("Invalid mode '" + mode + "' for channel");
     }
 
     bool alreadyHave = haveMode(cur_mode);
@@ -150,8 +147,7 @@ void Channel :: addModeToUser(User& user, const std::string& mode) {
   std::vector<t_user_mode> modes(USER_MODES, USER_MODES + sizeof(USER_MODES) / sizeof(USER_MODES[0]));
 
   if (!userOnChannel(user)) {
-    _log("User " + user.getUsername() + " is not on channel");
-    return;
+    return _log("User " + user.getUsername() + " is not on channel");
   }
 
   for (size_t i = 0; i < mode.size(); ++i) {
@@ -159,7 +155,7 @@ void Channel :: addModeToUser(User& user, const std::string& mode) {
     t_user_mode cur_mode = static_cast<t_user_mode>(mode[i]);
 
     if (std::find(modes.begin(), modes.end(), cur_mode) == modes.end()) {
-      throw std::invalid_argument(_log_message("Invalid mode '" + mode + "' for user"));
+      return _log("Invalid mode '" + mode + "' for user");
     }
 
     if (!_userHaveMode(user, cur_mode)) {
@@ -171,8 +167,7 @@ void Channel :: addModeToUser(User& user, const std::string& mode) {
 void Channel :: removeUserMode(User& user, const std::string& mode) {
 
   if (!userOnChannel(user)) {
-    _log("User " + user.getUsername() + " is not on channel");
-    return;
+    return _log("User " + user.getUsername() + " is not on channel");
   }
 
   std::vector<t_user_mode> modes = _user_mode[&user];
