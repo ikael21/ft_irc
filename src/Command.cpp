@@ -44,7 +44,7 @@ Command :: Command(irc::IrcServer &server, User& user, std::string command)
 }
 
 
-void Command :: excecute() {
+void Command :: execute() {
 
   // check if User Registered
   if (_user.getStatus() != ONLINE) {

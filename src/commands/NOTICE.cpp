@@ -47,7 +47,10 @@ void NOTICE(Command *command) {
   fullmessage << user.getPrefixMessage() << " " << \
     command->getCommandName() << " " << user.getNick() << " :" << message;
 
+#ifdef DEBUG
   std::cout << "Need to send message: '" + fullmessage.str() + " to:" << std::endl;
+#endif
+
   for (size_t i = 0; i < recipients.size(); ++i) {
     std::cout << recipients[i] << std::endl;
   }

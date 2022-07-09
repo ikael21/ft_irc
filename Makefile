@@ -2,7 +2,9 @@ NAME = ircserv
 MAIN = main.cpp
 HEADERS_DIR = include
 
-SRCS = src/IrcServer.cpp src/Channel.cpp \
+SRCS = src/IrcServer_initialization_methods.cpp \
+       src/IrcServer_events_methods.cpp \
+       src/IrcServer.cpp src/Channel.cpp \
        src/User.cpp src/errors.cpp \
        src/Command.cpp src/commands/PASS.cpp \
        src/commands/NICK.cpp src/commands/USER.cpp \
@@ -27,7 +29,7 @@ endif
 
 CC += -g
 FLAGS = -Wall -Wextra -Werror -std=c++98
-ifeq ($(DEBUG), 1) # enable to print more useful info from server
+ifeq ($(DEBUG), 1)
   FLAGS += -D DEBUG
 endif
 

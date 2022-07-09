@@ -64,7 +64,17 @@ void User :: sendMsgToUser(User& user, std::string message) {
 
 
 void User :: sendMsg(int fd, std::string message) {
-  send(fd, message.c_str(), message.size(), 0);
+  ssize_t bytes_sent = send(fd, message.c_str(), message.size(), 0);
+  (void)bytes_sent;
+
+  /*
+    TODO check if all data sent
+
+  size_t left_bytes =
+    (!bytes_sent || bytes_sent == -1) ?
+      0 : message.size() - static_cast<size_t>(bytes_sent);
+
+  */
 }
 
 /**

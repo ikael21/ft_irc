@@ -1,10 +1,6 @@
 #include "IrcServer.hpp"
 #include "Command.hpp"
 
-const char* irc::IrcServer::DEFAULT_IP = "127.0.0.1";
-const irc::int8_t irc::IrcServer::MAX_QUEUE = 128;
-const int irc::IrcServer::INVALID_FD = -1;
-
 
 typedef void (irc::IrcServer::*handler)(struct kevent& event);
 
@@ -23,43 +19,6 @@ irc::IrcServer::~IrcServer() {
 }
 
 
-void irc::IrcServer::_create_socket() {
-  _socket = socket(AF_INET, SOCK_STREAM, 0);
-  throw_if_true<TcpSocketError>(_socket == -1);
-
-  int res = 0;
-  const int y = 1;
-  res = setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &y, sizeof(int));
-  throw_if_true<TcpSocketError>(_socket == -1);
-
-  res = fcntl(_socket, F_SETFL, O_NONBLOCK);
-  throw_if_true<TcpSocketError>(res == -1);
-}
-
-
-void irc::IrcServer::_initialize_socket(irc::port_type port) {
-  sockaddr_in addr_info;
-  int res;
-
-  addr_info.sin_family = AF_INET;
-  addr_info.sin_port = htons(port);
-  addr_info.sin_addr.s_addr = inet_addr(IrcServer::DEFAULT_IP);
-
-  const sockaddr* addr_info_ptr = (const sockaddr*)&addr_info;
-  res = bind(_socket, addr_info_ptr, sizeof(addr_info));
-  throw_if_true<BindError>(res == -1);
-
-  res = listen(_socket, MAX_QUEUE);
-  throw_if_true<ListenError>(res == -1);
-}
-
-
-void irc::IrcServer::_initialize_kqueue() {
-  _kq = kqueue();
-  throw_if_true<ErrnoBase>(_kq == -1);
-}
-
-
 User& irc::IrcServer::_find_or_create_user(int fd) {
   for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
     if (i->getFD() == fd)
@@ -70,53 +29,12 @@ User& irc::IrcServer::_find_or_create_user(int fd) {
 }
 
 
-void irc::IrcServer::_add_read_event(int fd, t_changelist& changes) {
-  User& user = _find_or_create_user(fd);
-  t_event event;
-  EV_SET(&event, fd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, (void*)&user);
-  changes.push_back(event);
-  _enabled_events_num++;
+bool irc::IrcServer::isCorrectPassword(std::string pass) {
+  return _password == pass;
 }
 
 
-void irc::IrcServer::_add_write_event(int fd, t_changelist& changes) {
-  User& user = _find_or_create_user(fd);
-  t_event event;
-  EV_SET(&event, fd, EVFILT_WRITE, EV_ADD | EV_CLEAR, 0, 0, (void*)&user);
-  changes.push_back(event);
-  _enabled_events_num++;
-}
-
-// type (third arg) is either EVFILT_WRITE or EVFILT_READ
-void irc::IrcServer::_disable_event(int fd,
-                                    t_changelist& changes,
-                                    int type) {
-  t_event event;
-  EV_SET(&event, fd, type, EV_DISABLE, 0, 0, NULL);
-  changes.push_back(event);
-  if (_enabled_events_num > 0)
-    _enabled_events_num--;
-}
-
-// type (third arg) is either EVFILT_WRITE or EVFILT_READ
-void irc::IrcServer::_enable_event(int fd,
-                                    t_changelist& changes,
-                                    int type) {
-  t_event event;
-  EV_SET(&event, fd, type, EV_ENABLE, 0, 0, NULL);
-  changes.push_back(event);
-  _enabled_events_num++;
-}
-
-// not implemented yet
-bool irc::IrcServer::_authenticate_user(User& user) {
-  // check given password from user
-  (void)user;
-  return false;
-}
-
-
-void irc::IrcServer::_accept_handler(t_changelist& changes) {
+void irc::IrcServer::_accept_handler() {
   struct sockaddr sock_addr;
   socklen_t socklen = sizeof(struct sockaddr);
   int new_fd = accept(_socket, &sock_addr, &socklen);
@@ -125,69 +43,67 @@ void irc::IrcServer::_accept_handler(t_changelist& changes) {
   int res = fcntl(new_fd, F_SETFL, O_NONBLOCK);
   throw_if_true<ErrnoBase>(res == -1);
 
-  _add_read_event(new_fd, changes);
-  _add_write_event(new_fd, changes);
+  _add_read_event(new_fd);
+  _add_write_event(new_fd);
 
-  // we don't need to send anything to unauthorized client
+  User& user = _find_or_create_user(new_fd);
+  struct sockaddr_in* s = (struct sockaddr_in*)&sock_addr;
+  user.setHostname(inet_ntoa(s->sin_addr));
+
   // disable to avoid handling of unnecessary events
-  _disable_event(new_fd, changes, EVFILT_WRITE);
+  _disable_event(new_fd, EVFILT_WRITE);
 
-  _users.push_back(User(new_fd));
-}
-
-
-int irc::IrcServer::_wait_for_events(t_changelist& changes) {
-  struct timespec* timeout = NULL; // wait indefinitely
-  int changes_num = static_cast<int>(changes.size());
-  int events_num = static_cast<int>(_enabled_events_num);
-
-  t_event* changes_arr = list_to_array<t_event>(changes);
-  int new_events_num = kevent(_kq,
-                              changes_arr, changes_num,
-                              _events.data(), events_num,
-                              timeout);
-  delete [] changes_arr;
-  throw_if_true<ErrnoBase>(new_events_num == -1);
-  return new_events_num;
+#ifdef DEBUG
+  std::cout << MAGENTA "New User" << std::endl;
+  std::cout << CYAN "\tFD: " << YELLOW << new_fd << std::endl;
+  std::cout << CYAN "\tHostname: " << YELLOW
+    << user.getHostname() << RESET << std::endl;
+#endif
 }
 
 
 void irc::IrcServer::_read_handler(t_event& event) {
-  // event.data -> количество байт, которое можно считать без блокировки
   User* user = static_cast<User*>(event.udata);
-  user->receive(event.data);
+  user->receive(event.data); // event.data -> number of bytes to recieve
 
-  while (user->hasNextMsg()) {
-    Command command = Command(*this, *user, user->getNextMsg());
-    command.excecute();
+#ifdef DEBUG
+  std::cout << "Read event for User with FD: "
+    << user->getFD() << std::endl;
+#endif
+
+  if (user->hasNextMsg()) {
+    _enable_event(user->getFD(), EVFILT_WRITE);
+
+#ifdef DEBUG
+  std::cout << "Enable write event for User with FD: "
+    << user->getFD() << std::endl;
+#endif
+
   }
 }
 
+
 void irc::IrcServer::_write_handler(t_event& event) {
-  std::cout << "Write event just happend." << std::endl;
-  (void)event;
+  User* user = static_cast<User*>(event.udata);
+
+  if (user->hasNextMsg()) {
+    Command command = Command(*this, *user, user->getNextMsg());
+    command.execute();
+  }
+
+  // TODO
+  // if all data sent, need to disable event notify
 }
 
 
-void irc::IrcServer::_delete_client(t_event& event) {
-  int fd = ((User*)event.udata)->getFD();
-  t_userlist::iterator it = _users.begin();
-  while (it != _users.end() && it->getFD() != fd)
-    ++it;
-  _users.erase(it);
-  close(fd);
-  std::cout << "Client(FD: " << fd << ") just left..." << std::endl;
-}
-
-
-void irc::IrcServer::_execute_handler(t_event& event,
-                                      t_changelist& changes) {
+void irc::IrcServer::_execute_handler(t_event& event) {
   static const int conds_num = 4;
   static bool conds[conds_num];
-  conds[0] = static_cast<int>(event.ident) == _socket; // accept new client
-  conds[1] = event.flags & EV_EOF;                     // delete client that left
-  conds[3] = event.filter == EVFILT_WRITE;             // server may send something to client
-  conds[2] = event.filter == EVFILT_READ;              // server may get something from client
+
+  conds[0] = static_cast<int>(event.ident) == _socket;
+  conds[1] = event.flags & EV_EOF;
+  conds[2] = event.filter == EVFILT_READ;
+  conds[3] = event.filter == EVFILT_WRITE;
 
   static const handler event_handlers[] = {
     NULL,
@@ -197,7 +113,7 @@ void irc::IrcServer::_execute_handler(t_event& event,
   };
 
   if (conds[0])
-    return _accept_handler(changes);
+    return _accept_handler();
 
   // based on the rest conditions call the suitable handler
   for (int i = 1; i < conds_num; ++i)
@@ -207,24 +123,16 @@ void irc::IrcServer::_execute_handler(t_event& event,
 
 
 void irc::IrcServer::run() {
-  t_changelist changes;
-  _add_read_event(_socket, changes); // accept new connections
+  _add_socket_event(); // accept incoming connections
   _events.reserve(_enabled_events_num);
 
   while (true) {
-
-    int new_events_num = _wait_for_events(changes);
-
-#ifdef DEBUG
-    std::cout << "new_events_num: " << new_events_num << std::endl;
-#endif
-
+    int new_events_num = _wait_for_events();
     if (!new_events_num) continue;
 
-    changes.clear(); // clear old event changes
-
+    _changes.clear(); // clear old event changes
     for (int i = 0; i < new_events_num; ++i)
-      _execute_handler(_events[i], changes);
+      _execute_handler(_events[i]);
 
     // reserve correct memory size for new events
     _events.reserve(_enabled_events_num);
@@ -233,6 +141,11 @@ void irc::IrcServer::run() {
 }
 
 
-bool irc::IrcServer::isCorrectPassword(std::string pass) {
-  return _password == pass;
+irc::IrcServer::t_channel_list& irc::IrcServer::get_channels() {
+  return _channels;
+}
+
+
+void irc::IrcServer::add_channel(Channel& channel) {
+  _channels.push_back(channel);
 }
