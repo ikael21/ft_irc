@@ -3,7 +3,7 @@
 # define USER_HPP_
 
 # define BUFFER_SIZE     1024
-# define END_OF_MESSAGE  "\n"
+# define END_OF_MESSAGE  "\r\n"
 
 # include <string>
 # include <vector>

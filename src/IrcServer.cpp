@@ -157,7 +157,7 @@ void irc::IrcServer::_read_handler(t_event& event) {
   User* user = static_cast<User*>(event.udata);
   user->receive(event.data);
 
-  while (user->hasNextMsg()) {
+  if (user->hasNextMsg()) {
     Command command = Command(*this, *user, user->getNextMsg());
     command.excecute();
   }

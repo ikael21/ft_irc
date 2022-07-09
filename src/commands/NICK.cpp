@@ -1,4 +1,3 @@
-#include <cstring>
 #include "commands.hpp"
 
 void NICK(Command *command) {
@@ -22,10 +21,11 @@ void NICK(Command *command) {
   // 1. Check if NICK exists on server
   // 2. Send to all channels that user changes his nickname
 
+  user.setNick(nick);
+
   // if User has Username and Nick his status - ONLINE
   if (user.getUsername().length()) {
     user.setStatus(ONLINE);
+    __print_logo(command);
   }
-
-  user.setNick(nick);
 }

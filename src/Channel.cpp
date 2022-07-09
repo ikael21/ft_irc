@@ -6,11 +6,10 @@
 t_channel_mode CHANNEL_MODES[] = { CH_PRIVATE, CH_SECRET, CH_INVITE_ONLY, CH_TOPIC_MODIFIERS };
 t_user_mode    USER_MODES[] = { U_INVISIBLE, U_OPERATOR };
 
+
 Channel :: Channel() :
     _limit_users(DEFAULT_USERS), _modes(std::vector<t_channel_mode>(DEFAULT_CHANNEL_MODES)) {}
 
-Channel :: Channel(std::string name, std::string user) :
-    _name(name), _operator(user), _limit_users(DEFAULT_USERS), _modes(std::vector<t_channel_mode>(DEFAULT_CHANNEL_MODES)) {}
 
 Channel :: ~Channel() {}
 
@@ -85,6 +84,10 @@ void Channel :: setName(std::string name) {
   _name = name;
 }
 
+
+void Channel :: setKey(std::string key) { _key = key; }
+
+
 void Channel :: setTopic(std::string topic) { _topic = topic; }
 
 
@@ -101,6 +104,22 @@ void Channel :: addToInviteList(User& user) {
     _log("User " + user.getUsername() + " already invited");
   }
 }
+
+
+bool Channel :: isBanned(User& user) {
+    return std::find(_banned.begin(), _banned.end(), &user) != _banned.end();
+}
+
+
+void Channel :: addToBanList(User& user) {
+  if (!isBanned(user)) {
+    _banned.push_back(&user);
+    _log("User " + user.getUsername() + " added to ban list");
+  } else {
+    _log("User " + user.getUsername() + " already banned");
+  }
+}
+
 
 void Channel :: addChannelMode(const std::string& mode) { _changeChannelMode(mode, false); }
 void Channel :: removeChannelMode(const std::string& mode) { _changeChannelMode(mode, true); }
@@ -129,9 +148,11 @@ void Channel :: _changeChannelMode(const std::string& mode, bool remove) {
   }
 }
 
+
 bool Channel :: isPrivate() {
   return haveMode(CH_PRIVATE);
 }
+
 
 bool Channel :: haveMode(t_channel_mode mode) {
   return std::find(_modes.begin(), _modes.end(), mode) != _modes.end();
@@ -141,6 +162,7 @@ bool Channel :: haveMode(t_channel_mode mode) {
 bool Channel ::_userHaveMode(User& user, t_user_mode mode) {
   return std::find(_user_mode[&user].begin(), _user_mode[&user].end(), mode) != _user_mode[&user].end();
 }
+
 
 void Channel :: addModeToUser(User& user, const std::string& mode) {
 
@@ -155,12 +177,17 @@ void Channel :: addModeToUser(User& user, const std::string& mode) {
     t_user_mode cur_mode = static_cast<t_user_mode>(mode[i]);
 
     if (std::find(modes.begin(), modes.end(), cur_mode) == modes.end()) {
-      return _log("Invalid mode '" + mode + "' for user");
+      _log("Invalid mode '" + mode + "' for user");
+      continue;
     }
+    addModeToUser(user, cur_mode);
+  }
+}
 
-    if (!_userHaveMode(user, cur_mode)) {
-      _user_mode[&user].push_back(cur_mode);
-    }
+
+void Channel :: addModeToUser(User& user, t_user_mode mode) {
+  if (!_userHaveMode(user, mode)) {
+    _user_mode[&user].push_back(mode);
   }
 }
 
@@ -173,10 +200,15 @@ void Channel :: removeUserMode(User& user, const std::string& mode) {
   std::vector<t_user_mode> modes = _user_mode[&user];
 
   for (size_t i = 0; i < mode.size(); ++i) {
-    t_user_mode cur_mode = static_cast<t_user_mode>(mode[i]);
-    _user_mode[&user].erase(std::find(_user_mode[&user].begin(), _user_mode[&user].end(), cur_mode));
+    removeUserMode(user, static_cast<t_user_mode>(mode[i]));
   }
 }
+
+
+void Channel :: removeUserMode(User& user, t_user_mode mode) {
+  _user_mode[&user].erase(std::find(_user_mode[&user].begin(), _user_mode[&user].end(), mode));
+}
+
 
 bool Channel :: userIsOper(User& user) {
 
