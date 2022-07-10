@@ -66,19 +66,23 @@ void irc::IrcServer::_read_handler(t_event& event) {
   User* user = static_cast<User*>(event.udata);
   user->receive(event.data); // event.data -> number of bytes to recieve
 
-#ifdef DEBUG
-  std::cout << "Read event for User with FD: "
-    << user->getFD() << std::endl;
-#endif
-
   if (user->hasNextMsg()) {
     _enable_event(user->getFD(), EVFILT_WRITE);
 
 #ifdef DEBUG
-  std::cout << "Enable write event for User with FD: "
-    << user->getFD() << std::endl;
-#endif
+    std::cout << YELLOW "Message from User(FD: "
+      << user->getFD() << ")" RESET << std::endl;
 
+    std::string tmp(user->getBuffer());
+    while (tmp.find(END_OF_MESSAGE) != std::string::npos) {
+      std::cout << GREEN "\t|"
+        << tmp.substr(0, tmp.find(END_OF_MESSAGE))
+        << RESET << std::endl;
+      tmp = tmp.substr(tmp.find(END_OF_MESSAGE) + 1);
+    }
+    if (tmp.length())
+      std::cout << GREEN "\t|" << tmp << RESET << std::endl;
+#endif
   }
 }
 

@@ -2,10 +2,10 @@ NAME = ircserv
 MAIN = main.cpp
 HEADERS_DIR = include
 
-SRCS = src/IrcServer_initialization_methods.cpp \
-       src/IrcServer_events_methods.cpp \
-       src/IrcServer.cpp src/Channel.cpp \
-       src/User.cpp src/errors.cpp \
+SRCS = src/server/IrcServer_initialization_methods.cpp \
+       src/server/IrcServer_events_methods.cpp \
+       src/server/IrcServer.cpp \
+       src/Channel.cpp src/User.cpp src/errors.cpp \
        src/Command.cpp src/commands/PASS.cpp \
        src/commands/NICK.cpp src/commands/USER.cpp \
        src/commands/PRIVMSG.cpp src/commands/AWAY.cpp \

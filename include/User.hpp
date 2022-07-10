@@ -63,6 +63,8 @@ class User {
 
   bool isAway() { return !_afkMessage.empty(); }
 
+  const std::string& getBuffer() const { return _buffer; }
+
  private:
   int            _fd;
   t_user_status _status;
