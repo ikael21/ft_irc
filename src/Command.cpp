@@ -75,7 +75,7 @@ void Command :: reply(t_irc_error err_code, std::string a1, std::string a2, std:
   std::stringstream msg;
 
   // instead of 'irc.21-school.ru' must be _server.getHostname()
-  msg << ":" << "irc.21-school.ru" << " " << err_code << " "  << \
+  msg << ":" << irc::IrcServer::DEFAULT_IP << " " << err_code << " "  << \
     _user.getNick() << " " << irc_error(err_code, a1, a2, a3, a4, a5, a6, a7);
 
   // all messages send from User class, but I think that it must be sent something like that

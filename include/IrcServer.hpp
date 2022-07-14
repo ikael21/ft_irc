@@ -39,6 +39,9 @@ public:
   typedef std::list<Channel>  t_channel_list;
 
 
+  static const char* DEFAULT_IP;
+
+
   IrcServer(const char* port, const char* password);
   ~IrcServer();
 
@@ -47,13 +50,21 @@ public:
   bool            isCorrectPassword(std::string pass);
   void            add_channel(Channel& channel);
   t_channel_list& get_channels();
+  User&           get_user_by_nickname(const std::string& nickname);
 
   /* Propose to create next methods
 
   bool isUserOnServer(std::string nick);
-  bool isChannelOnServer(std::string channel_name);
 
-  User& getUser(std::string nick);
+  TODO
+  возможно лучше создать поле внутри юзера (state/status/is_online)
+  сервер будет пинговать юзеров и выставлять поле в зависимости от ответа
+
+
+  bool isChannelOnServer(std::string channel_name);
+  канал автоматически удаляется когда все юзеры покидают данный канал
+
+
   Channel& getChannel(std::string channel_name);
 
   void sendToUser(User& from, User& to, std::string msg);
@@ -97,7 +108,6 @@ private:
   t_userlist        _users;
   t_channel_list    _channels;
 
-  static const char*  DEFAULT_IP;
   static const int8_t MAX_QUEUE;
   static const int    INVALID_FD;
 

@@ -89,14 +89,13 @@ void irc::IrcServer::_read_handler(t_event& event) {
 
 void irc::IrcServer::_write_handler(t_event& event) {
   User* user = static_cast<User*>(event.udata);
-
   if (user->hasNextMsg()) {
     Command command = Command(*this, *user, user->getNextMsg());
     command.execute();
-  }
 
-  // TODO
-  // if all data sent, need to disable event notify
+    // TODO if all data sent, need to disable event notify
+    _disable_event(user->getFD(), EVFILT_WRITE);
+  }
 }
 
 
@@ -152,4 +151,15 @@ irc::IrcServer::t_channel_list& irc::IrcServer::get_channels() {
 
 void irc::IrcServer::add_channel(Channel& channel) {
   _channels.push_back(channel);
+}
+
+/**
+ * throws NoUserFound if User is not found in the list
+**/
+User& irc::IrcServer::get_user_by_nickname(const std::string& nickname) {
+  for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
+    if (i->getNick() == nickname)
+      return *i;
+  }
+  throw UserNotFound();
 }

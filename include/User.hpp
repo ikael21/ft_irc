@@ -1,4 +1,3 @@
-
 #ifndef USER_HPP_
 # define USER_HPP_
 
