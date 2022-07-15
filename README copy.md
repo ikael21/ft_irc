@@ -15,6 +15,15 @@ together to form a network.
 - [RFC 1459 RUS](https://www.lissyara.su/doc/rfc/rfc1459/)
 - [RFC 2813](https://datatracker.ietf.org/doc/html/rfc2813) (LAST ONE)
 
+Compile server
+```bash
+make
+```
+Compile server in debug mode
+```bash
+DEBUG=1 make re
+```
+
 ## Commands
 - `PASS <password>`
 - `NICK <nickname>`
@@ -22,9 +31,21 @@ together to form a network.
 - `PRIVMSG <receiver> {,<receiver>} <text to be sent>`
 - `NOTICE <nickname> <text>`
 - `JOIN <channel>{,<channel>} [<key>{,<key>}]`
+- `LIST [<channel>{,<channel>} [<server>]]`
+- `NAMES [<channel>{,<channel>}]`
 - `INVITE <nickname> <channel>`
 - `TOPIC <channel> [<topic>]`
 - `KICK <channel> <user> [<comment>]`
 - `PING <server>`
 - `PONG <daemon>`
 - `TIME <server>`
+- `USERS [<server>]`
+- `AWAY [message]`
+
+
+For `Linux` please install [libkqueue](https://github.com/mheily/libkqueue).
+
+```bash
+sudo apt update
+sudo apt install libkqueue-dev
+```
