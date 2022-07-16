@@ -8,7 +8,7 @@ SRCS = src/IrcServer.cpp src/Channel.cpp \
        src/commands/NICK.cpp src/commands/USER.cpp \
        src/commands/PRIVMSG.cpp src/commands/AWAY.cpp \
        src/commands/NOTICE.cpp src/utils.cpp \
-			 src/commands/JOIN.cpp
+	   src/commands/JOIN.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))
 D_FILES = $(patsubst %.cpp,$(OBJS_DIR)/%.d, $(SRCS))

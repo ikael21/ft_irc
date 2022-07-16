@@ -45,7 +45,7 @@ void JOIN(Command *command) {
       continue;
     }
 
-    if ( /* server.channelOnServer(channels[i]) */) {
+    if (false /* server.channelOnServer(channels[i]) */) {
       Channel channel = Channel() /* server.getChannel(channels[i]) */;
       channel.setName(channels[i]);
 
@@ -72,6 +72,7 @@ void JOIN(Command *command) {
 
       channel.addUser(user);
       channel.addModeToUser(user, U_OPERATOR);
+      std::cout << channel.userIsOper(user);
       /* server.addChannel(channel) */
       sendChannelInfo(command, channel);
     }
