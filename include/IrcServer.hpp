@@ -19,6 +19,8 @@
 # include "Channel.hpp"
 # include "exceptions.hpp"
 # include "utils.hpp"
+# include <ctime>
+# include <time.h>
 
 
 namespace irc {
@@ -84,7 +86,6 @@ private:
   void _initialize_kqueue();
 
   int  _wait_for_events();
-
   void _add_socket_event();
   void _add_read_event(int fd);
   void _add_write_event(int fd);
@@ -96,6 +97,8 @@ private:
   void _read_handler(t_event& event);
   void _write_handler(t_event& event);
   void _delete_client(t_event& event);
+
+  void _ping_by_nickname(const User& user);
 
   User& _find_or_create_user(int fd);
 

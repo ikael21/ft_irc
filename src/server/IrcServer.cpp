@@ -131,11 +131,19 @@ void irc::IrcServer::run() {
 
   while (true) {
     int new_events_num = _wait_for_events();
-    if (!new_events_num) continue;
-
     _changes.clear(); // clear old event changes
     for (int i = 0; i < new_events_num; ++i)
       _execute_handler(_events[i]);
+
+    /* TODO
+      Check last accepted event time for all users,
+      if there's much time passed - ping user (and wait answer for 1 minute)
+
+      Add some kinda states for user: ACTIVE, WAIT_PING, WAIT_PONG
+      ACTIVE -> user's online and sends messages
+      WAIT_PING -> ping user to see if he's stil online, state is now WAIT_PONG
+      WAIT_PONG -> server waits message from user
+    */
 
     // reserve correct memory size for new events
     _events.reserve(_enabled_events_num);
@@ -153,8 +161,9 @@ void irc::IrcServer::add_channel(Channel& channel) {
   _channels.push_back(channel);
 }
 
+
 /**
- * throws NoUserFound if User is not found in the list
+ * throws UserNotFound if User is not found in the list
 **/
 User& irc::IrcServer::get_user_by_nickname(const std::string& nickname) {
   for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
@@ -162,4 +171,10 @@ User& irc::IrcServer::get_user_by_nickname(const std::string& nickname) {
       return *i;
   }
   throw UserNotFound();
+}
+
+
+void irc::IrcServer::_ping_by_nickname(const User& user) {
+  std::string message("PING " + user.getNick() + "\r\n");
+  send(user.getFD(), message.c_str(), message.length(), 0);
 }

@@ -1,6 +1,5 @@
 #include "IrcServer.hpp"
 
-
 void irc::IrcServer::_add_socket_event() {
   t_event event;
   EV_SET(&event, _socket, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, NULL);
@@ -63,7 +62,7 @@ void irc::IrcServer::_delete_client(t_event& event) {
 
 
 int irc::IrcServer::_wait_for_events() {
-  struct timespec* timeout = NULL; // wait indefinitely
+  struct timespec timeout = { .tv_sec = 60, .tv_nsec = 0 }; // wait one minute
   int changes_num = static_cast<int>(_changes.size());
   int events_num = static_cast<int>(_enabled_events_num);
 
@@ -76,7 +75,7 @@ int irc::IrcServer::_wait_for_events() {
   int new_events_num = kevent(_kq,
                               changes_arr, changes_num,
                               _events.data(), events_num,
-                              timeout);
+                              &timeout);
   delete [] changes_arr;
   throw_if_true<ErrnoBase>(new_events_num == -1);
   return new_events_num;

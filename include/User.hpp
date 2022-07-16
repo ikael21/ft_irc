@@ -37,7 +37,7 @@ class User {
   std::string getRealname() { return _realname; }
 
   void setNick(std::string nick) { _nick = nick; }
-  std::string getNick() { return _nick; }
+  const std::string& getNick() const { return _nick; }
 
   void setAFKMessage(std::string message) { _afkMessage = message; }
   std::string getAFKMessage() { return _afkMessage; }
