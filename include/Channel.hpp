@@ -10,6 +10,10 @@
 
 # include "User.hpp"
 
+# ifndef DEBUG
+  # define DEBUG 0
+# endif
+
 /* Список доступных режимов канала:
  *   o - брать/давать привилегии операторов канала
  *   p - флаг приватности канала;
@@ -55,7 +59,7 @@ class Channel
 {
  public:
   Channel();
-  Channel(std::string channelName, std::string username);
+  // Channel(std::string channelName, std::string username);
 
   ~Channel();
 
@@ -84,14 +88,22 @@ class Channel
   void addToInviteList(User& user);
   bool isInvited(User& user);
 
+  void addToBanList(User& user);
+  bool isBanned(User& user);
+
   void setKey(std::string key);
-  std::string getKey() { return _key; }
+  bool hasKey() { return _key.size(); }
+  bool isCorrectKey(std::string key) { return _key == key; }
 
   void setLimitUsers(int limit);
   int getLimitUsers() { return _limit_users; }
+  bool isFull() { return _users.size() >= _limit_users; }
 
   void addModeToUser(User& user, const std::string& mode);
+  void addModeToUser(User& user, t_user_mode mode);
+
   void removeUserMode(User& user, const std::string& mode);
+  void removeUserMode(User& user, t_user_mode mode);
 
   bool userIsOper(User& user);
 
@@ -104,6 +116,7 @@ class Channel
 
   std::vector<User *> _users;
   std::vector<User *> _invited;
+  std::vector<User *> _banned;
 
   std::vector<t_channel_mode>                 _modes;
   std::map<User *, std::vector<t_user_mode> > _user_mode;
