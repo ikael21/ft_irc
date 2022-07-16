@@ -1,11 +1,22 @@
 #ifndef UTILS_HPP_
 # define UTILS_HPP_
 
-#include <string>
-#include <sstream>
-#include <vector>
-#include <algorithm>
-#include <list>
+# include <string>
+# include <sstream>
+# include <vector>
+# include <algorithm>
+# include <list>
+
+
+// colors for beauty
+# define RED     "\033[0;31m"
+# define YELLOW  "\033[0;33m"
+# define GREEN   "\033[0;32m"
+# define MAGENTA "\033[0;35m"
+# define BLUE    "\033[0;34m"
+# define CYAN    "\033[1;96m"
+# define RESET   "\033[0m"
+
 
 /**
  * throws an exception if result equals true

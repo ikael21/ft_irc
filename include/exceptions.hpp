@@ -6,26 +6,25 @@
 
 
 struct InvalidArgument : public std::exception {
-
   virtual const char* what() const throw() {
     return "Invalid argument(s)";
   }
-
 };
 
 
 struct ErrnoBase : public std::exception {
-
   virtual const char* what() const throw() {
     return strerror(errno);
   }
-
 };
 
 
 struct TcpSocketError : public ErrnoBase {};
 struct BindError : public ErrnoBase {};
 struct ListenError : public ErrnoBase {};
+
+
+struct UserNotFound {};
 
 
 #endif // EXCEPTIONS_H_

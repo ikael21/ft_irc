@@ -2,7 +2,7 @@
 #include <cstring>
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include "utils.hpp"
 #include "User.hpp"
 
 User :: User(): _status(AUTHENTICATION) {};
@@ -66,7 +66,24 @@ void User :: sendMsgToUser(User& user, std::string message) {
 
 
 void User :: sendMsg(int fd, std::string message) {
-  send(fd, message.c_str(), message.size(), 0);
+  ssize_t bytes_sent = send(fd, message.c_str(), message.size(), 0);
+  (void)bytes_sent;
+
+#ifdef DEBUG
+  std::cout << YELLOW "Reply for User(FD: "
+    << fd << ")" RESET << std::endl;
+  std::cout << GREEN "\t|" << message
+    << RESET << std::endl;
+#endif
+
+  /*
+    TODO check if all data sent
+
+  size_t left_bytes =
+    (!bytes_sent || bytes_sent == -1) ?
+      0 : message.size() - static_cast<size_t>(bytes_sent);
+
+  */
 }
 
 /**

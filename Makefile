@@ -2,13 +2,15 @@ NAME = ircserv
 MAIN = main.cpp
 HEADERS_DIR = include
 
-SRCS = src/IrcServer.cpp src/Channel.cpp \
-       src/User.cpp src/errors.cpp \
+SRCS = src/server/IrcServer_initialization_methods.cpp \
+       src/server/IrcServer_events_methods.cpp \
+       src/server/IrcServer.cpp \
+       src/Channel.cpp src/User.cpp src/errors.cpp \
        src/Command.cpp src/commands/PASS.cpp \
        src/commands/NICK.cpp src/commands/USER.cpp \
        src/commands/PRIVMSG.cpp src/commands/AWAY.cpp \
        src/commands/NOTICE.cpp src/utils.cpp \
-	   src/commands/JOIN.cpp
+	     src/commands/JOIN.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))
 D_FILES = $(patsubst %.cpp,$(OBJS_DIR)/%.d, $(SRCS))
@@ -28,7 +30,7 @@ endif
 
 CC += -g
 FLAGS = -Wall -Wextra -Werror -std=c++98
-ifeq ($(DEBUG), 1) # enable to print more useful info from server
+ifeq ($(DEBUG), 1)
   FLAGS += -D DEBUG
 endif
 

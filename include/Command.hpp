@@ -30,7 +30,7 @@ class Command {
   irc::IrcServer& getServer() { return _server; }
   User& getUser() { return _user; }
 
-  void excecute();
+  void execute();
 
   void reply(t_irc_error err_code,
               std::string a1 = "",

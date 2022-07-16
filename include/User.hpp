@@ -1,4 +1,3 @@
-
 #ifndef USER_HPP_
 # define USER_HPP_
 
@@ -62,6 +61,8 @@ class User {
   std::string getPrefixMessage();
 
   bool isAway() { return !_afkMessage.empty(); }
+
+  const std::string& getBuffer() const { return _buffer; }
 
  private:
   int            _fd;
