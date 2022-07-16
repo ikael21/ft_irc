@@ -3,8 +3,8 @@
 
 void NOTICE(Command *command) {
 
-  User& user = command->getUser();
-  std::vector<std::string> args = command->getArguments();
+  User& user = command->get_user();
+  std::vector<std::string> args = command->get_arguments();
   std::vector<std::string> recipients;
   std::string message;
 
@@ -44,8 +44,8 @@ void NOTICE(Command *command) {
 
   std::stringstream fullmessage;
 
-  fullmessage << user.getPrefixMessage() << " " << \
-    command->getCommandName() << " " << user.getNick() << " :" << message;
+  fullmessage << user.get_prefix_msg() << " " << \
+    command->get_command_name() << " " << user.get_nick() << " :" << message;
 
 #ifdef DEBUG
   std::cout << "Need to send message: '" + fullmessage.str() + " to:" << std::endl;

@@ -1,80 +1,84 @@
 #include "commands.hpp"
 
 
-void sendChannelInfo(Command* command, Channel& channel)
+void send_channel_info(Command* command, Channel& channel)
 {
-  if (!channel.getTopic().empty())
-    command->reply(RPL_TOPIC, channel.getName(), channel.getTopic());
+  if (!channel.get_topic().empty())
+    command->reply(RPL_TOPIC, channel.get_name(), channel.get_topic());
 
-  std::vector<User*> users = channel.getVisibleUsers();
+  std::vector<User*> users = channel.get_visible_users();
   std::stringstream nicks;
   for (size_t i = 0; i < users.size(); ++i) {
-    nicks << (channel.userIsOper(*users[i]) ? "@" : "+") << users[i]->getNick() << " ";
+    nicks << (channel.user_is_oper(*users[i]) ? "@" : "+") << users[i]->get_nick() << " ";
   }
-  command->reply(RPL_NAMREPLY, channel.getName(), nicks.str());
-  command->reply(RPL_ENDOFNAMES, channel.getName());
+  command->reply(RPL_NAMREPLY, channel.get_name(), nicks.str());
+  command->reply(RPL_ENDOFNAMES, channel.get_name());
 }
 
 
-bool userNotInvite(Channel& channel, User& user) {
-  return channel.isPrivate() && !channel.isInvited(user);
+bool user_not_invite(Channel& channel, User& user) {
+  return channel.is_private() && !channel.is_invited(user);
 }
 
 
-bool badChannelPrefix(std::string& channel) {
+bool bad_channel_prefix(std::string& channel) {
   return (channel[0] != '#' && channel[0] != '&');
 }
 
 
 void JOIN(Command *command) {
 
-  User& user = command->getUser();
-  // irc::IrcServer& server = command->getServer();
+  User& user = command->get_user();
+  irc::IrcServer& server = command->get_server();
+  irc::IrcServer::t_channel_list channels = server.get_channels();
 
-  std::vector<std::string> args = split(command->getArguments()[0], ' ', 1);
-  std::vector<std::string> channels = split(args[0], ',');
+  std::vector<std::string> args = split(command->get_arguments()[0], ' ', 1);
+  std::vector<std::string> channels_names = split(args[0], ',');
   std::vector<std::string> keys = std::vector<std::string>();
 
   if (args.size() > 1)
     keys = split(args[1], ',');
 
-  for (size_t i = 0; i < channels.size(); ++i) {
+  for (size_t i = 0; i < channels_names.size(); ++i) {
 
-    if (badChannelPrefix(channels[i])) {
-      command->reply(ERR_BADCHANMASK); // CHECK
+    if (bad_channel_prefix(channels_names[i])) {
+      command->reply(ERR_BADCHANMASK);
       continue;
     }
 
-    if (false /* server.channelOnServer(channels[i]) */) {
-      Channel channel = Channel() /* server.getChannel(channels[i]) */;
-      channel.setName(channels[i]);
+    irc::IrcServer::t_channel_list::iterator it = std::find(channels.begin(), channels.end(), channels_names[i]);
 
-      bool userHasIncorrectKey = channel.hasKey() && (i <= keys.size() || !channel.isCorrectKey(keys[i]));
+    if (it != channels.end()) {
+      Channel& channel = *it;
 
-      if (userNotInvite(channel, user)) {
-        command->reply(ERR_INVITEONLYCHAN, channel.getName());
-      } else if (userHasIncorrectKey) {
-        command->reply(ERR_BADCHANNELKEY, channel.getName());
-      } else if (channel.isFull()) {
-        command->reply(ERR_CHANNELISFULL, channel.getName());
-      } else if (channel.isBanned(user)) {
-        command->reply(ERR_BANNEDFROMCHAN, channel.getName());
+      bool user_has_incorrect_key = channel.has_key() && (i <= keys.size() || !channel.is_correct_key(keys[i]));
+
+      if (user_not_invite(channel, user)) {
+        command->reply(ERR_INVITEONLYCHAN, channel.get_name());
+      } else if (user_has_incorrect_key) {
+        command->reply(ERR_BADCHANNELKEY, channel.get_name());
+      } else if (channel.is_full()) {
+        command->reply(ERR_CHANNELISFULL, channel.get_name());
+      } else if (channel.is_banned(user)) {
+        command->reply(ERR_BANNEDFROMCHAN, channel.get_name());
       } else {
-        channel.addUser(user);
-        sendChannelInfo(command, channel);
+        channel.add_user(user);
+        send_channel_info(command, channel);
+        std::string msg = user.get_prefix_msg() + command->get_command_name() + " :" + channel.get_name();
+        channel.send_to_channel(user, msg);
       }
     } else {
       Channel channel = Channel();
-      channel.setName(channels[i]);
+      channel.set_name(channels_names[i]);
 
       if (keys.size() > i)
-        channel.setKey(keys[i]);
+        channel.set_key(keys[i]);
 
-      channel.addUser(user);
-      channel.addModeToUser(user, U_OPERATOR);
-      std::cout << channel.userIsOper(user);
-      /* server.addChannel(channel) */
-      sendChannelInfo(command, channel);
+      channel.add_user(user);
+      channel.add_mode_to_user(user, U_OPERATOR);
+      std::cout << channel.user_is_oper(user);
+      server.add_channel(channel);
+      send_channel_info(command, channel);
     }
   }
 }

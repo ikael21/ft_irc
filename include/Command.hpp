@@ -22,13 +22,13 @@ class Command {
 
   Command(irc::IrcServer& server, User& user, std::string command);
 
-  std::string getFullMessage() { return _full_message; }
-  std::string getCommandName() { return _command.func_name; }
-  std::vector<std::string> getArguments() { return _arguments; }
-  size_t numArgs() { return _arguments.size(); }
+  std::string get_full_msg() { return _full_message; }
+  std::string get_command_name() { return _command.func_name; }
+  std::vector<std::string> get_arguments() { return _arguments; }
+  size_t num_args() { return _arguments.size(); }
 
-  irc::IrcServer& getServer() { return _server; }
-  User& getUser() { return _user; }
+  irc::IrcServer& get_server() { return _server; }
+  User& get_user() { return _user; }
 
   void execute();
 
