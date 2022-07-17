@@ -1,6 +1,7 @@
 #ifndef IRC_SERVER_H_
 # define IRC_SERVER_H_
 # include <iostream>
+# include <sstream>
 # include <string>
 # include <sys/types.h>
 # include <sys/event.h>
@@ -19,8 +20,6 @@
 # include "Channel.hpp"
 # include "exceptions.hpp"
 # include "utils.hpp"
-# include <ctime>
-# include <time.h>
 
 
 namespace irc {
@@ -49,7 +48,7 @@ public:
 
   void run();
 
-  bool            isCorrectPassword(std::string pass);
+  bool            is_password_correct(std::string pass);
   void            add_channel(Channel& channel);
   t_channel_list& get_channels();
   User&           get_user_by_nickname(const std::string& nickname);
@@ -87,9 +86,9 @@ private:
 
   int  _wait_for_events();
   void _add_socket_event();
-  void _add_read_event(int fd);
-  void _add_write_event(int fd);
-  void _enable_event(int fd, int type);
+  void _add_read_event(User& user);
+  void _add_write_event(User& user);
+  void _enable_event(User& user, int type);
   void _disable_event(int fd, int type);
 
   void _execute_handler(t_event& event);
@@ -97,7 +96,9 @@ private:
   void _read_handler(t_event& event);
   void _write_handler(t_event& event);
   void _delete_client(t_event& event);
+  void _delete_client(User& user);
 
+  void _check_users_activity();
   void _ping_by_nickname(const User& user);
 
   User& _find_or_create_user(int fd);

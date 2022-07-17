@@ -5,20 +5,48 @@
 #include "utils.hpp"
 #include "User.hpp"
 
-User::User(): _status(AUTHENTICATION) {};
+User::User()
+  : _status(AUTHENTICATION),
+    _state(ACTIVE),
+    _last_activity(time(NULL)) {}
 
 
-User::User(int fd) : _fd(fd), _status(AUTHENTICATION), _nick("*") {}
+User::User(int fd)
+  : _fd(fd),
+    _status(AUTHENTICATION),
+    _nick("*"),
+    _state(ACTIVE),
+    _last_activity(time(NULL)) {}
 
 
-User::User(int fd, std::string username, std::string hostname, std::string servername, std::string realname)
+User::User(int fd, std::string username,
+                   std::string hostname,
+                   std::string servername,
+                   std::string realname)
   : _fd(fd),
     _status(AUTHENTICATION),
     _username(username),
     _hostname(hostname),
     _servername(servername),
     _realname(realname),
-    _nick("*") {}
+    _nick("*"),
+    _state(ACTIVE),
+    _last_activity(time(NULL)) {}
+
+
+User::User(const User& other)
+  : _fd(other._fd),
+    _status(other._status),
+    _username(other._username),
+    _hostname(other._hostname),
+    _servername(other._servername),
+    _realname(other._realname),
+    _nick(other._nick),
+    _state(other._state),
+    _last_activity(other._last_activity),
+    _afkMessage(other._afkMessage),
+    _quitMessage(other._quitMessage),
+    _buffer(other._buffer) {}
 
 
 User::~User() {}

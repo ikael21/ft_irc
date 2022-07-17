@@ -6,6 +6,7 @@
 
 # include <string>
 # include <vector>
+# include <ctime>
 
 typedef enum    s_user_status {
   AUTHENTICATION,
@@ -13,12 +14,21 @@ typedef enum    s_user_status {
   ONLINE
 }               t_user_status;
 
+
+typedef enum s_user_state {
+  ACTIVE,
+  SEND_PING,
+  WAIT_PONG
+}            t_user_state;
+
+
 class User {
 
  public:
   User();
   User(int fd);
   User(int fd, std::string username, std::string hostname, std::string servername, std::string realname);
+  User(const User& other);
   ~User();
 
   void set_fd(int fd) { _fd = fd; }
@@ -65,6 +75,14 @@ class User {
 
   const std::string& get_buffer() const { return _buffer; }
 
+  int8_t get_state() { return _state; }
+
+  // state is one of [ACTIVE, SEND_PING, WAIT_PONG]
+  void set_state(int8_t state) { _state = state; }
+
+  time_t get_last_activity() { return _last_activity; }
+  void set_last_activity(time_t t) { _last_activity = t; }
+
  private:
   int            _fd;
   t_user_status _status;
@@ -73,6 +91,9 @@ class User {
   std::string   _servername;
   std::string   _realname;
   std::string   _nick;
+
+  int8_t        _state;
+  time_t        _last_activity;
 
   std::string   _afkMessage;
   std::string   _quitMessage;

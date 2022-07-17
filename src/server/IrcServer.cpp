@@ -29,7 +29,7 @@ User& irc::IrcServer::_find_or_create_user(int fd) {
 }
 
 
-bool irc::IrcServer::isCorrectPassword(std::string pass) {
+bool irc::IrcServer::is_password_correct(std::string pass) {
   return _password == pass;
 }
 
@@ -43,22 +43,24 @@ void irc::IrcServer::_accept_handler() {
   int res = fcntl(new_fd, F_SETFL, O_NONBLOCK);
   throw_if_true<ErrnoBase>(res == -1);
 
-  _add_read_event(new_fd);
-  _add_write_event(new_fd);
-
-  User& user = _find_or_create_user(new_fd);
+  User new_user(new_fd);
   struct sockaddr_in* s = (struct sockaddr_in*)&sock_addr;
-  user.set_hostname(inet_ntoa(s->sin_addr));
-  user.set_servername(IrcServer::DEFAULT_IP);
+  new_user.set_hostname(inet_ntoa(s->sin_addr));
+  new_user.set_servername(IrcServer::DEFAULT_IP);
+  _users.push_back(new_user);
+
+  _add_read_event(_users.back());
+  _add_write_event(_users.back());
 
   // disable to avoid handling of unnecessary events
   _disable_event(new_fd, EVFILT_WRITE);
 
 #ifdef DEBUG
+  std::string state(!new_user.get_state() ? "ACTIVE" : "*_PING");
   std::cout << MAGENTA "New User" << std::endl;
-  std::cout << CYAN "\tFD: " << YELLOW << new_fd << std::endl;
-  std::cout << CYAN "\tHostname: " << YELLOW
-    << user.get_hostname() << RESET << std::endl;
+  std::cout << CYAN "\tFD: " YELLOW << new_fd << std::endl;
+  std::cout << CYAN "\tHostname: " YELLOW << new_user.get_hostname() << std::endl;
+  std::cout << CYAN "\tState: " GREEN << state << RESET << std::endl;
 #endif
 }
 
@@ -68,7 +70,11 @@ void irc::IrcServer::_read_handler(t_event& event) {
   user->receive(event.data); // event.data -> number of bytes to recieve
 
   if (user->has_msg()) {
-    _enable_event(user->get_fd(), EVFILT_WRITE);
+
+    // TODO check PONG message if state - WAIT_PONG
+    // set state ACTIVE if all good
+
+    _enable_event(*user, EVFILT_WRITE);
 
 #ifdef DEBUG
     std::cout << YELLOW "Message from User(FD: "
@@ -89,8 +95,14 @@ void irc::IrcServer::_read_handler(t_event& event) {
 
 
 void irc::IrcServer::_write_handler(t_event& event) {
-  User* user = static_cast<User*>(event.udata);
-  if (user->has_msg()) {
+  User* user = (User*)event.udata;
+
+  if (user->get_state() == SEND_PING) {
+    _ping_by_nickname(*user);
+    user->set_state(WAIT_PONG);
+    _disable_event(user->get_fd(), EVFILT_WRITE);
+  }
+  else if (user->has_msg()) {
     Command command = Command(*this, *user, user->get_next_msg());
     command.execute();
 
@@ -126,6 +138,30 @@ void irc::IrcServer::_execute_handler(t_event& event) {
 }
 
 
+void irc::IrcServer::_check_users_activity() {
+  const time_t minute = 60;
+  for (t_userlist::iterator it = _users.begin(); it != _users.end(); ++it) {
+    const time_t time_passed = time(NULL) - it->get_last_activity();
+    if (time_passed >= minute) {
+      if (it->get_state() == ACTIVE) {
+        it->set_state(SEND_PING);
+        _enable_event(*it, EVFILT_WRITE);
+
+        #ifdef DEBUG
+          std::cout << "Client(FD: " << it->get_fd()
+            << ")'s state set to " BLUE "SEND_PING" << RESET << std::endl;
+        #endif
+      }
+      else if (it->get_state() == WAIT_PONG) {
+        _delete_client(*it);
+
+      }
+    }
+
+  }
+}
+
+
 void irc::IrcServer::run() {
   _add_socket_event(); // accept incoming connections
   _events.reserve(_enabled_events_num);
@@ -142,9 +178,11 @@ void irc::IrcServer::run() {
 
       Add some kinda states for user: ACTIVE, WAIT_PING, WAIT_PONG
       ACTIVE -> user's online and sends messages
-      WAIT_PING -> ping user to see if he's stil online, state is now WAIT_PONG
+      WAIT_PING -> ping user to see if he's still online, state is now WAIT_PONG
       WAIT_PONG -> server waits message from user
     */
+
+   _check_users_activity();
 
     // reserve correct memory size for new events
     _events.reserve(_enabled_events_num);
@@ -178,4 +216,11 @@ User& irc::IrcServer::get_user_by_nickname(const std::string& nickname) {
 void irc::IrcServer::_ping_by_nickname(const User& user) {
   std::string message("PING " + user.get_nick() + "\r\n");
   send(user.get_fd(), message.c_str(), message.length(), 0);
+
+#ifdef DEBUG
+  std::cout << YELLOW "Reply for User(FD: "
+    << user.get_fd() << ")" RESET << std::endl;
+  std::cout << GREEN "\t|" << message
+    << RESET << std::endl;
+#endif
 }
