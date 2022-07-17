@@ -22,3 +22,7 @@ std::vector<std::string> split(const std::string &str, char delimeter, size_t n)
 
   return result;
 }
+
+bool is_channel(std::string& channel) {
+  return (channel[0] == '#' || channel[0] == '&');
+}

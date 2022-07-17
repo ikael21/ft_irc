@@ -223,7 +223,6 @@ bool Channel::user_is_oper(User& user) {
 
 void Channel::send_to_channel(User& user, std::string& msg) {
   for (size_t i = 0; i < _users.size(); ++i) {
-    std::cout << _users[i]->get_nick() << std::endl;
     if (user == *_users[i])
       continue;
     user.send_msg_to_user(*_users[i], msg);

@@ -118,12 +118,12 @@ class Channel
   std::string _key;
   size_t      _limit_users;
 
-  std::vector<User *> _users;
-  std::vector<User *> _invited;
-  std::vector<User *> _banned;
+  std::vector<User*> _users;
+  std::vector<User*> _invited;
+  std::vector<User*> _banned;
 
   std::vector<t_channel_mode>                 _modes;
-  std::map<User *, std::vector<t_user_mode> > _user_mode;
+  std::map<User*, std::vector<t_user_mode> > _user_mode;
 
   std::string _log_message(std::string message);
   void _log(std::string message);

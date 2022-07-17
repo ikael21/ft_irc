@@ -3,11 +3,13 @@
 void AWAY(Command *command) {
 
   User &user = command->get_user();
-  std::vector<std::string> args = command->get_arguments();
+  std::vector<std::string>& args = command->get_arguments();
   std::string message;
 
-  if (!args.size())
+  if (!args.size()) {
+    user.set_afk_msg(std::string());
     return command->reply(RPL_UNAWAY);
+  }
 
   message = args[0];
   if (message[0] == ':')

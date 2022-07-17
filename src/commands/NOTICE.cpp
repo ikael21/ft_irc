@@ -1,10 +1,10 @@
-#include <cstring>
 #include "commands.hpp"
 
 void NOTICE(Command *command) {
 
   User& user = command->get_user();
-  std::vector<std::string> args = command->get_arguments();
+  irc::IrcServer& server = command->get_server();
+  std::vector<std::string>& args = command->get_arguments();
   std::vector<std::string> recipients;
   std::string message;
 
@@ -35,24 +35,31 @@ void NOTICE(Command *command) {
   if (!message.length())
     return;
 
-  // TODO
-  // 1. Send to all recipients
-  // 2. Check if recipient Exists
-  // 3. Check if User on channel
-  // 4. Check if recipient duplicates
-  // 5. Check if User Away
+  if (is_channel(recipients[0])) {
+    irc::IrcServer::t_channel_list& channels = server.get_channels();
+    irc::IrcServer::t_channel_list::iterator it = std::find(channels.begin(), channels.end(), recipients[0]);
 
-  std::stringstream fullmessage;
+    if (it != channels.end()) {
+      // TODO need more checks, with privileges on channel
+      if (it->user_on_channel(user)) {
+        std::string fullmessage = user.get_prefix_msg() + \
+            command->get_command_name() + " " + it->get_name() + " :" + message;
 
-  fullmessage << user.get_prefix_msg() << " " << \
-    command->get_command_name() << " " << user.get_nick() << " :" << message;
+        it->send_to_channel(user, fullmessage);
+      }
 
-#ifdef DEBUG
-  std::cout << "Need to send message: '" + fullmessage.str() + " to:" << std::endl;
-#endif
+    }
+  } else {
 
-  for (size_t i = 0; i < recipients.size(); ++i) {
-    std::cout << recipients[i] << std::endl;
+    try {
+
+      User& to = server.get_user_by_nickname(recipients[0]);
+
+      std::string fullmessage = user.get_prefix_msg() + \
+        command->get_command_name() + " " + user.get_nick() + " :" + message;
+
+      user.send_msg_to_user(to, fullmessage);
+
+    } catch (UserNotFound& e) { }
   }
-
 }

@@ -20,17 +20,11 @@ bool user_not_invite(Channel& channel, User& user) {
   return channel.is_private() && !channel.is_invited(user);
 }
 
-
-bool bad_channel_prefix(std::string& channel) {
-  return (channel[0] != '#' && channel[0] != '&');
-}
-
-
 void JOIN(Command *command) {
 
   User& user = command->get_user();
   irc::IrcServer& server = command->get_server();
-  irc::IrcServer::t_channel_list channels = server.get_channels();
+  irc::IrcServer::t_channel_list& channels = server.get_channels();
 
   std::vector<std::string> args = split(command->get_arguments()[0], ' ', 1);
   std::vector<std::string> channels_names = split(args[0], ',');
@@ -41,7 +35,7 @@ void JOIN(Command *command) {
 
   for (size_t i = 0; i < channels_names.size(); ++i) {
 
-    if (bad_channel_prefix(channels_names[i])) {
+    if (!is_channel(channels_names[i])) {
       command->reply(ERR_BADCHANMASK);
       continue;
     }
@@ -76,7 +70,6 @@ void JOIN(Command *command) {
 
       channel.add_user(user);
       channel.add_mode_to_user(user, U_OPERATOR);
-      std::cout << channel.user_is_oper(user);
       server.add_channel(channel);
       send_channel_info(command, channel);
     }
