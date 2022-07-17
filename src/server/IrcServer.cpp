@@ -176,6 +176,6 @@ User& irc::IrcServer::get_user_by_nickname(const std::string& nickname) {
 
 
 void irc::IrcServer::_ping_by_nickname(const User& user) {
-  std::string message("PING " + user.getNick() + "\r\n");
-  send(user.getFD(), message.c_str(), message.length(), 0);
+  std::string message("PING " + user.get_nick() + "\r\n");
+  send(user.get_fd(), message.c_str(), message.length(), 0);
 }
