@@ -5,13 +5,13 @@
 #include "utils.hpp"
 #include "User.hpp"
 
-User :: User(): _status(AUTHENTICATION) {};
+User::User(): _status(AUTHENTICATION) {};
 
 
-User :: User(int fd) : _fd(fd), _status(AUTHENTICATION), _nick("*") {}
+User::User(int fd) : _fd(fd), _status(AUTHENTICATION), _nick("*") {}
 
 
-User :: User(int fd, std::string username, std::string hostname, std::string servername, std::string realname)
+User::User(int fd, std::string username, std::string hostname, std::string servername, std::string realname)
   : _fd(fd),
     _status(AUTHENTICATION),
     _username(username),
@@ -21,20 +21,20 @@ User :: User(int fd, std::string username, std::string hostname, std::string ser
     _nick("*") {}
 
 
-User :: ~User() {}
+User::~User() {}
 
 
 bool operator==(const User& left, const User& right) {
-  return left._username == right._username;
+  return left._fd == right._fd;
 }
 
 
-bool operator==(const User& left, const int fd) {
-  return left._fd == fd;
+bool operator!=(const User& left, const User& right) {
+    return left._fd != right._fd;
 }
 
 
-void User :: receive(ssize_t size) {
+void User::receive(ssize_t size) {
   char* buff = new char[size + 1];
 
   size = recv(_fd, buff, size, 0);
@@ -45,12 +45,12 @@ void User :: receive(ssize_t size) {
 }
 
 
-bool User :: hasNextMsg() {
+bool User::has_msg() {
   return _buffer.find(END_OF_MESSAGE) != std::string::npos;
 }
 
 
-std::string User :: getNextMsg() {
+std::string User::get_next_msg() {
 
   size_t eol = _buffer.find(END_OF_MESSAGE);
   std::string line = _buffer.substr(0, eol);
@@ -60,12 +60,12 @@ std::string User :: getNextMsg() {
 }
 
 
-void User :: sendMsgToUser(User& user, std::string message) {
-  sendMsg(user.getFD(), message + END_OF_MESSAGE);
+void User::send_msg_to_user(User& user, std::string message) {
+  send_msg(user.get_fd(), message + END_OF_MESSAGE);
 }
 
 
-void User :: sendMsg(int fd, std::string message) {
+void User::send_msg(int fd, std::string message) {
   ssize_t bytes_sent = send(fd, message.c_str(), message.size(), 0);
   (void)bytes_sent;
 
@@ -90,6 +90,6 @@ void User :: sendMsg(int fd, std::string message) {
  * @brief Prefix of User's message that must be sent to other users/channels
  * :nick!username@hostname(?)
  */
-std::string User :: getPrefixMessage() {
-  return ":" + _nick + "!" + _username + "@" + _hostname;
+std::string User::get_prefix_msg() {
+  return ":" + _nick + "!" + _username + "@" + _hostname + " ";
 }

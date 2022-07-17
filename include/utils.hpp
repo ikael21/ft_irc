@@ -48,4 +48,6 @@ T* list_to_array(const std::list<T>& list) {
 std::vector<std::string> split(const std::string &str, char delimeter);
 std::vector<std::string> split(const std::string &str, char delimeter, size_t n);
 
+bool is_channel(std::string& channel);
+
 #endif // UTILS_HPP_

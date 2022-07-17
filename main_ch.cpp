@@ -20,61 +20,61 @@ int main(int argc, char **argv) {
   User user1 = User();
   User user2 = User();
   User user3 = User();
-  user1.setUsername("User1");
-  user2.setUsername("User2");
-  user3.setUsername("User3");
+  user1.set_username("User1");
+  user2.set_username("User2");
+  user3.set_username("User3");
 
-  channel.setName("#ch1");
+  channel.set_name("#ch1");
 
-  channel.addUser(user1);
-  channel.addUser(user2);
-  channel.addUser(user3);
+  channel.add_user(user1);
+  channel.add_user(user2);
+  channel.add_user(user3);
 
-  assert(channel.getUsers().size() == 3L);
+  assert(channel.get_users().size() == 3L);
 
-  channel.removeUser(user2);
-  assert(channel.getUsers().size() == 2L);
+  channel.remove_user(user2);
+  assert(channel.get_users().size() == 2L);
 
-  std::cout << "User1 on channel: " << channel.userOnChannel(user1) << std::endl;
-  assert(channel.userOnChannel(user1));
+  std::cout << "User1 on channel: " << channel.user_on_channel(user1) << std::endl;
+  assert(channel.user_on_channel(user1));
 
-  std::cout << "Channel #ch1 is private: " << channel.isPrivate() << std::endl;
-  assert(channel.isPrivate() == false);
+  std::cout << "Channel #ch1 is private: " << channel.is_private() << std::endl;
+  assert(channel.is_private() == false);
 
-  channel.addChannelMode("p");
-  std::cout << "Channel #ch1 is private: " << channel.isPrivate() << std::endl;
-  assert(channel.isPrivate() == true);
+  channel.add_channel_mode("p");
+  std::cout << "Channel #ch1 is private: " << channel.is_private() << std::endl;
+  assert(channel.is_private() == true);
 
   User user4 = User();
-  user4.setUsername("User4");
+  user4.set_username("User4");
 
-  channel.addUser(user4);
-  assert(channel.getUsers().size() == 2L);
+  channel.add_user(user4);
+  assert(channel.get_users().size() == 2L);
 
-  channel.setName("#ch2");
-  assert(channel.getName() == "#ch2");
-  std::cout << "Users on channel " << channel.getUsers().size() << std::endl;
+  channel.set_name("#ch2");
+  assert(channel.get_name() == "#ch2");
+  std::cout << "Users on channel " << channel.get_users().size() << std::endl;
 
-  channel.addModeToUser(user1, "io");
-  assert(channel.userIsOper(user1) == true);
-  std::cout << "User1 is oper: " << channel.userIsOper(user1) << std::endl;
-  std::cout << "Users on channel " << channel.getUsers().size() << std::endl;
+  channel.add_mode_to_user(user1, "io");
+  assert(channel.user_is_oper(user1) == true);
+  std::cout << "User1 is oper: " << channel.user_is_oper(user1) << std::endl;
+  std::cout << "Users on channel " << channel.get_users().size() << std::endl;
 
 
-  channel.removeChannelMode("p");
-  std::cout << "Channel #ch2 is private: " << channel.isPrivate() << std::endl;
-  assert(channel.isPrivate() == false);
+  channel.remove_channel_mode("p");
+  std::cout << "Channel #ch2 is private: " << channel.is_private() << std::endl;
+  assert(channel.is_private() == false);
 
-  channel.addUser(user4);
+  channel.add_user(user4);
 
-  assert(channel.getVisibleUsers().size() == 2L);
-  channel.removeUserMode(user1, "i");
-  assert(channel.getUsers().size() == 3L);
+  assert(channel.get_visible_users().size() == 2L);
+  channel.remove_user_mode(user1, "i");
+  assert(channel.get_users().size() == 3L);
 
-  channel.removeUser(user1);
-  channel.removeUser(user3);
-  channel.removeUser(user4);
+  channel.remove_user(user1);
+  channel.remove_user(user3);
+  channel.remove_user(user4);
 
-  assert(channel.getUsers().size() == 0L);
+  assert(channel.get_users().size() == 0L);
   return 0;
 }

@@ -21,7 +21,7 @@ irc::IrcServer::~IrcServer() {
 
 User& irc::IrcServer::_find_or_create_user(int fd) {
   for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
-    if (i->getFD() == fd)
+    if (i->get_fd() == fd)
       return *i;
   }
   _users.push_back(User(fd));
@@ -48,7 +48,8 @@ void irc::IrcServer::_accept_handler() {
 
   User& user = _find_or_create_user(new_fd);
   struct sockaddr_in* s = (struct sockaddr_in*)&sock_addr;
-  user.setHostname(inet_ntoa(s->sin_addr));
+  user.set_hostname(inet_ntoa(s->sin_addr));
+  user.set_servername(IrcServer::DEFAULT_IP);
 
   // disable to avoid handling of unnecessary events
   _disable_event(new_fd, EVFILT_WRITE);
@@ -57,7 +58,7 @@ void irc::IrcServer::_accept_handler() {
   std::cout << MAGENTA "New User" << std::endl;
   std::cout << CYAN "\tFD: " << YELLOW << new_fd << std::endl;
   std::cout << CYAN "\tHostname: " << YELLOW
-    << user.getHostname() << RESET << std::endl;
+    << user.get_hostname() << RESET << std::endl;
 #endif
 }
 
@@ -66,14 +67,14 @@ void irc::IrcServer::_read_handler(t_event& event) {
   User* user = static_cast<User*>(event.udata);
   user->receive(event.data); // event.data -> number of bytes to recieve
 
-  if (user->hasNextMsg()) {
-    _enable_event(user->getFD(), EVFILT_WRITE);
+  if (user->has_msg()) {
+    _enable_event(user->get_fd(), EVFILT_WRITE);
 
 #ifdef DEBUG
     std::cout << YELLOW "Message from User(FD: "
-      << user->getFD() << ")" RESET << std::endl;
+      << user->get_fd() << ")" RESET << std::endl;
 
-    std::string tmp(user->getBuffer());
+    std::string tmp(user->get_buffer());
     while (tmp.find(END_OF_MESSAGE) != std::string::npos) {
       std::cout << GREEN "\t|"
         << tmp.substr(0, tmp.find(END_OF_MESSAGE))
@@ -89,12 +90,12 @@ void irc::IrcServer::_read_handler(t_event& event) {
 
 void irc::IrcServer::_write_handler(t_event& event) {
   User* user = static_cast<User*>(event.udata);
-  if (user->hasNextMsg()) {
-    Command command = Command(*this, *user, user->getNextMsg());
+  if (user->has_msg()) {
+    Command command = Command(*this, *user, user->get_next_msg());
     command.execute();
 
     // TODO if all data sent, need to disable event notify
-    _disable_event(user->getFD(), EVFILT_WRITE);
+    _disable_event(user->get_fd(), EVFILT_WRITE);
   }
 }
 
@@ -167,7 +168,7 @@ void irc::IrcServer::add_channel(Channel& channel) {
 **/
 User& irc::IrcServer::get_user_by_nickname(const std::string& nickname) {
   for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
-    if (i->getNick() == nickname)
+    if (i->get_nick() == nickname)
       return *i;
   }
   throw UserNotFound();

@@ -45,9 +45,9 @@ void irc::IrcServer::_enable_event(int fd, int type) {
 
 
 void irc::IrcServer::_delete_client(t_event& event) {
-  int fd = ((User*)event.udata)->getFD();
+  int fd = ((User*)event.udata)->get_fd();
   t_userlist::iterator it = _users.begin();
-  while (it != _users.end() && it->getFD() != fd)
+  while (it != _users.end() && it->get_fd() != fd)
     ++it;
   _users.erase(it);
   close(fd);
