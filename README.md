@@ -15,6 +15,20 @@ together to form a network.
 - [RFC 1459 RUS](https://www.lissyara.su/doc/rfc/rfc1459/)
 - [RFC 2813](https://datatracker.ietf.org/doc/html/rfc2813) (LAST ONE)
 
+Compile server
+```bash
+make
+```
+Compile server in debug mode
+```bash
+DEBUG=1 make re
+```
+
+Interact with `nc`:
+```bash
+nc -c <hostname> 6666
+```
+
 ## Commands
 - `PASS <password>`
 - `NICK <nickname>`

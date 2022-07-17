@@ -66,7 +66,10 @@ typedef enum  s_irc_error {
   RPL_USERS             = 393,
   RPL_ENDOFUSERS        = 394,
   RPL_NOUSERS           = 395,
-  RPL_UMODEIS           = 221
+  RPL_UMODEIS           = 221,
+  RPL_MOTDSTART         = 375,
+  RPL_MOTD              = 372,
+  RPL_ENDOFMOTD         = 376
 }             t_irc_error;
 
 std::string irc_error(t_irc_error err_code,

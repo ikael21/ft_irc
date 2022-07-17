@@ -5,6 +5,7 @@
 #include "Command.hpp"
 #include "errors.hpp"
 
+void __print_logo(Command *command);
 
 void PASS(Command *command);
 
@@ -17,3 +18,5 @@ void PRIVMSG(Command *command);
 void AWAY(Command *command);
 
 void NOTICE(Command *command);
+
+void JOIN(Command *command);

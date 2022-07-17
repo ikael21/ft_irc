@@ -95,7 +95,7 @@ std::string __ERR_BANNEDFROMCHAN(std::string channel) { return channel + " :Cann
 std::string __ERR_BADCHANNELKEY(std::string channel) { return channel + " :Cannot join channel (+k)"; }
 
 // 476
-std::string __ERR_BADCHANMASK() { return ":476"; }
+std::string __ERR_BADCHANMASK() { return ":Bad Channel Mask"; }
 
 // 482
 std::string __ERR_CHANOPRIVSNEEDED(std::string channel) { return channel + " :You're not channel operator"; }
@@ -167,7 +167,7 @@ std::string __RPL_WHOREPLY(
 std::string __RPL_ENDOFWHO(std::string name) { return name + " :End of /WHO list"; }
 
 // 353
-std::string __RPL_NAMREPLY(std::string channel, std::string nick) { return channel + " :[@|+]" + nick; }
+std::string __RPL_NAMREPLY(std::string channel, std::string nick) { return channel + " :" + nick; }
 
 // 366
 std::string __RPL_ENDOFNAMES(std::string channel) { return channel + " :End of /NAMES list"; }
@@ -200,6 +200,16 @@ std::string __RPL_NOUSERS() { return ":Nobody logged in"; }
 
 // 221
 std::string __RPL_UMODEIS(std::string user_mode) { return user_mode; }
+
+
+// 375
+std::string __RPL_MOTDSTART(std::string server) { return ":- " + server + " Message of the day - "; }
+
+// 372
+std::string __RPL_MOTD(std::string text) { return ":- " + text; }
+
+// 376
+std::string __RPL_ENDOFMOTD() { return ":End of /MOTD command"; }
 
 typedef struct  s_err {
   t_irc_error   err_code;
@@ -266,7 +276,10 @@ static t_err __error_arr[] = {
   { RPL_USERS,             (void*)&__RPL_USERS,            0L },
   { RPL_ENDOFUSERS,        (void*)&__RPL_ENDOFUSERS,       0L },
   { RPL_NOUSERS,           (void*)&__RPL_NOUSERS,          0L },
-  { RPL_UMODEIS,           (void*)&__RPL_UMODEIS,          1L }
+  { RPL_UMODEIS,           (void*)&__RPL_UMODEIS,          1L },
+  { RPL_MOTDSTART,         (void*)&__RPL_MOTDSTART,        1L },
+  { RPL_MOTD,              (void*)&__RPL_MOTD,             1L },
+  { RPL_ENDOFMOTD,         (void*)&__RPL_ENDOFMOTD,        0L }
 };
 
 t_err __get_error(t_irc_error err_code) {
