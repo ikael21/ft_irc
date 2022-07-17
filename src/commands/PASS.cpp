@@ -7,7 +7,7 @@ void PASS(Command *command) {
 
   if (user.get_status() == ONLINE || user.get_status() == REGISTRATION) {
     command->reply(ERR_ALREADYREGISTRED);
-  } else if (command->get_server().isCorrectPassword(pass)) {
+  } else if (command->get_server().is_password_correct(pass)) {
     user.set_status(REGISTRATION);
   } else {
     command->reply(ERR_PASSWDMISMATCH);
