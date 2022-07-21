@@ -105,12 +105,10 @@ void User::send_msg(int fd, std::string message) {
 #endif
 
   /*
-    TODO check if all data sent
-
+  TODO check if all data sent
   size_t left_bytes =
     (!bytes_sent || bytes_sent == -1) ?
       0 : message.size() - static_cast<size_t>(bytes_sent);
-
   */
 }
 
@@ -121,3 +119,9 @@ void User::send_msg(int fd, std::string message) {
 std::string User::get_prefix_msg() {
   return ":" + _nick + "!" + _username + "@" + _hostname + " ";
 }
+
+
+/**
+ * state must be one of [ACTIVE, SEND_PING, WAIT_PONG]
+**/
+void User::set_state(int8_t state) { _state = state; }
