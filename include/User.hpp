@@ -38,7 +38,7 @@ class User {
   std::string get_username() { return _username; }
 
   void set_hostname(std::string hostname) { _hostname = hostname; }
-  std::string get_hostname() { return _hostname; }
+  std::string get_hostname() const { return _hostname; }
 
   void set_servername(std::string servername) { _servername = servername; }
   std::string get_servername() { return _servername; }
@@ -73,12 +73,10 @@ class User {
 
   bool is_away() { return !_afkMessage.empty(); }
 
-  const std::string& get_buffer() const { return _buffer; }
+  std::string& get_buffer() { return _buffer; }
 
-  int8_t get_state() { return _state; }
-
-  // state is one of [ACTIVE, SEND_PING, WAIT_PONG]
-  void set_state(int8_t state) { _state = state; }
+  int8_t get_state() const { return _state; }
+  void set_state(int8_t state);
 
   time_t get_last_activity() { return _last_activity; }
   void set_last_activity(time_t t) { _last_activity = t; }
