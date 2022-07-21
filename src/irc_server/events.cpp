@@ -51,10 +51,10 @@ void irc::IrcServer::_delete_client(t_event& event) {
   if (_enabled_events_num > 0)
     _enabled_events_num--;
 
-#ifdef DEBUG
-  std::cout << BLUE "User(FD: " << fd
-    << ") just left..." RESET << std::endl;
-#endif
+  #ifdef DEBUG
+    std::cout << BLUE "User(FD: " << fd
+      << ") just left..." RESET << std::endl;
+  #endif
 }
 
 
@@ -68,40 +68,24 @@ void irc::IrcServer::_delete_client(User& user) {
   if (_enabled_events_num > 0)
     _enabled_events_num--;
 
-#ifdef DEBUG
-  std::cout << BLUE "User(FD: " << fd
-    << ") just left..." RESET << std::endl;
-#endif
+  #ifdef DEBUG
+    std::cout << BLUE "User(FD: " << fd
+      << ") just left..." RESET << std::endl;
+  #endif
 }
 
 
 int irc::IrcServer::_wait_for_events() {
-  struct timespec timeout = { .tv_sec = 60, .tv_nsec = 0 }; // wait one minute
+  struct timespec timeout = { .tv_sec = 30, .tv_nsec = 0 }; // wait 30 seconds
   int changes_num = static_cast<int>(_changes.size());
   int events_num = static_cast<int>(_enabled_events_num);
-
   t_event* changes_arr = list_to_array<t_event>(_changes);
 
-#ifdef DEBUG
-  std::cout << "waiting for new events(enabled: " RED
-    << events_num << RESET ")..." << std::endl;
-  std::cout << YELLOW "changes:" RESET << std::endl;
-  for (int i = 0; i < changes_num; ++i) {
-    std::string filter(MAGENTA);
-    filter += changes_arr[i].filter == EVFILT_WRITE ? "WRITE" : "READ";
-    filter += RESET;
-    std::string flags(BLUE);
-    if (changes_arr[i].flags & EV_ADD) flags += "EV_ADD ";
-    if (changes_arr[i].flags & EV_ENABLE) flags += "EV_ENABLE ";
-    if (changes_arr[i].flags & EV_DISABLE) flags += "EV_DISABLE ";
-    flags += " " RESET;
-    User* u = (User*)changes_arr[i].udata;
-    std::stringstream ss;
-    if (u) ss << "User(" << GREEN << u << RESET << ", FD: " << RED << u->get_fd() << RESET ")";
-    std::cout << "\t" + filter + "\t" + flags + "\t" + ss.str() << std::endl;
-  }
-  std::cout << std::endl;
-#endif
+  #ifdef DEBUG
+    std::cout << "waiting for new events(enabled: " RED
+      << events_num << RESET ")..." << std::endl;
+    _print_event_changes(changes_arr, _changes.size());
+  #endif
 
   int new_events_num = kevent(_kq,
                               changes_arr, changes_num,
