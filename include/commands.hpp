@@ -20,3 +20,5 @@ void AWAY(Command *command);
 void NOTICE(Command *command);
 
 void JOIN(Command *command);
+
+void PONG(Command *command);
