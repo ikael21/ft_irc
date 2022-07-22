@@ -13,7 +13,9 @@ Command::t_command_struct command_arr[] = {
   { "PRIVMSG", &PRIVMSG, 0L },
   { "AWAY",    &AWAY,    0L },
   { "NOTICE",  &NOTICE,  0L },
-  { "JOIN",    &JOIN,    1L }
+  { "JOIN",    &JOIN,    1L },
+  { "QUIT",    &QUIT,    0L },
+  { "KICK",    &KICK,    2L }
 };
 
 

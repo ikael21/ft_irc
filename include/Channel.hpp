@@ -59,8 +59,6 @@ class Channel
 {
  public:
   Channel();
-  // Channel(std::string channelName, std::string username);
-
   ~Channel();
 
   bool is_private();

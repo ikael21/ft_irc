@@ -20,3 +20,7 @@ void AWAY(Command *command);
 void NOTICE(Command *command);
 
 void JOIN(Command *command);
+
+void QUIT(Command *command);
+
+void KICK(Command *command);
