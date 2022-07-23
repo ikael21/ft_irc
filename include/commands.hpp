@@ -26,3 +26,5 @@ void QUIT(Command *command);
 void KICK(Command *command);
 
 void PART(Command *command);
+
+void MODE(Command *command);

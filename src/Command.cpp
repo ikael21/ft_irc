@@ -16,7 +16,8 @@ Command::t_command_struct command_arr[] = {
   { "JOIN",    &JOIN,    1L },
   { "QUIT",    &QUIT,    0L },
   { "KICK",    &KICK,    2L },
-  { "PART",    &PART,    1L }
+  { "PART",    &PART,    1L },
+  { "MODE",    &MODE,    2L }
 };
 
 

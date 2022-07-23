@@ -49,6 +49,9 @@ nc -c <hostname> 6666
 - `NAMES [<channel>{,<channel>}]`
 - `QUIT [<Quit message>]`
 - `PART <channel>{,<channel>}`
+- `MODE <channel> {[+|-]|o|p|s|i|t|n|b|v} [<limit>] [<user>]`
+- `MODE <nickname> {[+|-]|i|w|s|o}`
+
 
 For `Linux` please install [libkqueue](https://github.com/mheily/libkqueue).
 

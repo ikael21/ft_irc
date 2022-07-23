@@ -93,3 +93,25 @@ void User::send_msg(int fd, std::string message) {
 std::string User::get_prefix_msg() {
   return ":" + _nick + "!" + _username + "@" + _hostname + " ";
 }
+
+
+bool User::_has_mode(t_user_mode mode) {
+  return std::find(_modes.begin(), _modes.end(), mode) != _modes.end();
+}
+
+
+void User::add_mode(t_user_mode mode) {
+  if (!_has_mode(mode))
+    _modes.push_back(mode);
+}
+
+
+void User::remove_mode(t_user_mode mode) {
+  if (_has_mode(mode))
+    _modes.erase(std::find(_modes.begin(), _modes.end(), mode));
+}
+
+
+bool User::is_invisible() {
+  return _has_mode(U_INVISIBLE);
+}

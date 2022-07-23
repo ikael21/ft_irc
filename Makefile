@@ -11,7 +11,8 @@ SRCS = src/server/IrcServer_initialization_methods.cpp \
        src/commands/PRIVMSG.cpp src/commands/AWAY.cpp \
        src/commands/NOTICE.cpp src/utils.cpp \
 	     src/commands/JOIN.cpp src/commands/QUIT.cpp \
-       src/commands/KICK.cpp src/commands/PART.cpp
+       src/commands/KICK.cpp src/commands/PART.cpp \
+       src/commands/MODE.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))
 D_FILES = $(patsubst %.cpp,$(OBJS_DIR)/%.d, $(SRCS))

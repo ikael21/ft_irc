@@ -9,7 +9,7 @@ void send_channel_info(Command* command, Channel& channel)
   std::vector<User*> users = channel.get_visible_users();
   std::stringstream nicks;
   for (size_t i = 0; i < users.size(); ++i) {
-    nicks << (channel.user_is_oper(*users[i]) ? "@" : "+") << users[i]->get_nick() << " ";
+    nicks << (channel.is_oper(*users[i]) ? "@" : "+") << users[i]->get_nick() << " ";
   }
   command->reply(RPL_NAMREPLY, channel.get_name(), nicks.str());
   command->reply(RPL_ENDOFNAMES, channel.get_name());
@@ -69,7 +69,7 @@ void JOIN(Command *command) {
         channel.set_key(keys[i]);
 
       channel.add_user(user);
-      channel.add_mode_to_user(user, U_OPERATOR);
+      channel.add_oper(user);
       server.add_channel(channel);
       send_channel_info(command, channel);
     }
