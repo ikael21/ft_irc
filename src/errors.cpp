@@ -55,6 +55,9 @@ std::string __ERR_NICKNAMEINUSE(std::string nick) { return nick + " :Nickname is
 // 436
 std::string __ERR_NICKCOLLISION(std::string nick) { return nick + " :Nickname collision KILL"; }
 
+// 441
+std::string __ERR_USERNOTINCHANNEL(std::string nick, std::string channel) { return nick + " " + channel + " :They aren't on that channel"; }
+
 // 442
 std::string __ERR_NOTONCHANNEL(std::string channel) { return channel + " :You're not on that channel"; }
 
@@ -236,6 +239,7 @@ static t_err __error_arr[] = {
   { ERR_ERRONEUSNICKNAME,  (void*)&__ERR_ERRONEUSNICKNAME, 1L },
   { ERR_NICKNAMEINUSE,     (void*)&__ERR_NICKNAMEINUSE,    1L },
   { ERR_NICKCOLLISION,     (void*)&__ERR_NICKCOLLISION,    1L },
+  { ERR_USERNOTINCHANNEL,  (void*)&__ERR_USERNOTINCHANNEL, 2L },
   { ERR_NOTONCHANNEL,      (void*)&__ERR_NOTONCHANNEL,     1L },
   { ERR_USERONCHANNEL,     (void*)&__ERR_USERONCHANNEL,    2L },
   { ERR_USERSDISABLED,     (void*)&__ERR_USERSDISABLED,    0L },

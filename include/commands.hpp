@@ -34,3 +34,9 @@ void TIME(Command *command);
 void USERS(Command *command);
 
 void JOIN(Command *command);
+
+void QUIT(Command *command);
+
+void KICK(Command *command);
+
+void PART(Command *command);

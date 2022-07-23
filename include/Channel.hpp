@@ -59,8 +59,6 @@ class Channel
 {
  public:
   Channel();
-  // Channel(std::string channelName, std::string username);
-
   ~Channel();
 
   bool is_private();
@@ -96,6 +94,7 @@ class Channel
   void set_limit_users(int limit);
   int get_limit_users() { return _limit_users; }
   bool is_full() { return _users.size() >= _limit_users; }
+  bool is_empty() { return !_users.size(); }
 
   void add_mode_to_user(User& user, const std::string& mode);
   void add_mode_to_user(User& user, t_user_mode mode);

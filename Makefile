@@ -11,7 +11,10 @@ SRCS = src/IrcServer.cpp src/Channel.cpp \
 	    src/commands/NAMES.cpp src/commands/INVITE.cpp \
 	    src/commands/TOPIC.cpp src/commands/KICK.cpp \
 	    src/commands/TIME.cpp src/commands/USERS.cpp \
-	     src/commands/JOIN.cpp
+	     src/commands/JOIN.cpp \
+       src/commands/NOTICE.cpp src/utils.cpp \
+	     src/commands/JOIN.cpp src/commands/QUIT.cpp \
+       src/commands/KICK.cpp src/commands/PART.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))
 D_FILES = $(patsubst %.cpp,$(OBJS_DIR)/%.d, $(SRCS))
