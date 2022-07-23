@@ -58,7 +58,7 @@ void JOIN(Command *command) {
       } else {
         channel.add_user(user);
         send_channel_info(command, channel);
-        std::string msg = user.get_prefix_msg() + command->get_command_name() + " :" + channel.get_name();
+        std::string msg = user.get_prefix_msg() + command->get_command_name() + " " + channel.get_name();
         channel.send_to_channel(user, msg);
       }
     } else {

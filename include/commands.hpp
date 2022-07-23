@@ -24,3 +24,5 @@ void JOIN(Command *command);
 void QUIT(Command *command);
 
 void KICK(Command *command);
+
+void PART(Command *command);

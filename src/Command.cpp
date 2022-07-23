@@ -15,7 +15,8 @@ Command::t_command_struct command_arr[] = {
   { "NOTICE",  &NOTICE,  0L },
   { "JOIN",    &JOIN,    1L },
   { "QUIT",    &QUIT,    0L },
-  { "KICK",    &KICK,    2L }
+  { "KICK",    &KICK,    2L },
+  { "PART",    &PART,    1L }
 };
 
 
@@ -24,7 +25,6 @@ Command::Command(irc::IrcServer &server, User& user, std::string command)
 
   bzero(&_command, sizeof(t_command_struct));
 
-  // std::replace(command.begin(), command.end(), '\t', ' ');
   _arguments = split(command, ' ', 1);
 
   if (!_arguments.empty()) {
@@ -41,7 +41,7 @@ Command::Command(irc::IrcServer &server, User& user, std::string command)
     _arguments.erase(_arguments.begin());
 
     if (_command.min_args && !_arguments.empty()) {
-      _arguments = split(_arguments[1], ' ', _command.min_args + 1);
+      _arguments = split(_arguments[1], ' ', _command.min_args);
     }
   }
 }

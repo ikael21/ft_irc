@@ -48,6 +48,7 @@ nc -c <hostname> 6666
 - `AWAY [message]`
 - `NAMES [<channel>{,<channel>}]`
 - `QUIT [<Quit message>]`
+- `PART <channel>{,<channel>}`
 
 For `Linux` please install [libkqueue](https://github.com/mheily/libkqueue).
 
