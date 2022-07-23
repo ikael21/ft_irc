@@ -2,6 +2,6 @@
 
 void TOPIC(Command *command) {
 
-  std::vector<std::string> args = command->getArguments();
+  std::vector<std::string> args = command->get_arguments();
   
 }

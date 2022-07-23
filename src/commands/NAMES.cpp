@@ -16,7 +16,7 @@ void NAMES(Command *command) {
 //   которые видимые, но не находятся ни на одной канале, или не на одном
 //   видимом канале, которые начинаюся как 'channel' "*".
 
-    std::vector<std::string> args = command->getArguments();
+    std::vector<std::string> args = command->get_arguments();
     std::string message;
 
     if (args.empty())

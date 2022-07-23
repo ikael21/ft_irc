@@ -19,7 +19,7 @@ Command::t_command_struct command_arr[] = {
   { "KICK",    &KICK,    2L },
   { "TIME",    &TIME,    0L },
   { "USERS",   &USERS,   0L },
-  { "NAMES",   &NAMES,   0L }
+  { "NAMES",   &NAMES,   0L },
   { "JOIN",    &JOIN,    1L },
   { "QUIT",    &QUIT,    0L },
   { "KICK",    &KICK,    2L },

@@ -10,7 +10,7 @@ void LIST(Command *command) {
     // секретные каналы не приводятся в списке,
     // если, конечно, клиент не является членом подобного канала.
 
-    std::vector<std::string> args = command->getArguments();
+    std::vector<std::string> args = command->get_arguments();
     std::string message;
 
     if (args.empty())
