@@ -9,24 +9,29 @@ void LIST(Command *command) {
     // указания количества клиентов, сидящих на этом канале. 
     // секретные каналы не приводятся в списке,
     // если, конечно, клиент не является членом подобного канала.
-
-    std::vector<std::string> args = command->get_arguments();
-    std::string message;
-
-    if (args.empty())
-        return;
-
-    message = args[0];
-
-    // ?? channals = command->getChannals();
-
-    //if (channals.empty())
-     //   return reply(ERR_NOSUCHSERVER);
-
-    return command->reply(RPL_LISTSTART);
     
-    return command->reply(RPL_LIST);
+    std::vector<std::string> args = command->get_arguments();
+    irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();    
+    
+    if (channels.empty())
+       return command->reply(ERR_NOSUCHSERVER);
 
-    return command->reply(RPL_LISTEND);
+    command->reply(RPL_LISTSTART);
+    
+    if (args.empty()){
+        for (int i = 0; ;++i)
+        {
+            irc::IrcServer::t_channel_list::iterator channel = std::find(channels.begin(), channels.end(), args[i]);
+            command->reply(RPL_LIST, channel->get_name());
+            if (channel == channels.end())
+                 break;
+        }  
+    }
+    else{
+        irc::IrcServer::t_channel_list::iterator channel = std::find(channels.begin(), channels.end(), args[0]);
+        command->reply(RPL_LIST, channel->get_name(), channel->get_topic());
+    }
+    command->reply(RPL_LISTEND);
+    return;
 
 }
