@@ -58,7 +58,7 @@ void irc::IrcServer::_accept_handler() {
   std::cout << MAGENTA "New User" << std::endl;
   std::cout << CYAN "\tFD: " << YELLOW << new_fd << std::endl;
   std::cout << CYAN "\tHostname: " << YELLOW
-    << user.get_hostname() << RESET << std::endl;
+ //   << user.get_hostname() << RESET << std::endl;
 #endif
 }
 
