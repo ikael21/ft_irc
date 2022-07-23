@@ -59,45 +59,57 @@ class Channel
 {
  public:
   Channel();
-  Channel(std::string channelName, std::string username);
+  // Channel(std::string channelName, std::string username);
 
   ~Channel();
 
-  bool isPrivate();
+  bool is_private();
 
-  void addUser(User& user);
-  void removeUser(User& user);
+  void add_user(User& user);
+  void remove_user(User& user);
 
-  std::vector<User *> getUsers() { return _users; }
-  std::vector<User *> getVisibleUsers();
+  std::vector<User *> get_users() { return _users; }
+  std::vector<User *> get_visible_users();
 
-  bool userOnChannel(User& user);
+  void set_name(std::string channelName);
+  std::string get_name() { return _name; }
 
-  void setName(std::string channelName);
-  std::string getName() { return _name; }
+  void set_topic(std::string topic);
+  std::string get_topic() { return _topic; }
 
-  void setTopic(std::string topic);
-  std::string getTopic() { return _topic; }
+  void add_channel_mode(const std::string& mode);
+  void remove_channel_mode(const std::string& mode);
 
-  void addChannelMode(const std::string& mode);
-  void removeChannelMode(const std::string& mode);
+  std::vector<t_channel_mode> get_channel_modes() { return _modes; }
+  bool have_mode(t_channel_mode mode);
 
-  std::vector<t_channel_mode> getChannelModes() { return _modes; }
-  bool haveMode(t_channel_mode mode);
+  void add_to_invite_list(User& user);
+  bool is_invited(User& user);
 
-  void addToInviteList(User& user);
-  bool isInvited(User& user);
+  void add_to_ban_list(User& user);
+  bool is_banned(User& user);
 
-  void setKey(std::string key);
-  std::string getKey() { return _key; }
+  void set_key(std::string key);
+  bool has_key() { return _key.size(); }
+  bool is_correct_key(std::string key) { return _key == key; }
 
-  void setLimitUsers(int limit);
-  int getLimitUsers() { return _limit_users; }
+  void set_limit_users(int limit);
+  int get_limit_users() { return _limit_users; }
+  bool is_full() { return _users.size() >= _limit_users; }
 
-  void addModeToUser(User& user, const std::string& mode);
-  void removeUserMode(User& user, const std::string& mode);
+  void add_mode_to_user(User& user, const std::string& mode);
+  void add_mode_to_user(User& user, t_user_mode mode);
 
-  bool userIsOper(User& user);
+  void remove_user_mode(User& user, const std::string& mode);
+  void remove_user_mode(User& user, t_user_mode mode);
+
+  bool user_on_channel(User& user);
+  bool user_is_oper(User& user);
+
+  void send_to_channel(User& user, std::string& msg);
+
+  friend bool operator==(const Channel& left, const Channel& right);
+  friend bool operator==(const Channel& left, const std::string& channel_name);
 
  private:
   std::string _name;
@@ -106,17 +118,18 @@ class Channel
   std::string _key;
   size_t      _limit_users;
 
-  std::vector<User *> _users;
-  std::vector<User *> _invited;
+  std::vector<User*> _users;
+  std::vector<User*> _invited;
+  std::vector<User*> _banned;
 
   std::vector<t_channel_mode>                 _modes;
-  std::map<User *, std::vector<t_user_mode> > _user_mode;
+  std::map<User*, std::vector<t_user_mode> > _user_mode;
 
   std::string _log_message(std::string message);
   void _log(std::string message);
 
-  bool _userHaveMode(User& user, t_user_mode mode);
-  void _changeChannelMode(const std::string& user, bool remove);
+  bool _user_have_mode(User& user, t_user_mode mode);
+  void _change_channel_mode(const std::string& user, bool remove);
 };
 
 #endif

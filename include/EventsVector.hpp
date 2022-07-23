@@ -56,6 +56,8 @@ public:
   }
 
   void reserve(size_type new_capacity) {
+    if (new_capacity == _capacity) return;
+
     pointer tmp = new value_type[new_capacity];
     _capacity = new_capacity;
     for (size_type i = 0; i < _size; ++i)

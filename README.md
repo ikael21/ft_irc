@@ -24,6 +24,11 @@ Compile server in debug mode
 DEBUG=1 make re
 ```
 
+Interact with `nc`:
+```bash
+nc -c <hostname> 6666
+```
+
 ## Commands
 - `PASS <password>`
 - `NICK <nickname>`

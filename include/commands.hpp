@@ -5,6 +5,7 @@
 #include "Command.hpp"
 #include "errors.hpp"
 
+void __print_logo(Command *command);
 
 void PASS(Command *command);
 
@@ -31,3 +32,5 @@ void KICK(Command *command);
 void TIME(Command *command);
 
 void USERS(Command *command);
+
+void JOIN(Command *command);
