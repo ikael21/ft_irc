@@ -44,11 +44,9 @@ void User :: receive(ssize_t size) {
   delete [] buff;
 }
 
-
 bool User :: hasNextMsg() {
   return _buffer.find(END_OF_MESSAGE) != std::string::npos;
 }
-
 
 std::string User :: getNextMsg() {
 

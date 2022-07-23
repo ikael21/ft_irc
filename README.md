@@ -42,7 +42,6 @@ DEBUG=1 make re
 - `USERS [<server>]`
 - `AWAY [message]`
 
-
 For `Linux` please install [libkqueue](https://github.com/mheily/libkqueue).
 
 ```bash
