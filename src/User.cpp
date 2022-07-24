@@ -115,3 +115,10 @@ void User::remove_mode(t_user_mode mode) {
 bool User::is_invisible() {
   return _has_mode(U_INVISIBLE);
 }
+
+std::string User::get_modes_as_str() {
+  std::string modes("+");
+  for (size_t i = 0; i < _modes.size(); ++i)
+    modes += static_cast<char>(_modes[i]);
+  return modes;
+}

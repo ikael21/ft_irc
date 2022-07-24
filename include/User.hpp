@@ -14,7 +14,7 @@ typedef enum    s_user_status {
 }               t_user_status;
 
 
-/* Список доступных режимов юзера:
+/* Список доступных режимов пользователя:
  *   i - делает пользователя невидимым;
  *   s - marks a user for receipt of server notices;
  *   w - user receives wallops;
@@ -77,6 +77,8 @@ class User {
   void add_mode(t_user_mode mode);
   void remove_mode(t_user_mode mode);
   bool is_invisible();
+
+  std::string get_modes_as_str();
 
   const std::string& get_buffer() const { return _buffer; }
 

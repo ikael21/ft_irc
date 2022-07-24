@@ -17,7 +17,7 @@ Command::t_command_struct command_arr[] = {
   { "QUIT",    &QUIT,    0L },
   { "KICK",    &KICK,    2L },
   { "PART",    &PART,    1L },
-  { "MODE",    &MODE,    2L }
+  { "MODE",    &MODE,    1L }
 };
 
 

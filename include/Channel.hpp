@@ -7,6 +7,7 @@
 # include <algorithm>
 # include <stdexcept>
 # include <iostream>
+# include <sstream>
 
 # include "User.hpp"
 
@@ -94,6 +95,7 @@ class Channel
   void add_oper(User& user);
   void remove_oper(User& user);
   bool is_oper(User& user);
+  std::string get_modes_as_str();
 
   void send_to_channel(User& user, std::string& msg);
 

@@ -170,10 +170,33 @@ void Channel::send_to_channel(User& user, std::string& msg) {
   }
 }
 
+
 bool operator==(const Channel& left, const Channel& right) {
   return left._name == right._name;
 }
 
+
 bool operator==(const Channel& left, const std::string& channel_name) {
   return left._name == channel_name;
+}
+
+
+std::string Channel::get_modes_as_str() {
+
+  std::stringstream modes;
+  std::stringstream values;
+
+  modes << "+";
+  for (size_t i = 0; i < _modes.size(); ++i) {
+
+    modes << static_cast<char>(_modes[i]);
+
+    if (_modes[i] == CH_CHANGE_KEY)
+      values << " " << _key;
+    else if (_modes[i] == CH_CHANGE_LIMIT_USERS)
+      values << " " << _limit_users;
+  }
+
+  return modes.str() + values.str();
+
 }

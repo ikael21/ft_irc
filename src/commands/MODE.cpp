@@ -47,12 +47,16 @@ t_channel_mode __get_channel_mode(char mode) {
   return CH_UNKNOWN_MODE;
 }
 
-
+/* Список доступных режимов пользователя:
+ *   i - делает пользователя невидимым;
+ *   s - marks a user for receipt of server notices;
+ *   w - user receives wallops;
+ *   o - флаг оператора.
+ */
 void user_mode(Command* command) {
 
   User& user = command->get_user();
   std::string nick = command->get_arguments()[0];
-  std::string modes = command->get_arguments()[1];
 
   try {
 
@@ -60,29 +64,36 @@ void user_mode(Command* command) {
 
     if (user != command->get_server().get_user_by_nickname(nick))
       return command->reply(ERR_USERSDONTMATCH);
+    else if (command->num_args() == 1) {
+      return command->reply(RPL_UMODEIS, user.get_modes_as_str());
+    }
 
+    std::string modes = command->get_arguments()[1];
+    std::string apply_modes;
     bool plus = true;
+
     for (size_t i = 0; i < modes.length(); ++i) {
-      if (modes[i] == '-')
+      if (modes[i] == '-') {
+        apply_modes += (apply_modes.back() == '-' ? "" : "-");
         plus = false;
-      else if (modes[i] == '+')
+      } else if (modes[i] == '+') {
+        apply_modes += (apply_modes.back() == '+' ? "" : "+");
         plus = true;
-      else {
+      } else {
         t_user_mode cur_mode = __get_user_mode(modes[i]);
 
         if (cur_mode == U_UNKNOWN_MODE) {
           command->reply(ERR_UNKNOWNMODE, std::string(1, modes[i]));
           continue;
         }
-
         if (plus)
           mod_user.add_mode(cur_mode);
         else
           mod_user.remove_mode(cur_mode);
-
-        command->reply(RPL_UMODEIS, (plus ? "+" : "-") + std::string(1, modes[i]));
+        apply_modes += modes[i];
       }
     }
+    command->reply(RPL_UMODEIS, apply_modes);
   } catch (UserNotFound& e) {
     return command->reply(ERR_NOSUCHNICK, nick);
   }
@@ -111,31 +122,34 @@ bool is_switch_mode(t_channel_mode mode) {
  *   k - установка на канал ключа (пароля).
  */
 
-
 void channel_mode(Command* command) {
 
   User& user = command->get_user();
   std::string channel_name = command->get_arguments()[0];
-  std::string modes = command->get_arguments()[1];
-
   irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();
+
   irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), channel_name);
 
-  if (ch == channels.end())
+  if (ch == channels.end()) {
     return command->reply(ERR_NOSUCHCHANNEL, channel_name);
-  else if (command->num_args() == 1) {
-    command->reply(RPL_CHANNELMODEIS, "TODO", "TODO", "TODO");
-  }
-  else if (!ch->is_oper(user))
+  } else if (command->num_args() == 1) {
+    return command->reply(RPL_CHANNELMODEIS, ch->get_name(), ch->get_modes_as_str());
+  } else if (!ch->is_oper(user))
     return command->reply(ERR_CHANOPRIVSNEEDED, ch->get_name());
 
+  std::string modes = command->get_arguments()[1];
+  std::string apply_modes;
+  std::string apply_values;
   bool plus = true;
+
   for (size_t i = 0; i < modes.length(); ++i) {
-    if (modes[i] == '-')
+    if (modes[i] == '-') {
+      apply_modes += (apply_modes.back() == '-' ? "" : "-");
       plus = false;
-    else if (modes[i] == '+')
+    } else if (modes[i] == '+') {
+      apply_modes += (apply_modes.back() == '+' ? "" : "+");
       plus = true;
-    else {
+    } else {
 
       t_channel_mode cur_mode = __get_channel_mode(modes[i]);
 
@@ -150,14 +164,19 @@ void channel_mode(Command* command) {
         else
           ch->remove_channel_mode(cur_mode);
 
-        std::string msg = user.get_prefix_msg() + command->get_command_name() + " " \
-          + ch->get_name() + (plus ? "+" : "-") + std::string(1, modes[i]);
 
-        user.send_msg_to_user(user, msg);
+      } else if (cur_mode == CH_CHANGE_KEY) {
+
       }
 
       //TODO Write non switched modes
     }
+
+    std::string msg = user.get_prefix_msg() + command->get_command_name() + " " \
+      + ch->get_name() + " " + apply_modes + apply_values;
+
+    ch->send_to_channel(user, msg);
+    user.send_msg_to_user(user, msg);
   }
 }
 
