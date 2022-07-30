@@ -74,6 +74,7 @@ class User {
 
   std::string get_prefix_msg();
 
+  bool has_mode(t_user_mode mode);
   void add_mode(t_user_mode mode);
   void remove_mode(t_user_mode mode);
   bool is_invisible();
@@ -93,8 +94,6 @@ class User {
   std::string              _afkMessage;
   std::vector<t_user_mode> _modes;
   std::string              _buffer;
-
-  bool _has_mode(t_user_mode mode);
 };
 
 # endif

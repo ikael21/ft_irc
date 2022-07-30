@@ -95,25 +95,25 @@ std::string User::get_prefix_msg() {
 }
 
 
-bool User::_has_mode(t_user_mode mode) {
+bool User::has_mode(t_user_mode mode) {
   return std::find(_modes.begin(), _modes.end(), mode) != _modes.end();
 }
 
 
 void User::add_mode(t_user_mode mode) {
-  if (!_has_mode(mode))
+  if (!has_mode(mode))
     _modes.push_back(mode);
 }
 
 
 void User::remove_mode(t_user_mode mode) {
-  if (_has_mode(mode))
+  if (has_mode(mode))
     _modes.erase(std::find(_modes.begin(), _modes.end(), mode));
 }
 
 
 bool User::is_invisible() {
-  return _has_mode(U_INVISIBLE);
+  return has_mode(U_INVISIBLE);
 }
 
 std::string User::get_modes_as_str() {

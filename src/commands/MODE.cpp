@@ -15,7 +15,40 @@
  * ERR_UMODEUNKNOWNFLAG
  */
 
+template<typename T>
+std::string __cast_modes_to_str(std::vector<T>& plus_modes, std::vector<T>& minus_modes) {
 
+  std::string result;
+
+  if (plus_modes.size()) {
+    result += "+";
+    for (size_t i = 0; i < plus_modes.size(); ++i)
+      result += static_cast<char>(plus_modes[i]);
+  }
+  if (minus_modes.size()) {
+    result += "-";
+    for (size_t i = 0; i < minus_modes.size(); ++i)
+      result += static_cast<char>(minus_modes[i]);
+  }
+  return result;
+}
+
+
+template<typename T>
+void __switch_mode(T cur_mode, std::vector<T>& plus_modes, std::vector<T>& minus_modes) {
+  if (std::find(minus_modes.begin(), minus_modes.end(), cur_mode) != minus_modes.end())
+    minus_modes.erase(std::find(minus_modes.begin(), minus_modes.end(), cur_mode));
+  else
+    plus_modes.push_back(cur_mode);
+}
+
+
+/* Список доступных режимов пользователя:
+ *   i - делает пользователя невидимым;
+ *   s - marks a user for receipt of server notices;
+ *   w - user receives wallops;
+ *   o - флаг оператора.
+ */
 t_user_mode __get_user_mode(char mode) {
 
   static t_user_mode user_modes[] = {
@@ -31,28 +64,6 @@ t_user_mode __get_user_mode(char mode) {
 }
 
 
-t_channel_mode __get_channel_mode(char mode) {
-
-  static t_channel_mode channel_modes[] = {
-    CH_UNKNOWN_MODE, CH_CHANGE_PRIVILEGE, CH_PRIVATE, CH_SECRET, CH_INVITE_ONLY,
-    CH_TOPIC_MODIFIERS, CH_FORBID_OUT_MSG, CH_MODERATE, CH_CHANGE_LIMIT_USERS,
-    CH_BAN_USER, CH_CHANGE_MODERATE, CH_CHANGE_KEY
-  };
-
-  for (size_t i = 0; i < sizeof(channel_modes) / sizeof(t_user_mode); ++i) {
-    if (mode == channel_modes[i])
-      return channel_modes[i];
-  }
-
-  return CH_UNKNOWN_MODE;
-}
-
-/* Список доступных режимов пользователя:
- *   i - делает пользователя невидимым;
- *   s - marks a user for receipt of server notices;
- *   w - user receives wallops;
- *   o - флаг оператора.
- */
 void user_mode(Command* command) {
 
   User& user = command->get_user();
@@ -69,15 +80,14 @@ void user_mode(Command* command) {
     }
 
     std::string modes = command->get_arguments()[1];
-    std::string apply_modes;
+    std::vector<t_user_mode> plus_modes = std::vector<t_user_mode>();
+    std::vector<t_user_mode> minus_modes = std::vector<t_user_mode>();
     bool plus = true;
 
     for (size_t i = 0; i < modes.length(); ++i) {
       if (modes[i] == '-') {
-        apply_modes += (apply_modes.back() == '-' ? "" : "-");
         plus = false;
       } else if (modes[i] == '+') {
-        apply_modes += (apply_modes.back() == '+' ? "" : "+");
         plus = true;
       } else {
         t_user_mode cur_mode = __get_user_mode(modes[i]);
@@ -86,14 +96,21 @@ void user_mode(Command* command) {
           command->reply(ERR_UNKNOWNMODE, std::string(1, modes[i]));
           continue;
         }
-        if (plus)
+        if (plus && !mod_user.has_mode(cur_mode)) {
           mod_user.add_mode(cur_mode);
-        else
+          __switch_mode<t_user_mode>(cur_mode, plus_modes, minus_modes);
+        } else if (!plus && mod_user.has_mode(cur_mode)) {
           mod_user.remove_mode(cur_mode);
-        apply_modes += modes[i];
+          __switch_mode<t_user_mode>(cur_mode, minus_modes, plus_modes);
+        }
       }
     }
-    command->reply(RPL_UMODEIS, apply_modes);
+
+    std::string apply_modes = __cast_modes_to_str<t_user_mode>(plus_modes, minus_modes);
+
+    if (apply_modes.length())
+      command->reply(RPL_UMODEIS, apply_modes);
+
   } catch (UserNotFound& e) {
     return command->reply(ERR_NOSUCHNICK, nick);
   }
@@ -104,6 +121,7 @@ bool is_switch_mode(t_channel_mode mode) {
   return mode == CH_PRIVATE || mode == CH_SECRET || mode == CH_INVITE_ONLY \
     || mode == CH_TOPIC_MODIFIERS || mode == CH_FORBID_OUT_MSG || mode == CH_MODERATE;
 }
+
 
 /* Список доступных режимов канала:
  * SWITCHED:
@@ -121,6 +139,22 @@ bool is_switch_mode(t_channel_mode mode) {
  *   v - брать/давать возможность голоса при модерируемом режиме;
  *   k - установка на канал ключа (пароля).
  */
+t_channel_mode __get_channel_mode(char mode) {
+
+  static t_channel_mode channel_modes[] = {
+    CH_UNKNOWN_MODE, CH_CHANGE_PRIVILEGE, CH_PRIVATE, CH_SECRET, CH_INVITE_ONLY,
+    CH_TOPIC_MODIFIERS, CH_FORBID_OUT_MSG, CH_MODERATE, CH_CHANGE_LIMIT_USERS,
+    CH_BAN_USER, CH_CHANGE_MODERATE, CH_CHANGE_KEY
+  };
+
+  for (size_t i = 0; i < sizeof(channel_modes) / sizeof(t_user_mode); ++i) {
+    if (mode == channel_modes[i])
+      return channel_modes[i];
+  }
+
+  return CH_UNKNOWN_MODE;
+}
+
 
 void channel_mode(Command* command) {
 
@@ -138,16 +172,14 @@ void channel_mode(Command* command) {
     return command->reply(ERR_CHANOPRIVSNEEDED, ch->get_name());
 
   std::string modes = command->get_arguments()[1];
-  std::string apply_modes;
-  std::string apply_values;
+  std::vector<t_channel_mode> plus_modes = std::vector<t_channel_mode>();
+  std::vector<t_channel_mode> minus_modes = std::vector<t_channel_mode>();
   bool plus = true;
 
   for (size_t i = 0; i < modes.length(); ++i) {
     if (modes[i] == '-') {
-      apply_modes += (apply_modes.back() == '-' ? "" : "-");
       plus = false;
     } else if (modes[i] == '+') {
-      apply_modes += (apply_modes.back() == '+' ? "" : "+");
       plus = true;
     } else {
 
@@ -164,16 +196,25 @@ void channel_mode(Command* command) {
         else
           ch->remove_channel_mode(cur_mode);
 
-
-      } else if (cur_mode == CH_CHANGE_KEY) {
-
+        if (plus && !ch->have_mode(cur_mode)) {
+          ch->add_channel_mode(cur_mode);
+          __switch_mode<t_channel_mode>(cur_mode, plus_modes, minus_modes);
+        } else if (!plus && ch->have_mode(cur_mode)) {
+          ch->remove_channel_mode(cur_mode);
+          __switch_mode<t_channel_mode>(cur_mode, minus_modes, plus_modes);
+        }
       }
 
       //TODO Write non switched modes
     }
 
+    std::string apply_modes = __cast_modes_to_str<t_channel_mode>(plus_modes, minus_modes);
+
+    if (apply_modes.length())
+      command->reply(RPL_UMODEIS, apply_modes);
+
     std::string msg = user.get_prefix_msg() + command->get_command_name() + " " \
-      + ch->get_name() + " " + apply_modes + apply_values;
+      + ch->get_name() + " " + apply_modes;
 
     ch->send_to_channel(user, msg);
     user.send_msg_to_user(user, msg);

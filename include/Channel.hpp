@@ -103,18 +103,18 @@ class Channel
   friend bool operator==(const Channel& left, const std::string& channel_name);
 
  private:
-  std::string _name;
-  std::string _operator;
-  std::string _topic;
-  std::string _key;
-  size_t      _limit_users;
+  std::string        _name;
+  std::string        _operator;
+  std::string        _topic;
+  std::string        _key;
+  size_t             _limit_users;
 
   std::vector<User*> _users;
   std::vector<User*> _operators;
   std::vector<User*> _invited;
   std::vector<User*> _banned;
 
-  std::vector<t_channel_mode>                 _modes;
+  std::vector<t_channel_mode> _modes;
 
   std::string _log_message(std::string message);
   void _log(std::string message);
