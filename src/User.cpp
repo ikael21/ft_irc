@@ -45,7 +45,6 @@ User::User(const User& other)
     _state(other._state),
     _last_activity(other._last_activity),
     _afkMessage(other._afkMessage),
-    _quitMessage(other._quitMessage),
     _buffer(other._buffer) {}
 
 
