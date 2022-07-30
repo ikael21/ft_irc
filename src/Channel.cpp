@@ -52,7 +52,10 @@ void Channel::remove_user(User &user) {
   }
 
   _users.erase(std::find(_users.begin(), _users.end(), &user));
-  _user_mode.erase(&user);
+
+  if (is_oper(user))
+    _operators.erase(std::find(_users.begin(), _users.end(), &user));
+
   _log("User " +  user.get_nick() + " remove from channel");
 }
 
@@ -62,7 +65,7 @@ std::vector<User *> Channel::get_visible_users() {
 
   for (size_t i = 0; i < _users.size(); ++i) {
 
-    if (_user_have_mode(*_users[i], U_INVISIBLE))
+    if (_users[i]->is_invisible())
       continue;
 
     users.push_back(_users[i]);
@@ -121,31 +124,15 @@ void Channel::add_to_ban_list(User& user) {
 }
 
 
-void Channel::add_channel_mode(const std::string& mode) { _change_channel_mode(mode, false); }
-void Channel::remove_channel_mode(const std::string& mode) { _change_channel_mode(mode, true); }
+void Channel::add_channel_mode(t_channel_mode mode) {
+  if (!have_mode(mode))
+    _modes.push_back(mode);
+}
 
-void Channel::_change_channel_mode(const std::string& mode, bool remove) {
 
-  std::vector<t_channel_mode> all_mode(CHANNEL_MODES, CHANNEL_MODES + sizeof(CHANNEL_MODES) / sizeof(CHANNEL_MODES[0]));
-
-  for (size_t i = 0; i < mode.size(); ++i) {
-
-    t_channel_mode cur_mode = static_cast<t_channel_mode>(mode[i]);
-
-    if (std::find(all_mode.begin(), all_mode.end(), cur_mode) == all_mode.end()) {
-      return _log("Invalid mode '" + mode + "' for channel");
-    }
-
-    bool alreadyHave = have_mode(cur_mode);
-
-    if (remove && alreadyHave) {
-      _modes.erase(std::find(_modes.begin(), _modes.end(), cur_mode));
-    }
-    else if (!remove && !alreadyHave) {
-      _modes.push_back(cur_mode);
-    }
-
-  }
+void Channel::remove_channel_mode(t_channel_mode mode) {
+  if (have_mode(mode))
+    _modes.erase(std::find(_modes.begin(), _modes.end(), mode));
 }
 
 
@@ -159,65 +146,19 @@ bool Channel::have_mode(t_channel_mode mode) {
 }
 
 
-bool Channel ::_user_have_mode(User& user, t_user_mode mode) {
-  return std::find(_user_mode[&user].begin(), _user_mode[&user].end(), mode) != _user_mode[&user].end();
+void Channel::add_oper(User& user) {
+  if (!is_oper(user))
+    _operators.push_back(&user);
 }
 
 
-void Channel::add_mode_to_user(User& user, const std::string& mode) {
-
-  std::vector<t_user_mode> modes(USER_MODES, USER_MODES + sizeof(USER_MODES) / sizeof(USER_MODES[0]));
-
-  if (!user_on_channel(user)) {
-    return _log("User " + user.get_nick() + " is not on channel");
-  }
-
-  for (size_t i = 0; i < mode.size(); ++i) {
-
-    t_user_mode cur_mode = static_cast<t_user_mode>(mode[i]);
-
-    if (std::find(modes.begin(), modes.end(), cur_mode) == modes.end()) {
-      _log("Invalid mode '" + mode + "' for user");
-      continue;
-    }
-    add_mode_to_user(user, cur_mode);
-  }
+void Channel::remove_oper(User& user) {
+  _operators.erase(std::find(_operators.begin(), _operators.end(), &user));
 }
 
 
-void Channel::add_mode_to_user(User& user, t_user_mode mode) {
-  if (!_user_have_mode(user, mode)) {
-    _user_mode[&user].push_back(mode);
-  }
-}
-
-void Channel::remove_user_mode(User& user, const std::string& mode) {
-
-  if (!user_on_channel(user)) {
-    return _log("User " + user.get_nick() + " is not on channel");
-  }
-
-  std::vector<t_user_mode> modes = _user_mode[&user];
-
-  for (size_t i = 0; i < mode.size(); ++i) {
-    remove_user_mode(user, static_cast<t_user_mode>(mode[i]));
-  }
-}
-
-
-void Channel::remove_user_mode(User& user, t_user_mode mode) {
-  _user_mode[&user].erase(std::find(_user_mode[&user].begin(), _user_mode[&user].end(), mode));
-}
-
-
-bool Channel::user_is_oper(User& user) {
-
-  if (!user_on_channel(user)) {
-    _log("User " + user.get_nick() + " is not on channel");
-    return false;
-  }
-
-  return _user_have_mode(user, U_OPERATOR);
+bool Channel::is_oper(User& user) {
+  return std::find(_operators.begin(), _operators.end(), &user) != _operators.end();
 }
 
 
@@ -229,10 +170,33 @@ void Channel::send_to_channel(User& user, std::string& msg) {
   }
 }
 
+
 bool operator==(const Channel& left, const Channel& right) {
   return left._name == right._name;
 }
 
+
 bool operator==(const Channel& left, const std::string& channel_name) {
   return left._name == channel_name;
+}
+
+
+std::string Channel::get_modes_as_str() {
+
+  std::stringstream modes;
+  std::stringstream values;
+
+  modes << "+";
+  for (size_t i = 0; i < _modes.size(); ++i) {
+
+    modes << static_cast<char>(_modes[i]);
+
+    if (_modes[i] == CH_CHANGE_KEY)
+      values << " " << _key;
+    else if (_modes[i] == CH_CHANGE_LIMIT_USERS)
+      values << " " << _limit_users;
+  }
+
+  return modes.str() + values.str();
+
 }

@@ -2,7 +2,7 @@
 
 void AWAY(Command *command) {
 
-  User &user = command->get_user();
+  User& user = command->get_user();
   std::vector<std::string>& args = command->get_arguments();
   std::string message;
 

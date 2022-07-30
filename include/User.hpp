@@ -22,6 +22,21 @@ typedef enum s_user_state {
 }            t_user_state;
 
 
+/* Список доступных режимов пользователя:
+ *   i - делает пользователя невидимым;
+ *   s - marks a user for receipt of server notices;
+ *   w - user receives wallops;
+ *   o - флаг оператора.
+ */
+typedef enum    s_user_mode {
+  U_UNKNOWN_MODE = '\0',
+  U_INVISIBLE    = 'i',
+  U_OPERATOR     = 'o',
+  U_WALLOPS      = 'w',
+  U_S_NOTICE     = 's'
+}               t_user_mode;
+
+
 class User {
 
  public:
@@ -51,16 +66,13 @@ class User {
 
   void set_afk_msg(std::string message) { _afkMessage = message; }
   std::string get_afk_msg() { return _afkMessage; }
-
-  void set_quit_msg(std::string message) { _quitMessage = message; }
-  std::string get_quit_msg() { return _quitMessage; }
+  bool is_away() { return !_afkMessage.empty(); }
 
   void set_status(t_user_status status) { _status = status; }
   t_user_status get_status() { return _status; }
 
   friend bool operator==(const User& left, const User& right);
   friend bool operator!=(const User& left, const User& right);
-
 
   void receive(ssize_t size);
   bool has_msg();
@@ -71,7 +83,12 @@ class User {
 
   std::string get_prefix_msg();
 
-  bool is_away() { return !_afkMessage.empty(); }
+  bool has_mode(t_user_mode mode);
+  void add_mode(t_user_mode mode);
+  void remove_mode(t_user_mode mode);
+  bool is_invisible();
+
+  std::string get_modes_as_str();
 
   std::string& get_buffer() { return _buffer; }
 
@@ -82,21 +99,18 @@ class User {
   void set_last_activity(time_t t) { _last_activity = t; }
 
  private:
-  int            _fd;
-  t_user_status _status;
-  std::string   _username;
-  std::string   _hostname;
-  std::string   _servername;
-  std::string   _realname;
-  std::string   _nick;
-
-  int8_t        _state;
-  time_t        _last_activity;
-
-  std::string   _afkMessage;
-  std::string   _quitMessage;
-
-  std::string   _buffer;
+  int                      _fd;
+  t_user_status            _status;
+  std::string              _username;
+  std::string              _hostname;
+  std::string              _servername;
+  std::string              _realname;
+  std::string              _nick;
+  int8_t                   _state;
+  time_t                   _last_activity;
+  std::string              _afkMessage;
+  std::vector<t_user_mode> _modes;
+  std::string              _buffer;
 };
 
 # endif

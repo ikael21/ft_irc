@@ -22,3 +22,11 @@ void NOTICE(Command *command);
 void JOIN(Command *command);
 
 void PONG(Command *command);
+
+void QUIT(Command *command);
+
+void KICK(Command *command);
+
+void PART(Command *command);
+
+void MODE(Command *command);

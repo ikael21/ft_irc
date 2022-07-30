@@ -55,6 +55,9 @@ std::string __ERR_NICKNAMEINUSE(std::string nick) { return nick + " :Nickname is
 // 436
 std::string __ERR_NICKCOLLISION(std::string nick) { return nick + " :Nickname collision KILL"; }
 
+// 441
+std::string __ERR_USERNOTINCHANNEL(std::string nick, std::string channel) { return nick + " " + channel + " :They aren't on that channel"; }
+
 // 442
 std::string __ERR_NOTONCHANNEL(std::string channel) { return channel + " :You're not on that channel"; }
 
@@ -134,8 +137,8 @@ std::string __RPL_LIST(std::string channel, std::string visible, std::string top
 std::string __RPL_LISTEND() { return ":End of /LIST"; }
 
 // 324
-std::string __RPL_CHANNELMODEIS(std::string channel, std::string mode, std::string mode_params) {
-  return channel + " " + mode + " " + mode_params;
+std::string __RPL_CHANNELMODEIS(std::string channel, std::string mode_plus_params) {
+  return channel + " " + mode_plus_params;
 }
 
 // 331
@@ -236,6 +239,7 @@ static t_err __error_arr[] = {
   { ERR_ERRONEUSNICKNAME,  (void*)&__ERR_ERRONEUSNICKNAME, 1L },
   { ERR_NICKNAMEINUSE,     (void*)&__ERR_NICKNAMEINUSE,    1L },
   { ERR_NICKCOLLISION,     (void*)&__ERR_NICKCOLLISION,    1L },
+  { ERR_USERNOTINCHANNEL,  (void*)&__ERR_USERNOTINCHANNEL, 2L },
   { ERR_NOTONCHANNEL,      (void*)&__ERR_NOTONCHANNEL,     1L },
   { ERR_USERONCHANNEL,     (void*)&__ERR_USERONCHANNEL,    2L },
   { ERR_USERSDISABLED,     (void*)&__ERR_USERSDISABLED,    0L },
@@ -260,7 +264,7 @@ static t_err __error_arr[] = {
   { RPL_LISTSTART,         (void*)&__RPL_LISTSTART,        0L },
   { RPL_LIST,              (void*)&__RPL_LIST,             3L },
   { RPL_LISTEND,           (void*)&__RPL_LISTEND,          0L },
-  { RPL_CHANNELMODEIS,     (void*)&__RPL_CHANNELMODEIS,    3L },
+  { RPL_CHANNELMODEIS,     (void*)&__RPL_CHANNELMODEIS,    2L },
   { RPL_NOTOPIC,           (void*)&__RPL_NOTOPIC,          1L },
   { RPL_TOPIC,             (void*)&__RPL_TOPIC,            2L },
   { RPL_INVITING,          (void*)&__RPL_INVITING,         2L },

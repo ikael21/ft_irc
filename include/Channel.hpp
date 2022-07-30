@@ -7,6 +7,7 @@
 # include <algorithm>
 # include <stdexcept>
 # include <iostream>
+# include <sstream>
 
 # include "User.hpp"
 
@@ -20,21 +21,26 @@
  *   s - флаг секретности канала;
  *   i - флаг канала invite-only;
  *   t - при установке этого флага, менять топик могут только операторы;
- * ? n - запрещает сообщения на канал от посторонних клиентов;
- * ? m - модерируемый канал;
+ *   n - запрещает сообщения на канал от посторонних клиентов;
+ *   m - модерируемый канал;
  *   l - установка ограничения на количество пользователей;
- * ? b - установка маски бана;
- * ? v - брать/давать возможность голоса при модерируемом режиме;
+ *   b - установка маски бана;
+ *   v - брать/давать возможность голоса при модерируемом режиме;
  *   k - установка на канал ключа (пароля).
  */
 
 typedef enum    s_channel_mode {
+  CH_UNKNOWN_MODE       = '\0',
   CH_CHANGE_PRIVILEGE   = 'o',
   CH_PRIVATE            = 'p',
   CH_SECRET             = 's',
   CH_INVITE_ONLY        = 'i',
   CH_TOPIC_MODIFIERS    = 't',
+  CH_FORBID_OUT_MSG     = 'n',
+  CH_MODERATE           = 'm',
   CH_CHANGE_LIMIT_USERS = 'l',
+  CH_BAN_USER           = 'b',
+  CH_CHANGE_MODERATE    = 'v',
   CH_CHANGE_KEY         = 'k'
 }               t_channel_mode;
 
@@ -43,24 +49,10 @@ typedef enum    s_channel_mode {
 # define DEFAULT_CHANNEL_MODES          CH_TOPIC_MODIFIERS
 
 
-/* Список доступных режимов юзера:
- *   i - делает пользователя невидимым;
- * ? s - marks a user for receipt of server notices;
- * ? w - user receives wallops;
- *   o - флаг оператора.
- */
-
-typedef enum    s_user_mode {
-  U_INVISIBLE   = 'i',
-  U_OPERATOR    = 'o'
-}               t_user_mode;
-
 class Channel
 {
  public:
   Channel();
-  // Channel(std::string channelName, std::string username);
-
   ~Channel();
 
   bool is_private();
@@ -68,8 +60,8 @@ class Channel
   void add_user(User& user);
   void remove_user(User& user);
 
-  std::vector<User *> get_users() { return _users; }
-  std::vector<User *> get_visible_users();
+  std::vector<User*> get_users() { return _users; }
+  std::vector<User*> get_visible_users();
 
   void set_name(std::string channelName);
   std::string get_name() { return _name; }
@@ -77,8 +69,8 @@ class Channel
   void set_topic(std::string topic);
   std::string get_topic() { return _topic; }
 
-  void add_channel_mode(const std::string& mode);
-  void remove_channel_mode(const std::string& mode);
+  void add_channel_mode(t_channel_mode mode);
+  void remove_channel_mode(t_channel_mode mode);
 
   std::vector<t_channel_mode> get_channel_modes() { return _modes; }
   bool have_mode(t_channel_mode mode);
@@ -96,15 +88,14 @@ class Channel
   void set_limit_users(int limit);
   int get_limit_users() { return _limit_users; }
   bool is_full() { return _users.size() >= _limit_users; }
-
-  void add_mode_to_user(User& user, const std::string& mode);
-  void add_mode_to_user(User& user, t_user_mode mode);
-
-  void remove_user_mode(User& user, const std::string& mode);
-  void remove_user_mode(User& user, t_user_mode mode);
+  bool is_empty() { return !_users.size(); }
 
   bool user_on_channel(User& user);
-  bool user_is_oper(User& user);
+
+  void add_oper(User& user);
+  void remove_oper(User& user);
+  bool is_oper(User& user);
+  std::string get_modes_as_str();
 
   void send_to_channel(User& user, std::string& msg);
 
@@ -112,23 +103,22 @@ class Channel
   friend bool operator==(const Channel& left, const std::string& channel_name);
 
  private:
-  std::string _name;
-  std::string _operator;
-  std::string _topic;
-  std::string _key;
-  size_t      _limit_users;
+  std::string        _name;
+  std::string        _operator;
+  std::string        _topic;
+  std::string        _key;
+  size_t             _limit_users;
 
   std::vector<User*> _users;
+  std::vector<User*> _operators;
   std::vector<User*> _invited;
   std::vector<User*> _banned;
 
-  std::vector<t_channel_mode>                 _modes;
-  std::map<User*, std::vector<t_user_mode> > _user_mode;
+  std::vector<t_channel_mode> _modes;
 
   std::string _log_message(std::string message);
   void _log(std::string message);
 
-  bool _user_have_mode(User& user, t_user_mode mode);
   void _change_channel_mode(const std::string& user, bool remove);
 };
 

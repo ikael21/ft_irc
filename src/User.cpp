@@ -125,3 +125,30 @@ std::string User::get_prefix_msg() {
  * state must be one of [ACTIVE, SEND_PING, WAIT_PONG]
 **/
 void User::set_state(int8_t state) { _state = state; }
+bool User::has_mode(t_user_mode mode) {
+  return std::find(_modes.begin(), _modes.end(), mode) != _modes.end();
+}
+
+
+void User::add_mode(t_user_mode mode) {
+  if (!has_mode(mode))
+    _modes.push_back(mode);
+}
+
+
+void User::remove_mode(t_user_mode mode) {
+  if (has_mode(mode))
+    _modes.erase(std::find(_modes.begin(), _modes.end(), mode));
+}
+
+
+bool User::is_invisible() {
+  return has_mode(U_INVISIBLE);
+}
+
+std::string User::get_modes_as_str() {
+  std::string modes("+");
+  for (size_t i = 0; i < _modes.size(); ++i)
+    modes += static_cast<char>(_modes[i]);
+  return modes;
+}
