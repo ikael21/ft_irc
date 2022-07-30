@@ -54,6 +54,7 @@ public:
   void            add_channel(Channel& channel);
   t_channel_list& get_channels();
   User&           get_user_by_nickname(const std::string& nickname);
+  void            delete_client(User& user);
 
   /* Propose to create next methods
 
@@ -98,7 +99,6 @@ private:
   void _read_handler(t_event& event);
   void _write_handler(t_event& event);
   void _delete_client(t_event& event);
-  void _delete_client(User& user);
 
   void _check_users_activity();
 

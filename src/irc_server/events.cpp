@@ -58,7 +58,7 @@ void irc::IrcServer::_delete_client(t_event& event) {
 }
 
 
-void irc::IrcServer::_delete_client(User& user) {
+void irc::IrcServer::delete_client(User& user) {
   int fd = user.get_fd();
   t_userlist::iterator it = _users.begin();
   while (it != _users.end() && it->get_fd() != fd)

@@ -6,7 +6,7 @@
  * returns result (first argument)
 **/
 bool irc::IrcServer::_delete_client_if_true(bool result, User& user) {
-  if (result) _delete_client(user);
+  if (result) delete_client(user);
   return result;
 }
 
