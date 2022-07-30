@@ -8,6 +8,7 @@
 # include <stdexcept>
 # include <iostream>
 # include <sstream>
+# include <chrono>
 
 # include "User.hpp"
 
@@ -40,7 +41,7 @@ typedef enum    s_channel_mode {
   CH_MODERATE           = 'm',
   CH_CHANGE_LIMIT_USERS = 'l',
   CH_BAN_USER           = 'b',
-  CH_CHANGE_MODERATE    = 'v',
+  CH_CHANGE_VOICE       = 'v',
   CH_CHANGE_KEY         = 'k'
 }               t_channel_mode;
 
@@ -51,6 +52,15 @@ typedef enum    s_channel_mode {
 
 class Channel
 {
+  struct BannedUser
+  {
+    User*       user;
+    User*       who;
+    time_t      when;
+    BannedUser(User* user, User* who)
+      : user(user), who(who), when(std::time(NULL)) {};
+  };
+
  public:
   Channel();
   ~Channel();
@@ -76,14 +86,17 @@ class Channel
   bool have_mode(t_channel_mode mode);
 
   void add_to_invite_list(User& user);
+  void remove_from_invite_list(User& user);
   bool is_invited(User& user);
 
-  void add_to_ban_list(User& user);
+  void add_to_ban_list(User& user, User& who);
+  void remove_from_ban_list(User& user);
   bool is_banned(User& user);
+  std::vector<std::string> get_ban_list();
 
   void set_key(std::string key);
   bool has_key() { return _key.size(); }
-  bool is_correct_key(std::string key) { return _key == key; }
+  std::string get_key() { return _key; }
 
   void set_limit_users(int limit);
   int get_limit_users() { return _limit_users; }
@@ -95,6 +108,7 @@ class Channel
   void add_oper(User& user);
   void remove_oper(User& user);
   bool is_oper(User& user);
+
   std::string get_modes_as_str();
 
   void send_to_channel(User& user, std::string& msg);
@@ -109,10 +123,10 @@ class Channel
   std::string        _key;
   size_t             _limit_users;
 
-  std::vector<User*> _users;
-  std::vector<User*> _operators;
-  std::vector<User*> _invited;
-  std::vector<User*> _banned;
+  std::vector<User*>      _users;
+  std::vector<User*>      _operators;
+  std::vector<User*>      _invited;
+  std::vector<BannedUser> _banned;
 
   std::vector<t_channel_mode> _modes;
 

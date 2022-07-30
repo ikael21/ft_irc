@@ -130,13 +130,13 @@ bool is_switch_mode(t_channel_mode mode) {
  *   i - флаг канала invite-only;
  *   t - при установке этого флага, менять топик могут только операторы;
  *   n - запрещает сообщения на канал от посторонних клиентов;
- *   m - модерируемый канал;
+ * ? m - модерируемый канал;
  *
  * WITH OPTIONS:
  *   o - брать/давать привилегии операторов канала
  *   l - установка ограничения на количество пользователей;
  *   b - установка маски бана;
- *   v - брать/давать возможность голоса при модерируемом режиме;
+ * ? v - брать/давать возможность голоса при модерируемом режиме;
  *   k - установка на канал ключа (пароля).
  */
 t_channel_mode __get_channel_mode(char mode) {
@@ -144,7 +144,7 @@ t_channel_mode __get_channel_mode(char mode) {
   static t_channel_mode channel_modes[] = {
     CH_UNKNOWN_MODE, CH_CHANGE_PRIVILEGE, CH_PRIVATE, CH_SECRET, CH_INVITE_ONLY,
     CH_TOPIC_MODIFIERS, CH_FORBID_OUT_MSG, CH_MODERATE, CH_CHANGE_LIMIT_USERS,
-    CH_BAN_USER, CH_CHANGE_MODERATE, CH_CHANGE_KEY
+    CH_BAN_USER, CH_CHANGE_VOICE, CH_CHANGE_KEY
   };
 
   for (size_t i = 0; i < sizeof(channel_modes) / sizeof(t_user_mode); ++i) {
@@ -153,6 +153,107 @@ t_channel_mode __get_channel_mode(char mode) {
   }
 
   return CH_UNKNOWN_MODE;
+}
+
+void __send_info(User& user,
+                 irc::IrcServer::t_channel_list::iterator ch,
+                 std::string comm_name,
+                 std::string& msg) {
+
+  std::string full_msg = user.get_prefix_msg() + comm_name + " " + ch->get_name() + " " + msg;
+  ch->send_to_channel(user, full_msg);
+  user.send_msg_to_user(user, full_msg);
+}
+
+void __change_oper_in_channel(Command* command,
+                              User& user,
+                              irc::IrcServer::t_channel_list::iterator ch,
+                              std::string& nick,
+                              bool plus) {
+
+  try {
+    User& new_op_user = command->get_server().get_user_by_nickname(nick);
+    std::string msg = (plus ? "+o " : "-o ") + nick;
+
+    if (!ch->user_on_channel(new_op_user)) {
+      command->reply(ERR_USERNOTINCHANNEL, nick, ch->get_name());
+    } else if (plus && !ch->is_oper(new_op_user)) {
+      ch->add_oper(new_op_user);
+      __send_info(user, ch, command->get_command_name(), msg);
+    } else if (!plus && ch->is_oper(new_op_user)) {
+      ch->remove_oper(new_op_user);
+      __send_info(user, ch, command->get_command_name(), msg);
+    }
+  } catch (UserNotFound &e) {
+    command->reply(ERR_NOSUCHNICK, nick);
+  }
+}
+
+void __change_ban_in_channel(Command* command,
+                             User& user,
+                             irc::IrcServer::t_channel_list::iterator ch,
+                             std::string& nick,
+                             bool plus) {
+
+  try {
+    User& banned_user = command->get_server().get_user_by_nickname(nick);
+    std::string msg = (plus ? "+b " : "-b ") + nick + "!*@*";
+
+    if (nick.empty()) {
+      std::vector<std::string> ban_list = ch->get_ban_list();
+      for (size_t i = 0; i < ban_list.size(); ++i)
+        command->reply(RPL_BANLIST, ch->get_name(), ban_list[i]);
+      command->reply(RPL_ENDOFBANLIST);
+    } else if (plus && !ch->is_banned(banned_user)) {
+      ch->add_to_ban_list(banned_user, user);
+      __send_info(user, ch, command->get_command_name(), msg);
+    } else if (!plus && ch->is_banned(banned_user)) {
+      ch->remove_from_ban_list(banned_user);
+      __send_info(user, ch, command->get_command_name(), msg);
+    }
+  } catch (UserNotFound &e) {
+    command->reply(ERR_NOSUCHNICK, nick);
+  }
+}
+
+void __change_key_in_channel(Command* command,
+                             User& user,
+                             irc::IrcServer::t_channel_list::iterator ch,
+                             std::string& new_key,
+                             bool plus) {
+
+    std::string msg = (plus ? ("+k " + new_key) : ("-k " + ch->get_key()));
+
+    if (plus && !ch->has_key()) {
+      ch->set_key(new_key);
+      __send_info(user, ch, command->get_command_name(), msg);
+    } else if (plus && ch->get_key() == new_key) {
+      command->reply(ERR_KEYSET, ch->get_name());
+    } else if (!plus) {
+      ch->set_key("");
+      __send_info(user, ch, command->get_command_name(), msg);
+    }
+}
+
+void __change_limit_in_channel(Command* command,
+                             User& user,
+                             irc::IrcServer::t_channel_list::iterator ch,
+                             std::string& limit,
+                             bool plus) {
+
+    int new_limit = atoi(limit.c_str());
+    if (new_limit < 0)
+      new_limit = 1;
+    else if (new_limit > 1000000)
+      new_limit = 1000000;
+    else if (!plus)
+      new_limit = DEFAULT_USERS;
+
+    std::string msg = (plus ? ("+k " + std::to_string(new_limit)) : "-k ");
+
+    ch->set_limit_users(new_limit);
+    if (new_limit)
+      __send_info(user, ch, command->get_command_name(), msg);
 }
 
 
@@ -175,6 +276,11 @@ void channel_mode(Command* command) {
   std::vector<t_channel_mode> plus_modes = std::vector<t_channel_mode>();
   std::vector<t_channel_mode> minus_modes = std::vector<t_channel_mode>();
   bool plus = true;
+
+  std::vector<std::string> mode_args = std::vector<std::string>();
+  if (command->num_args() == 3)
+    mode_args = split(command->get_arguments()[2], ' ');
+  std::vector<std::string>::iterator m_arg = mode_args.begin();
 
   for (size_t i = 0; i < modes.length(); ++i) {
     if (modes[i] == '-') {
@@ -203,9 +309,18 @@ void channel_mode(Command* command) {
           ch->remove_channel_mode(cur_mode);
           __switch_mode<t_channel_mode>(cur_mode, minus_modes, plus_modes);
         }
+      } else if (cur_mode == CH_BAN_USER) {
+        std::string arg = (m_arg != mode_args.end() ? *m_arg : "");
+        __change_ban_in_channel(command, user, ch, arg, plus);
+      } else if (m_arg != mode_args.end()) {
+        if (cur_mode == CH_CHANGE_PRIVILEGE)
+          __change_oper_in_channel(command, user, ch, *m_arg, plus);
+        else if (cur_mode == CH_CHANGE_KEY)
+          __change_key_in_channel(command, user, ch, *m_arg, plus);
+        else if (cur_mode == CH_CHANGE_LIMIT_USERS)
+          __change_limit_in_channel(command, user, ch, *m_arg, plus);
       }
-
-      //TODO Write non switched modes
+      ++m_arg;
     }
 
     std::string apply_modes = __cast_modes_to_str<t_channel_mode>(plus_modes, minus_modes);

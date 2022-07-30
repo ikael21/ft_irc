@@ -45,7 +45,7 @@ void JOIN(Command *command) {
     if (it != channels.end()) {
       Channel& channel = *it;
 
-      bool user_has_incorrect_key = channel.has_key() && (i <= keys.size() || !channel.is_correct_key(keys[i]));
+      bool user_has_incorrect_key = channel.has_key() && (i <= keys.size() || channel.get_key() == keys[i]);
 
       if (user_not_invite(channel, user)) {
         command->reply(ERR_INVITEONLYCHAN, channel.get_name());
