@@ -8,19 +8,17 @@ void irc::IrcServer::_add_socket_event() {
 }
 
 
-void irc::IrcServer::_add_read_event(int fd) {
-  User& user = _find_or_create_user(fd);
+void irc::IrcServer::_add_read_event(User& user) {
   t_event event;
-  EV_SET(&event, fd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, (void*)&user);
+  EV_SET(&event, user.get_fd(), EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, (void*)&user);
   _changes.push_back(event);
   _enabled_events_num++;
 }
 
 
-void irc::IrcServer::_add_write_event(int fd) {
-  User& user = _find_or_create_user(fd);
+void irc::IrcServer::_add_write_event(User& user) {
   t_event event;
-  EV_SET(&event, fd, EVFILT_WRITE, EV_ADD | EV_CLEAR, 0, 0, (void*)&user);
+  EV_SET(&event, user.get_fd(), EVFILT_WRITE, EV_ADD | EV_CLEAR, 0, 0, (void*)&user);
   _changes.push_back(event);
   _enabled_events_num++;
 }
@@ -35,10 +33,9 @@ void irc::IrcServer::_disable_event(int fd, int type) {
 }
 
 // type (second arg) is either EVFILT_WRITE or EVFILT_READ
-void irc::IrcServer::_enable_event(int fd, int type) {
-  User& user = _find_or_create_user(fd);
+void irc::IrcServer::_enable_event(User& user, int type) {
   t_event event;
-  EV_SET(&event, fd, type, EV_ENABLE, 0, 0, (void*)&user);
+  EV_SET(&event, user.get_fd(), type, EV_ENABLE, 0, 0, (void*)&user);
   _changes.push_back(event);
   _enabled_events_num++;
 }
@@ -54,24 +51,42 @@ void irc::IrcServer::_delete_client(t_event& event) {
   if (_enabled_events_num > 0)
     _enabled_events_num--;
 
-#ifdef DEBUG
-  std::cout << BLUE "User(FD: " << fd
-    << ") just left..." RESET << std::endl;
-#endif
+  #ifdef DEBUG
+    std::cout << BLUE "User(FD: " << fd
+      << ") just left..." RESET << std::endl;
+  #endif
+}
+
+
+void irc::IrcServer::_delete_client(User& user) {
+  int fd = user.get_fd();
+  t_userlist::iterator it = _users.begin();
+  while (it != _users.end() && it->get_fd() != fd)
+    ++it;
+  _users.erase(it);
+  close(fd);
+  if (_enabled_events_num > 0)
+    _enabled_events_num--;
+
+  #ifdef DEBUG
+    std::cout << BLUE "User(FD: " << fd
+      << ") just left..." RESET << std::endl;
+  #endif
 }
 
 
 int irc::IrcServer::_wait_for_events() {
-  struct timespec timeout = { .tv_sec = 60, .tv_nsec = 0 }; // wait one minute
+  struct timespec timeout = { .tv_sec = 30, .tv_nsec = 0 }; // wait 30 seconds
   int changes_num = static_cast<int>(_changes.size());
   int events_num = static_cast<int>(_enabled_events_num);
-
-#ifdef DEBUG
-  std::cout << "waiting for new events(enabled: " RED
-    << events_num << RESET ")..." << std::endl;
-#endif
-
   t_event* changes_arr = list_to_array<t_event>(_changes);
+
+  #ifdef DEBUG
+    std::cout << "waiting for new events(enabled: " RED
+      << events_num << RESET ")..." << std::endl;
+    _print_event_changes(changes_arr, _changes.size());
+  #endif
+
   int new_events_num = kevent(_kq,
                               changes_arr, changes_num,
                               _events.data(), events_num,

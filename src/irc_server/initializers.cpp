@@ -1,7 +1,7 @@
 #include "IrcServer.hpp"
 
 
-const char* irc::IrcServer::DEFAULT_IP = "127.0.0.1";
+const char* irc::IrcServer::DEFAULT_IP = "0.0.0.0";
 const irc::int8_t irc::IrcServer::MAX_QUEUE = 128;
 const int irc::IrcServer::INVALID_FD = -1;
 
