@@ -37,17 +37,18 @@ void NOTICE(Command *command) {
 
   if (is_channel(recipients[0])) {
     irc::IrcServer::t_channel_list& channels = server.get_channels();
-    irc::IrcServer::t_channel_list::iterator it = std::find(channels.begin(), channels.end(), recipients[0]);
+    irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), recipients[0]);
 
-    if (it != channels.end()) {
-      // TODO need more checks, with privileges on channel
-      if (it->user_on_channel(user)) {
+    if (ch != channels.end()) {
+      bool user_may_send_to_channel = !ch->is_banned(user) \
+        || (ch->have_mode(CH_FORBID_OUT_MSG) && ch->user_on_channel(user)) || !ch->have_mode(CH_FORBID_OUT_MSG);
+
+      if (user_may_send_to_channel) {
         std::string fullmessage = user.get_prefix_msg() + \
-            command->get_command_name() + " " + it->get_name() + " :" + message;
+            command->get_command_name() + " " + ch->get_name() + " :" + message;
 
-        it->send_to_channel(user, fullmessage);
+        ch->send_to_channel(user, fullmessage);
       }
-
     }
   } else {
 

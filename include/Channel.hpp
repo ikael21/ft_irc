@@ -47,7 +47,6 @@ typedef enum    s_channel_mode {
 
 # define FORBIDDEN_CHANNEL_NAME_SYMBOLS "\t\n "
 # define DEFAULT_USERS                  42
-# define DEFAULT_CHANNEL_MODES          CH_TOPIC_MODIFIERS
 
 
 class Channel

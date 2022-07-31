@@ -199,12 +199,7 @@ void __change_ban_in_channel(Command* command,
     User& banned_user = command->get_server().get_user_by_nickname(nick);
     std::string msg = (plus ? "+b " : "-b ") + nick + "!*@*";
 
-    if (nick.empty()) {
-      std::vector<std::string> ban_list = ch->get_ban_list();
-      for (size_t i = 0; i < ban_list.size(); ++i)
-        command->reply(RPL_BANLIST, ch->get_name(), ban_list[i]);
-      command->reply(RPL_ENDOFBANLIST);
-    } else if (plus && !ch->is_banned(banned_user)) {
+    if (plus && !ch->is_banned(banned_user)) {
       ch->add_to_ban_list(banned_user, user);
       __send_info(user, ch, command->get_command_name(), msg);
     } else if (!plus && ch->is_banned(banned_user)) {
@@ -212,7 +207,14 @@ void __change_ban_in_channel(Command* command,
       __send_info(user, ch, command->get_command_name(), msg);
     }
   } catch (UserNotFound &e) {
-    command->reply(ERR_NOSUCHNICK, nick);
+    if (nick.empty()) {
+      std::vector<std::string> ban_list = ch->get_ban_list();
+      for (size_t i = 0; i < ban_list.size(); ++i)
+        command->reply(RPL_BANLIST, ch->get_name(), ban_list[i]);
+      command->reply(RPL_ENDOFBANLIST, ch->get_name());
+    } else {
+      command->reply(ERR_NOSUCHNICK, nick);
+    }
   }
 }
 
@@ -249,7 +251,7 @@ void __change_limit_in_channel(Command* command,
     else if (!plus)
       new_limit = DEFAULT_USERS;
 
-    std::string msg = (plus ? ("+k " + std::to_string(new_limit)) : "-k ");
+    std::string msg = (plus ? ("+l " + std::to_string(new_limit)) : "-l ");
 
     ch->set_limit_users(new_limit);
     if (new_limit)
@@ -269,8 +271,9 @@ void channel_mode(Command* command) {
     return command->reply(ERR_NOSUCHCHANNEL, channel_name);
   } else if (command->num_args() == 1) {
     return command->reply(RPL_CHANNELMODEIS, ch->get_name(), ch->get_modes_as_str());
-  } else if (!ch->is_oper(user))
+  } else if (!ch->is_oper(user)) {
     return command->reply(ERR_CHANOPRIVSNEEDED, ch->get_name());
+  }
 
   std::string modes = command->get_arguments()[1];
   std::vector<t_channel_mode> plus_modes = std::vector<t_channel_mode>();
@@ -297,11 +300,6 @@ void channel_mode(Command* command) {
       }
 
       if (is_switch_mode(cur_mode)) {
-        if (plus)
-          ch->add_channel_mode(cur_mode);
-        else
-          ch->remove_channel_mode(cur_mode);
-
         if (plus && !ch->have_mode(cur_mode)) {
           ch->add_channel_mode(cur_mode);
           __switch_mode<t_channel_mode>(cur_mode, plus_modes, minus_modes);
@@ -312,6 +310,7 @@ void channel_mode(Command* command) {
       } else if (cur_mode == CH_BAN_USER) {
         std::string arg = (m_arg != mode_args.end() ? *m_arg : "");
         __change_ban_in_channel(command, user, ch, arg, plus);
+        ++m_arg;
       } else if (m_arg != mode_args.end()) {
         if (cur_mode == CH_CHANGE_PRIVILEGE)
           __change_oper_in_channel(command, user, ch, *m_arg, plus);
@@ -319,20 +318,18 @@ void channel_mode(Command* command) {
           __change_key_in_channel(command, user, ch, *m_arg, plus);
         else if (cur_mode == CH_CHANGE_LIMIT_USERS)
           __change_limit_in_channel(command, user, ch, *m_arg, plus);
+        ++m_arg;
       }
-      ++m_arg;
     }
+  }
 
-    std::string apply_modes = __cast_modes_to_str<t_channel_mode>(plus_modes, minus_modes);
+  std::string apply_modes = __cast_modes_to_str<t_channel_mode>(plus_modes, minus_modes);
 
-    if (apply_modes.length())
-      command->reply(RPL_UMODEIS, apply_modes);
-
+  if (apply_modes.length()) {
+    command->reply(RPL_UMODEIS, apply_modes);
     std::string msg = user.get_prefix_msg() + command->get_command_name() + " " \
       + ch->get_name() + " " + apply_modes;
-
     ch->send_to_channel(user, msg);
-    user.send_msg_to_user(user, msg);
   }
 }
 

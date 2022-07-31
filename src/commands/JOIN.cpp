@@ -17,7 +17,7 @@ void send_channel_info(Command* command, Channel& channel)
 
 
 bool user_not_invite(Channel& channel, User& user) {
-  return channel.is_private() && !channel.is_invited(user);
+  return channel.have_mode(CH_INVITE_ONLY) && !channel.is_invited(user);
 }
 
 void JOIN(Command *command) {
@@ -26,7 +26,7 @@ void JOIN(Command *command) {
   irc::IrcServer& server = command->get_server();
   irc::IrcServer::t_channel_list& channels = server.get_channels();
 
-  std::vector<std::string> args = split(command->get_arguments()[0], ' ', 1);
+  std::vector<std::string> args = command->get_arguments();
   std::vector<std::string> channels_names = split(args[0], ',');
   std::vector<std::string> keys = std::vector<std::string>();
 
@@ -45,7 +45,7 @@ void JOIN(Command *command) {
     if (it != channels.end()) {
       Channel& channel = *it;
 
-      bool user_has_incorrect_key = channel.has_key() && (i <= keys.size() || channel.get_key() == keys[i]);
+      bool user_has_incorrect_key = channel.has_key() && (i >= keys.size() || channel.get_key() != keys[i]);
 
       if (user_not_invite(channel, user)) {
         command->reply(ERR_INVITEONLYCHAN, channel.get_name());

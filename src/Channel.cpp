@@ -4,12 +4,15 @@
 
 #define DEBUG_LOG(x) do { if (DEBUG) { std::cerr << x << std::endl; } } while (0)
 
-t_channel_mode CHANNEL_MODES[] = { CH_PRIVATE, CH_SECRET, CH_INVITE_ONLY, CH_TOPIC_MODIFIERS };
-t_user_mode    USER_MODES[] = { U_INVISIBLE, U_OPERATOR };
+t_channel_mode DEFAULT_CHANNEL_MODES[] = { CH_TOPIC_MODIFIERS, CH_FORBID_OUT_MSG };
 
 
 Channel::Channel() :
-    _limit_users(DEFAULT_USERS), _modes(std::vector<t_channel_mode>(DEFAULT_CHANNEL_MODES)) {}
+    _limit_users(DEFAULT_USERS) {
+
+  _modes = std::vector<t_channel_mode>(DEFAULT_CHANNEL_MODES, DEFAULT_CHANNEL_MODES \
+    + sizeof(DEFAULT_CHANNEL_MODES) / sizeof(DEFAULT_CHANNEL_MODES[0]));
+}
 
 
 Channel::~Channel() {}
