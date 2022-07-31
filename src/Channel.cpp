@@ -1,14 +1,18 @@
 
+#include <chrono>
 #include "Channel.hpp"
 
 #define DEBUG_LOG(x) do { if (DEBUG) { std::cerr << x << std::endl; } } while (0)
 
-t_channel_mode CHANNEL_MODES[] = { CH_PRIVATE, CH_SECRET, CH_INVITE_ONLY, CH_TOPIC_MODIFIERS };
-t_user_mode    USER_MODES[] = { U_INVISIBLE, U_OPERATOR };
+t_channel_mode DEFAULT_CHANNEL_MODES[] = { CH_TOPIC_MODIFIERS, CH_FORBID_OUT_MSG };
 
 
 Channel::Channel() :
-    _limit_users(DEFAULT_USERS), _modes(std::vector<t_channel_mode>(DEFAULT_CHANNEL_MODES)) {}
+    _limit_users(DEFAULT_USERS) {
+
+  _modes = std::vector<t_channel_mode>(DEFAULT_CHANNEL_MODES, DEFAULT_CHANNEL_MODES \
+    + sizeof(DEFAULT_CHANNEL_MODES) / sizeof(DEFAULT_CHANNEL_MODES[0]));
+}
 
 
 Channel::~Channel() {}
@@ -91,6 +95,9 @@ void Channel::set_name(std::string name) {
 void Channel::set_key(std::string key) { _key = key; }
 
 
+void Channel::set_limit_users(int new_limit) { _limit_users = new_limit; }
+
+
 void Channel::set_topic(std::string topic) { _topic = topic; }
 
 
@@ -109,18 +116,50 @@ void Channel::add_to_invite_list(User& user) {
 }
 
 
-bool Channel::is_banned(User& user) {
-    return std::find(_banned.begin(), _banned.end(), &user) != _banned.end();
+void Channel::remove_from_invite_list(User& user) {
+  if (is_invited(user))
+    _invited.erase(std::find(_invited.begin(), _invited.end(), &user));
 }
 
 
-void Channel::add_to_ban_list(User& user) {
+bool Channel::is_banned(User& user) {
+  for (std::vector<BannedUser>::iterator it = _banned.begin(); it != _banned.end(); ++it) {
+    if (it->user == &user)
+      return true;
+  }
+  return false;
+}
+
+
+void Channel::add_to_ban_list(User& user, User& who) {
   if (!is_banned(user)) {
-    _banned.push_back(&user);
+    _banned.push_back(BannedUser(&user, &who));
     _log("User " + user.get_nick() + " added to ban list");
   } else {
     _log("User " + user.get_nick() + " already banned");
   }
+}
+
+
+void Channel::remove_from_ban_list(User& user) {
+  for (std::vector<BannedUser>::iterator it = _banned.begin(); it != _banned.end(); ++it) {
+    if (it->user == &user) {
+      _banned.erase(it);
+      break;
+    }
+  }
+}
+
+std::vector<std::string> Channel::get_ban_list() {
+
+  std::vector<std::string> ban_list = std::vector<std::string>();
+
+  for (size_t i = 0; i < _banned.size(); ++i) {
+    std::string ban_id = _banned[i].user->get_nick() + "!*@* " \
+      + _banned[i].who->get_nick() + " " + std::to_string(_banned[i].when);
+    ban_list.push_back(ban_id);
+  }
+  return ban_list;
 }
 
 

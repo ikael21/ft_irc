@@ -43,7 +43,7 @@ Command::Command(irc::IrcServer &server, User& user, std::string command)
     _arguments.erase(_arguments.begin());
 
     if (_command.min_args && !_arguments.empty()) {
-      _arguments = split(_arguments[1], ' ', _command.min_args);
+      _arguments = split(_arguments[1], ' ', _command.min_args + 1);
     }
   }
 }

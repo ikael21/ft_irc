@@ -41,21 +41,22 @@ void PRIVMSG(Command *command) {
 
     if (is_channel(*recipient)) {
       irc::IrcServer::t_channel_list& channels = server.get_channels();
-      irc::IrcServer::t_channel_list::iterator it = std::find(channels.begin(), channels.end(), *recipient);
+      irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), *recipient);
 
-      if (it == channels.end()) {
+      if (ch == channels.end()) {
         command->reply(ERR_NOSUCHNICK, *recipient);
       } else {
 
-        // TODO need more checks, with privileges on channel
-        if (it->user_on_channel(user)) {
-          std::string fullmessage = user.get_prefix_msg() + \
-            command->get_command_name() + " " + it->get_name() + " :" + message;
-
-          it->send_to_channel(user, fullmessage);
-        }
-        else
+        if (ch->is_banned(user)) {
           command->reply(ERR_CANNOTSENDTOCHAN, *recipient);
+        } else if ((ch->have_mode(CH_FORBID_OUT_MSG) && ch->user_on_channel(user)) || !ch->have_mode(CH_FORBID_OUT_MSG)) {
+          std::string fullmessage = user.get_prefix_msg() + \
+            command->get_command_name() + " " + ch->get_name() + " :" + message;
+
+          ch->send_to_channel(user, fullmessage);
+        } else {
+          command->reply(ERR_CANNOTSENDTOCHAN, *recipient);
+        }
       }
     } else {
 
