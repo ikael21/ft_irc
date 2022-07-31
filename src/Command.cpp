@@ -14,6 +14,7 @@ Command::t_command_struct command_arr[] = {
   { "AWAY",    &AWAY,    0L },
   { "NOTICE",  &NOTICE,  0L },
   { "JOIN",    &JOIN,    1L },
+  { "PONG",    &PONG,    1L },
   { "QUIT",    &QUIT,    0L },
   { "KICK",    &KICK,    2L },
   { "PART",    &PART,    1L },
@@ -85,4 +86,5 @@ void Command::reply(t_irc_error err_code, std::string a1, std::string a2, std::s
   // all messages send from User class, but I think that it must be sent something like that
   // _server.sendMsgToUser(_user, msg.str());
   _user.send_msg_to_user(_user, msg.str());
+  _user.get_buffer().clear();
 }

@@ -23,6 +23,5 @@ void QUIT(Command* command) {
         channels.erase(ch);
     }
   }
-
-  //TODO close User's connection and delete User from Server
+  command->get_server().delete_client(user);
 }

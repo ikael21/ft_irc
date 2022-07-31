@@ -1,7 +1,10 @@
 #ifndef IRC_SERVER_H_
 # define IRC_SERVER_H_
 # include <iostream>
+# include <sstream>
 # include <string>
+# include <algorithm>
+# include <cctype>
 # include <sys/types.h>
 # include <sys/event.h>
 # include <sys/time.h>
@@ -19,8 +22,6 @@
 # include "Channel.hpp"
 # include "exceptions.hpp"
 # include "utils.hpp"
-# include <ctime>
-# include <time.h>
 
 
 namespace irc {
@@ -49,10 +50,11 @@ public:
 
   void run();
 
-  bool            isCorrectPassword(std::string pass);
+  bool            is_password_correct(std::string pass);
   void            add_channel(Channel& channel);
   t_channel_list& get_channels();
   User&           get_user_by_nickname(const std::string& nickname);
+  void            delete_client(User& user);
 
   /* Propose to create next methods
 
@@ -87,9 +89,9 @@ private:
 
   int  _wait_for_events();
   void _add_socket_event();
-  void _add_read_event(int fd);
-  void _add_write_event(int fd);
-  void _enable_event(int fd, int type);
+  void _add_read_event(User& user);
+  void _add_write_event(User& user);
+  void _enable_event(User& user, int type);
   void _disable_event(int fd, int type);
 
   void _execute_handler(t_event& event);
@@ -98,9 +100,23 @@ private:
   void _write_handler(t_event& event);
   void _delete_client(t_event& event);
 
-  void _ping_by_nickname(const User& user);
+  void _check_users_activity();
+
+  // helpers
 
   User& _find_or_create_user(int fd);
+  bool _delete_client_if_true(bool result, User& user);
+  void _ping_client(User& user);
+  void _ping_by_nickname(const User& user);
+
+  // methods for debug (if DEBUG defined)
+
+  void _print_new_user_info(const User& user);
+  void _print_user_state(const User& user);
+  void _print_message_for_user(const User& user, const std::string& message);
+  void _print_message_from_user(User& user);
+  void _print_event_changes(t_event* changes, size_t size);
+
 
   const std::string _password;
   int               _socket;

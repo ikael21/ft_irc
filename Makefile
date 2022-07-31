@@ -2,16 +2,18 @@ NAME = ircserv
 MAIN = main.cpp
 HEADERS_DIR = include
 
-SRCS = src/server/IrcServer_initialization_methods.cpp \
-       src/server/IrcServer_events_methods.cpp \
-       src/server/IrcServer.cpp \
+SRCS = src/irc_server/IrcServer.cpp \
+       src/irc_server/initializers.cpp \
+       src/irc_server/events.cpp \
+       src/irc_server/helpers.cpp \
+       src/irc_server/debug_info_printers.cpp \
        src/Channel.cpp src/User.cpp src/errors.cpp \
        src/Command.cpp src/commands/PASS.cpp \
        src/commands/NICK.cpp src/commands/USER.cpp \
        src/commands/PRIVMSG.cpp src/commands/AWAY.cpp \
        src/commands/NOTICE.cpp src/utils.cpp \
-	     src/commands/JOIN.cpp src/commands/QUIT.cpp \
-       src/commands/KICK.cpp src/commands/PART.cpp \
+	     src/commands/JOIN.cpp src/commands/PONG.cpp \
+       src/commands/QUIT.cpp src/commands/KICK.cpp src/commands/PART.cpp \
        src/commands/MODE.cpp
 
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o, $(SRCS))

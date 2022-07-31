@@ -6,12 +6,20 @@
 
 # include <string>
 # include <vector>
+# include <ctime>
 
 typedef enum    s_user_status {
   AUTHENTICATION,
   REGISTRATION,
   ONLINE
 }               t_user_status;
+
+
+typedef enum s_user_state {
+  ACTIVE,
+  SEND_PING,
+  WAIT_PONG
+}            t_user_state;
 
 
 /* Список доступных режимов пользователя:
@@ -35,6 +43,7 @@ class User {
   User();
   User(int fd);
   User(int fd, std::string username, std::string hostname, std::string servername, std::string realname);
+  User(const User& other);
   ~User();
 
   void set_fd(int fd) { _fd = fd; }
@@ -44,7 +53,7 @@ class User {
   std::string get_username() { return _username; }
 
   void set_hostname(std::string hostname) { _hostname = hostname; }
-  std::string get_hostname() { return _hostname; }
+  std::string get_hostname() const { return _hostname; }
 
   void set_servername(std::string servername) { _servername = servername; }
   std::string get_servername() { return _servername; }
@@ -81,7 +90,13 @@ class User {
 
   std::string get_modes_as_str();
 
-  const std::string& get_buffer() const { return _buffer; }
+  std::string& get_buffer() { return _buffer; }
+
+  int8_t get_state() const { return _state; }
+  void set_state(int8_t state);
+
+  time_t get_last_activity() { return _last_activity; }
+  void set_last_activity(time_t t) { _last_activity = t; }
 
  private:
   int                      _fd;
@@ -91,6 +106,8 @@ class User {
   std::string              _servername;
   std::string              _realname;
   std::string              _nick;
+  int8_t                   _state;
+  time_t                   _last_activity;
   std::string              _afkMessage;
   std::vector<t_user_mode> _modes;
   std::string              _buffer;
