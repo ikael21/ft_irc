@@ -158,7 +158,7 @@ t_channel_mode __get_channel_mode(char mode) {
 void __send_info(User& user,
                  irc::IrcServer::t_channel_list::iterator ch,
                  std::string comm_name,
-                 std::string& msg) {
+                 std::string msg) {
 
   std::string full_msg = user.get_prefix_msg() + comm_name + " " + ch->get_name() + " " + msg;
   ch->send_to_channel(user, full_msg);
@@ -251,11 +251,12 @@ void __change_limit_in_channel(Command* command,
     else if (!plus)
       new_limit = DEFAULT_USERS;
 
-    std::string msg = (plus ? ("+l " + std::to_string(new_limit)) : "-l ");
+    std::stringstream msg(plus ? "+l " : "-l");
+    if (plus) msg << limit;
 
     ch->set_limit_users(new_limit);
     if (new_limit)
-      __send_info(user, ch, command->get_command_name(), msg);
+      __send_info(user, ch, command->get_command_name(), msg.str());
 }
 
 
@@ -333,6 +334,7 @@ void channel_mode(Command* command) {
   }
 }
 
+// TODO NEED TESTS WITH CLIENT
 void MODE(Command* command) {
   if (is_channel(command->get_arguments()[0]))
     channel_mode(command);
