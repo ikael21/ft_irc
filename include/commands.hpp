@@ -19,6 +19,20 @@ void AWAY(Command *command);
 
 void NOTICE(Command *command);
 
+void LIST(Command *command);
+
+void NAMES(Command *command);
+
+void INVITE(Command *command);
+
+void TOPIC(Command *command);
+
+void KICK(Command *command);
+
+void TIME(Command *command);
+
+void USERS(Command *command);
+
 void JOIN(Command *command);
 
 void PONG(Command *command);
