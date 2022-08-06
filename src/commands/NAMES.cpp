@@ -1,8 +1,6 @@
 #include "commands.hpp"
 
-void NAMES(Command *command) {
-
-
+//TODO
 //     Параметры: [<channel>{,<channel>}]
 //   пользователь может получитт список всех
 //   никнеймов, которые он видит на любом канале, на которых они находятся.
@@ -15,24 +13,16 @@ void NAMES(Command *command) {
 //   тех, кто на них находится. И к концу списка - список пользователей,
 //   которые видимые, но не находятся ни на одной канале, или не на одном
 //   видимом канале, которые начинаюся как 'channel' "*".
+void NAMES(Command *command) {
+  std::vector<std::string> args = command->get_arguments();
+  std::string message;
 
-    std::vector<std::string> args = command->get_arguments();
-    std::string message;
+  if (args.empty())
+    return;
 
-    if (args.empty())
-        return;
+  message = args[0];
 
-    message = args[0];
-
-    // ?? channals = command->getChannals();
-
-    //if (channals.empty())
-     //   return reply(ERR_NOSUCHSERVER);
-
-    return command->reply(RPL_LISTSTART);
-    
-    return command->reply(RPL_LIST);
-
-    return command->reply(RPL_LISTEND);
-
+  // return command->reply(RPL_LISTSTART);
+  // return command->reply(RPL_LIST);
+  return command->reply(RPL_LISTEND);
 }
