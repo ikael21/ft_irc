@@ -14,7 +14,7 @@ void KICK(Command* command) {
     return command->reply(ERR_NOSUCHCHANNEL, args[0]);
   else if (!channel->user_on_channel(user))
     return command->reply(ERR_NOTONCHANNEL, args[0]);
-  else if (!channel->user_is_oper(user))
+  else if (!channel->is_oper(user))
     return command->reply(ERR_CHANOPRIVSNEEDED, channel->get_name());
 
   try {

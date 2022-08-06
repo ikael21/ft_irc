@@ -5,20 +5,47 @@
 #include "utils.hpp"
 #include "User.hpp"
 
-User::User(): _status(AUTHENTICATION) {};
+User::User()
+  : _status(AUTHENTICATION),
+    _state(ACTIVE),
+    _last_activity(time(NULL)) {}
 
 
-User::User(int fd) : _fd(fd), _status(AUTHENTICATION), _nick("*") {}
+User::User(int fd)
+  : _fd(fd),
+    _status(AUTHENTICATION),
+    _nick("*"),
+    _state(ACTIVE),
+    _last_activity(time(NULL)) {}
 
 
-User::User(int fd, std::string username, std::string hostname, std::string servername, std::string realname)
+User::User(int fd, std::string username,
+                   std::string hostname,
+                   std::string servername,
+                   std::string realname)
   : _fd(fd),
     _status(AUTHENTICATION),
     _username(username),
     _hostname(hostname),
     _servername(servername),
     _realname(realname),
-    _nick("*") {}
+    _nick("*"),
+    _state(ACTIVE),
+    _last_activity(time(NULL)) {}
+
+
+User::User(const User& other)
+  : _fd(other._fd),
+    _status(other._status),
+    _username(other._username),
+    _hostname(other._hostname),
+    _servername(other._servername),
+    _realname(other._realname),
+    _nick(other._nick),
+    _state(other._state),
+    _last_activity(other._last_activity),
+    _afkMessage(other._afkMessage),
+    _buffer(other._buffer) {}
 
 
 User::~User() {}
@@ -77,12 +104,10 @@ void User::send_msg(int fd, std::string message) {
 #endif
 
   /*
-    TODO check if all data sent
-
+  TODO check if all data sent
   size_t left_bytes =
     (!bytes_sent || bytes_sent == -1) ?
       0 : message.size() - static_cast<size_t>(bytes_sent);
-
   */
 }
 
@@ -92,4 +117,37 @@ void User::send_msg(int fd, std::string message) {
  */
 std::string User::get_prefix_msg() {
   return ":" + _nick + "!" + _username + "@" + _hostname + " ";
+}
+
+
+/**
+ * state must be one of [ACTIVE, SEND_PING, WAIT_PONG]
+**/
+void User::set_state(int8_t state) { _state = state; }
+bool User::has_mode(t_user_mode mode) {
+  return std::find(_modes.begin(), _modes.end(), mode) != _modes.end();
+}
+
+
+void User::add_mode(t_user_mode mode) {
+  if (!has_mode(mode))
+    _modes.push_back(mode);
+}
+
+
+void User::remove_mode(t_user_mode mode) {
+  if (has_mode(mode))
+    _modes.erase(std::find(_modes.begin(), _modes.end(), mode));
+}
+
+
+bool User::is_invisible() {
+  return has_mode(U_INVISIBLE);
+}
+
+std::string User::get_modes_as_str() {
+  std::string modes("+");
+  for (size_t i = 0; i < _modes.size(); ++i)
+    modes += static_cast<char>(_modes[i]);
+  return modes;
 }

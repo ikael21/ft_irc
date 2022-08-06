@@ -21,9 +21,11 @@ Command::t_command_struct command_arr[] = {
   { "USERS",   &USERS,   0L },
   { "NAMES",   &NAMES,   0L },
   { "JOIN",    &JOIN,    1L },
+  { "PONG",    &PONG,    1L },
   { "QUIT",    &QUIT,    0L },
   { "KICK",    &KICK,    2L },
-  { "PART",    &PART,    1L }
+  { "PART",    &PART,    1L },
+  { "MODE",    &MODE,    1L }
 };
 
 
@@ -48,7 +50,7 @@ Command::Command(irc::IrcServer &server, User& user, std::string command)
     _arguments.erase(_arguments.begin());
 
     if (_command.min_args && !_arguments.empty()) {
-      _arguments = split(_arguments[1], ' ', _command.min_args);
+      _arguments = split(_arguments[1], ' ', _command.min_args + 1);
     }
   }
 }
@@ -91,4 +93,5 @@ void Command::reply(t_irc_error err_code, std::string a1, std::string a2, std::s
   // all messages send from User class, but I think that it must be sent something like that
   // _server.sendMsgToUser(_user, msg.str());
   _user.send_msg_to_user(_user, msg.str());
+  _user.get_buffer().clear();
 }

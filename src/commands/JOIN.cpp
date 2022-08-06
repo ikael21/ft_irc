@@ -9,7 +9,7 @@ void send_channel_info(Command* command, Channel& channel)
   std::vector<User*> users = channel.get_visible_users();
   std::stringstream nicks;
   for (size_t i = 0; i < users.size(); ++i) {
-    nicks << (channel.user_is_oper(*users[i]) ? "@" : "+") << users[i]->get_nick() << " ";
+    nicks << (channel.is_oper(*users[i]) ? "@" : "+") << users[i]->get_nick() << " ";
   }
   command->reply(RPL_NAMREPLY, channel.get_name(), nicks.str());
   command->reply(RPL_ENDOFNAMES, channel.get_name());
@@ -17,7 +17,7 @@ void send_channel_info(Command* command, Channel& channel)
 
 
 bool user_not_invite(Channel& channel, User& user) {
-  return channel.is_private() && !channel.is_invited(user);
+  return channel.have_mode(CH_INVITE_ONLY) && !channel.is_invited(user);
 }
 
 void JOIN(Command *command) {
@@ -26,7 +26,7 @@ void JOIN(Command *command) {
   irc::IrcServer& server = command->get_server();
   irc::IrcServer::t_channel_list& channels = server.get_channels();
 
-  std::vector<std::string> args = split(command->get_arguments()[0], ' ', 1);
+  std::vector<std::string> args = command->get_arguments();
   std::vector<std::string> channels_names = split(args[0], ',');
   std::vector<std::string> keys = std::vector<std::string>();
 
@@ -45,7 +45,7 @@ void JOIN(Command *command) {
     if (it != channels.end()) {
       Channel& channel = *it;
 
-      bool user_has_incorrect_key = channel.has_key() && (i <= keys.size() || !channel.is_correct_key(keys[i]));
+      bool user_has_incorrect_key = channel.has_key() && (i >= keys.size() || channel.get_key() != keys[i]);
 
       if (user_not_invite(channel, user)) {
         command->reply(ERR_INVITEONLYCHAN, channel.get_name());
@@ -69,7 +69,7 @@ void JOIN(Command *command) {
         channel.set_key(keys[i]);
 
       channel.add_user(user);
-      channel.add_mode_to_user(user, U_OPERATOR);
+      channel.add_oper(user);
       server.add_channel(channel);
       send_channel_info(command, channel);
     }

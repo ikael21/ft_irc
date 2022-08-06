@@ -55,9 +55,11 @@ int main(int argc, char **argv) {
   assert(channel.get_name() == "#ch2");
   std::cout << "Users on channel " << channel.get_users().size() << std::endl;
 
-  channel.add_mode_to_user(user1, "io");
-  assert(channel.user_is_oper(user1) == true);
-  std::cout << "User1 is oper: " << channel.user_is_oper(user1) << std::endl;
+  channel.add_oper(user1);
+  assert(channel.is_oper(user1) == true);
+  std::cout << "User1 is oper: " << channel.is_oper(user1) << std::endl;
+
+  user1.add_mode(U_INVISIBLE);
   std::cout << "Users on channel " << channel.get_users().size() << std::endl;
 
 
@@ -68,7 +70,7 @@ int main(int argc, char **argv) {
   channel.add_user(user4);
 
   assert(channel.get_visible_users().size() == 2L);
-  channel.remove_user_mode(user1, "i");
+  user1.remove_mode(U_INVISIBLE);
   assert(channel.get_users().size() == 3L);
 
   channel.remove_user(user1);

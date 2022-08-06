@@ -137,8 +137,8 @@ std::string __RPL_LIST(std::string channel, std::string visible, std::string top
 std::string __RPL_LISTEND() { return ":End of /LIST"; }
 
 // 324
-std::string __RPL_CHANNELMODEIS(std::string channel, std::string mode, std::string mode_params) {
-  return channel + " " + mode + " " + mode_params;
+std::string __RPL_CHANNELMODEIS(std::string channel, std::string mode_plus_params) {
+  return channel + " " + mode_plus_params;
 }
 
 // 331
@@ -264,7 +264,7 @@ static t_err __error_arr[] = {
   { RPL_LISTSTART,         (void*)&__RPL_LISTSTART,        0L },
   { RPL_LIST,              (void*)&__RPL_LIST,             3L },
   { RPL_LISTEND,           (void*)&__RPL_LISTEND,          0L },
-  { RPL_CHANNELMODEIS,     (void*)&__RPL_CHANNELMODEIS,    3L },
+  { RPL_CHANNELMODEIS,     (void*)&__RPL_CHANNELMODEIS,    2L },
   { RPL_NOTOPIC,           (void*)&__RPL_NOTOPIC,          1L },
   { RPL_TOPIC,             (void*)&__RPL_TOPIC,            2L },
   { RPL_INVITING,          (void*)&__RPL_INVITING,         2L },

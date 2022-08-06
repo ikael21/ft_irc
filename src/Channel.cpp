@@ -1,14 +1,18 @@
 
+#include <chrono>
 #include "Channel.hpp"
 
 #define DEBUG_LOG(x) do { if (DEBUG) { std::cerr << x << std::endl; } } while (0)
 
-t_channel_mode CHANNEL_MODES[] = { CH_PRIVATE, CH_SECRET, CH_INVITE_ONLY, CH_TOPIC_MODIFIERS };
-t_user_mode    USER_MODES[] = { U_INVISIBLE, U_OPERATOR };
+t_channel_mode DEFAULT_CHANNEL_MODES[] = { CH_TOPIC_MODIFIERS, CH_FORBID_OUT_MSG };
 
 
 Channel::Channel() :
-    _limit_users(DEFAULT_USERS), _modes(std::vector<t_channel_mode>(DEFAULT_CHANNEL_MODES)) {}
+    _limit_users(DEFAULT_USERS) {
+
+  _modes = std::vector<t_channel_mode>(DEFAULT_CHANNEL_MODES, DEFAULT_CHANNEL_MODES \
+    + sizeof(DEFAULT_CHANNEL_MODES) / sizeof(DEFAULT_CHANNEL_MODES[0]));
+}
 
 
 Channel::~Channel() {}
@@ -52,7 +56,10 @@ void Channel::remove_user(User &user) {
   }
 
   _users.erase(std::find(_users.begin(), _users.end(), &user));
-  _user_mode.erase(&user);
+
+  if (is_oper(user))
+    _operators.erase(std::find(_users.begin(), _users.end(), &user));
+
   _log("User " +  user.get_nick() + " remove from channel");
 }
 
@@ -62,7 +69,7 @@ std::vector<User *> Channel::get_visible_users() {
 
   for (size_t i = 0; i < _users.size(); ++i) {
 
-    if (_user_have_mode(*_users[i], U_INVISIBLE))
+    if (_users[i]->is_invisible())
       continue;
 
     users.push_back(_users[i]);
@@ -88,6 +95,9 @@ void Channel::set_name(std::string name) {
 void Channel::set_key(std::string key) { _key = key; }
 
 
+void Channel::set_limit_users(int new_limit) { _limit_users = new_limit; }
+
+
 void Channel::set_topic(std::string topic) { _topic = topic; }
 
 
@@ -106,14 +116,24 @@ void Channel::add_to_invite_list(User& user) {
 }
 
 
-bool Channel::is_banned(User& user) {
-    return std::find(_banned.begin(), _banned.end(), &user) != _banned.end();
+void Channel::remove_from_invite_list(User& user) {
+  if (is_invited(user))
+    _invited.erase(std::find(_invited.begin(), _invited.end(), &user));
 }
 
 
-void Channel::add_to_ban_list(User& user) {
+bool Channel::is_banned(User& user) {
+  for (std::vector<BannedUser>::iterator it = _banned.begin(); it != _banned.end(); ++it) {
+    if (it->user == &user)
+      return true;
+  }
+  return false;
+}
+
+
+void Channel::add_to_ban_list(User& user, User& who) {
   if (!is_banned(user)) {
-    _banned.push_back(&user);
+    _banned.push_back(BannedUser(&user, &who));
     _log("User " + user.get_nick() + " added to ban list");
   } else {
     _log("User " + user.get_nick() + " already banned");
@@ -121,31 +141,37 @@ void Channel::add_to_ban_list(User& user) {
 }
 
 
-void Channel::add_channel_mode(const std::string& mode) { _change_channel_mode(mode, false); }
-void Channel::remove_channel_mode(const std::string& mode) { _change_channel_mode(mode, true); }
-
-void Channel::_change_channel_mode(const std::string& mode, bool remove) {
-
-  std::vector<t_channel_mode> all_mode(CHANNEL_MODES, CHANNEL_MODES + sizeof(CHANNEL_MODES) / sizeof(CHANNEL_MODES[0]));
-
-  for (size_t i = 0; i < mode.size(); ++i) {
-
-    t_channel_mode cur_mode = static_cast<t_channel_mode>(mode[i]);
-
-    if (std::find(all_mode.begin(), all_mode.end(), cur_mode) == all_mode.end()) {
-      return _log("Invalid mode '" + mode + "' for channel");
+void Channel::remove_from_ban_list(User& user) {
+  for (std::vector<BannedUser>::iterator it = _banned.begin(); it != _banned.end(); ++it) {
+    if (it->user == &user) {
+      _banned.erase(it);
+      break;
     }
-
-    bool alreadyHave = have_mode(cur_mode);
-
-    if (remove && alreadyHave) {
-      _modes.erase(std::find(_modes.begin(), _modes.end(), cur_mode));
-    }
-    else if (!remove && !alreadyHave) {
-      _modes.push_back(cur_mode);
-    }
-
   }
+}
+
+std::vector<std::string> Channel::get_ban_list() {
+
+  std::vector<std::string> ban_list = std::vector<std::string>();
+
+  for (size_t i = 0; i < _banned.size(); ++i) {
+    std::string ban_id = _banned[i].user->get_nick() + "!*@* " \
+      + _banned[i].who->get_nick() + " " + std::to_string(_banned[i].when);
+    ban_list.push_back(ban_id);
+  }
+  return ban_list;
+}
+
+
+void Channel::add_channel_mode(t_channel_mode mode) {
+  if (!have_mode(mode))
+    _modes.push_back(mode);
+}
+
+
+void Channel::remove_channel_mode(t_channel_mode mode) {
+  if (have_mode(mode))
+    _modes.erase(std::find(_modes.begin(), _modes.end(), mode));
 }
 
 
@@ -159,65 +185,19 @@ bool Channel::have_mode(t_channel_mode mode) {
 }
 
 
-bool Channel ::_user_have_mode(User& user, t_user_mode mode) {
-  return std::find(_user_mode[&user].begin(), _user_mode[&user].end(), mode) != _user_mode[&user].end();
+void Channel::add_oper(User& user) {
+  if (!is_oper(user))
+    _operators.push_back(&user);
 }
 
 
-void Channel::add_mode_to_user(User& user, const std::string& mode) {
-
-  std::vector<t_user_mode> modes(USER_MODES, USER_MODES + sizeof(USER_MODES) / sizeof(USER_MODES[0]));
-
-  if (!user_on_channel(user)) {
-    return _log("User " + user.get_nick() + " is not on channel");
-  }
-
-  for (size_t i = 0; i < mode.size(); ++i) {
-
-    t_user_mode cur_mode = static_cast<t_user_mode>(mode[i]);
-
-    if (std::find(modes.begin(), modes.end(), cur_mode) == modes.end()) {
-      _log("Invalid mode '" + mode + "' for user");
-      continue;
-    }
-    add_mode_to_user(user, cur_mode);
-  }
+void Channel::remove_oper(User& user) {
+  _operators.erase(std::find(_operators.begin(), _operators.end(), &user));
 }
 
 
-void Channel::add_mode_to_user(User& user, t_user_mode mode) {
-  if (!_user_have_mode(user, mode)) {
-    _user_mode[&user].push_back(mode);
-  }
-}
-
-void Channel::remove_user_mode(User& user, const std::string& mode) {
-
-  if (!user_on_channel(user)) {
-    return _log("User " + user.get_nick() + " is not on channel");
-  }
-
-  std::vector<t_user_mode> modes = _user_mode[&user];
-
-  for (size_t i = 0; i < mode.size(); ++i) {
-    remove_user_mode(user, static_cast<t_user_mode>(mode[i]));
-  }
-}
-
-
-void Channel::remove_user_mode(User& user, t_user_mode mode) {
-  _user_mode[&user].erase(std::find(_user_mode[&user].begin(), _user_mode[&user].end(), mode));
-}
-
-
-bool Channel::user_is_oper(User& user) {
-
-  if (!user_on_channel(user)) {
-    _log("User " + user.get_nick() + " is not on channel");
-    return false;
-  }
-
-  return _user_have_mode(user, U_OPERATOR);
+bool Channel::is_oper(User& user) {
+  return std::find(_operators.begin(), _operators.end(), &user) != _operators.end();
 }
 
 
@@ -229,10 +209,33 @@ void Channel::send_to_channel(User& user, std::string& msg) {
   }
 }
 
+
 bool operator==(const Channel& left, const Channel& right) {
   return left._name == right._name;
 }
 
+
 bool operator==(const Channel& left, const std::string& channel_name) {
   return left._name == channel_name;
+}
+
+
+std::string Channel::get_modes_as_str() {
+
+  std::stringstream modes;
+  std::stringstream values;
+
+  modes << "+";
+  for (size_t i = 0; i < _modes.size(); ++i) {
+
+    modes << static_cast<char>(_modes[i]);
+
+    if (_modes[i] == CH_CHANGE_KEY)
+      values << " " << _key;
+    else if (_modes[i] == CH_CHANGE_LIMIT_USERS)
+      values << " " << _limit_users;
+  }
+
+  return modes.str() + values.str();
+
 }
