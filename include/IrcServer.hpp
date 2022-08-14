@@ -42,9 +42,6 @@ public:
   typedef std::list<Channel>  t_channel_list;
 
 
-  static const char* DEFAULT_IP;
-
-
   IrcServer(const char* port, const char* password);
   ~IrcServer();
 
@@ -56,6 +53,8 @@ public:
   User&                get_user_by_nickname(const std::string& nickname);
   t_userlist::iterator get_user_by_fd(const int fd);
   void                 delete_client(t_userlist::iterator user);
+  t_userlist&          get_users();
+  const std::string    get_server_name() const;
 
   /* Propose to create next methods
 
@@ -119,6 +118,7 @@ private:
 
 
   const std::string _password;
+  const std::string _name;
   int               _socket;
   int               _kq;
   t_eventlist       _events;
@@ -127,8 +127,9 @@ private:
   t_userlist        _users;
   t_channel_list    _channels;
 
-  static const int8_t MAX_QUEUE;
+  static const char*  DEFAULT_IP;
   static const int    INVALID_FD;
+  static const int8_t MAX_QUEUE;
 
 };
 

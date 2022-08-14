@@ -55,9 +55,6 @@ class User {
   void set_hostname(std::string hostname) { _hostname = hostname; }
   std::string get_hostname() const { return _hostname; }
 
-  void set_servername(std::string servername) { _servername = servername; }
-  std::string get_servername() { return _servername; }
-
   void set_realname(std::string realname) { _realname = realname; }
   std::string get_realname() { return _realname; }
 

@@ -29,8 +29,9 @@ void INVITE(Command *command) {
     command->reply(RPL_INVITING, channel_name, nick);
 
     std::stringstream notice;
-    notice << ":" << irc::IrcServer::DEFAULT_IP << " NOTICE @" << channel_name \
-      << " :" << user.get_nick() << " invited " << nick << " into the channel.";
+    notice << ":" << command->get_server().get_server_name()
+      << " NOTICE @" << channel_name << " :" << user.get_nick()
+      << " invited " << nick << " into the channel.";
     std::string msg = notice.str();
 
     //TODO TEST

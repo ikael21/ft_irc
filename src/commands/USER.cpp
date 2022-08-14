@@ -12,7 +12,7 @@ std::string logo[] = {
 };
 
 void __print_logo(Command *command) {
-  command->reply(RPL_MOTDSTART, "irc.21-school.ru");
+  command->reply(RPL_MOTDSTART, command->get_server().get_server_name());
   for (size_t i = 0; i < sizeof(logo) / sizeof(std::string); ++i) {
     command->reply(RPL_MOTD, logo[i]);
   }

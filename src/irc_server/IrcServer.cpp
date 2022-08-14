@@ -6,7 +6,9 @@ typedef void (irc::IrcServer::*handler)(struct kevent& event);
 
 
 irc::IrcServer::IrcServer(const char* port, const char* password)
-    : _password(password), _enabled_events_num(0) {
+    : _password(password),
+      _name("ircserv.school21"),
+      _enabled_events_num(0) {
   _create_socket();
   _initialize_socket(static_cast<irc::port_type>(atoi(port)));
   _initialize_kqueue();
@@ -36,7 +38,6 @@ void irc::IrcServer::_accept_handler() {
   User new_user(new_fd);
   struct sockaddr_in* s = (struct sockaddr_in*)&sock_addr;
   new_user.set_hostname(inet_ntoa(s->sin_addr));
-  new_user.set_servername(IrcServer::DEFAULT_IP);
   _users.push_back(new_user);
 
   _add_read_event(_users.back());
@@ -177,4 +178,14 @@ irc::IrcServer::t_userlist::iterator irc::IrcServer::get_user_by_fd(const int fd
       return i;
   }
   throw UserNotFound();
+}
+
+
+irc::IrcServer::t_userlist& irc::IrcServer::get_users() {
+  return _users;
+}
+
+
+const std::string irc::IrcServer::get_server_name() const {
+  return _name;
 }
