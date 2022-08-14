@@ -44,7 +44,6 @@ class Command {
  private:
   irc::IrcServer&           _server;
   User&                     _user;
-
   std::string               _full_message;
   std::string               _command_name;
   t_command_struct          _command;

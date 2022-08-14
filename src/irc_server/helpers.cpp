@@ -1,16 +1,6 @@
 #include "IrcServer.hpp"
 
 
-/**
- * if result true - deletes client from the list and closes connection
- * returns result (first argument)
-**/
-bool irc::IrcServer::_delete_client_if_true(bool result, User& user) {
-  if (result) delete_client(user);
-  return result;
-}
-
-
 User& irc::IrcServer::_find_or_create_user(int fd) {
   for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
     if (i->get_fd() == fd)

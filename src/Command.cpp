@@ -7,18 +7,24 @@
 
 
 Command::t_command_struct command_arr[] = {
-  { "PASS",    &PASS,    1L },
-  { "NICK",    &NICK,    0L },
-  { "USER",    &USER,    4L },
-  { "PRIVMSG", &PRIVMSG, 0L },
   { "AWAY",    &AWAY,    0L },
-  { "NOTICE",  &NOTICE,  0L },
+  { "INVITE",  &INVITE,  2L },
   { "JOIN",    &JOIN,    1L },
-  { "PONG",    &PONG,    1L },
-  { "QUIT",    &QUIT,    0L },
   { "KICK",    &KICK,    2L },
+  { "LIST",    &LIST,    0L },
+  { "MODE",    &MODE,    1L },
+  { "NAMES",   &NAMES,   0L },
+  { "NICK",    &NICK,    0L },
+  { "NOTICE",  &NOTICE,  0L },
   { "PART",    &PART,    1L },
-  { "MODE",    &MODE,    1L }
+  { "PASS",    &PASS,    1L },
+  { "PONG",    &PONG,    1L },
+  { "PRIVMSG", &PRIVMSG, 0L },
+  { "QUIT",    &QUIT,    0L },
+  { "TIME",    &TIME,    0L },
+  { "TOPIC",   &TOPIC,   1L },
+  { "USER",    &USER,    4L },
+  { "USERS",   &USERS,   0L }
 };
 
 

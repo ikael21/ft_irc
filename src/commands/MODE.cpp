@@ -45,14 +45,14 @@ void __switch_mode(T cur_mode, std::vector<T>& plus_modes, std::vector<T>& minus
 
 /* Список доступных режимов пользователя:
  *   i - делает пользователя невидимым;
- *   s - marks a user for receipt of server notices;
- *   w - user receives wallops;
- *   o - флаг оператора.
+ *   s - пользователь (не)получает NOTICE сообщения;
+ * - w - пользователь (не)получает WALLOPS сообщения;
+ * - o - флаг оператора.
  */
 t_user_mode __get_user_mode(char mode) {
 
   static t_user_mode user_modes[] = {
-    U_UNKNOWN_MODE, U_INVISIBLE, U_OPERATOR, U_WALLOPS, U_S_NOTICE
+    U_UNKNOWN_MODE, U_INVISIBLE, U_S_NOTICE // U_OPERATOR, U_WALLOPS
   };
 
   for (size_t i = 0; i < sizeof(user_modes) / sizeof(t_user_mode); ++i) {
@@ -130,21 +130,21 @@ bool is_switch_mode(t_channel_mode mode) {
  *   i - флаг канала invite-only;
  *   t - при установке этого флага, менять топик могут только операторы;
  *   n - запрещает сообщения на канал от посторонних клиентов;
- * ? m - модерируемый канал;
+ * - m - модерируемый канал;
  *
  * WITH OPTIONS:
  *   o - брать/давать привилегии операторов канала
  *   l - установка ограничения на количество пользователей;
  *   b - установка маски бана;
- * ? v - брать/давать возможность голоса при модерируемом режиме;
+ * - v - брать/давать возможность голоса при модерируемом режиме;
  *   k - установка на канал ключа (пароля).
  */
 t_channel_mode __get_channel_mode(char mode) {
 
+  // CH_MODERATE, CH_CHANGE_VOICE
   static t_channel_mode channel_modes[] = {
     CH_UNKNOWN_MODE, CH_CHANGE_PRIVILEGE, CH_PRIVATE, CH_SECRET, CH_INVITE_ONLY,
-    CH_TOPIC_MODIFIERS, CH_FORBID_OUT_MSG, CH_MODERATE, CH_CHANGE_LIMIT_USERS,
-    CH_BAN_USER, CH_CHANGE_VOICE, CH_CHANGE_KEY
+    CH_TOPIC_MODIFIERS, CH_FORBID_OUT_MSG, CH_CHANGE_LIMIT_USERS, CH_BAN_USER, CH_CHANGE_KEY
   };
 
   for (size_t i = 0; i < sizeof(channel_modes) / sizeof(t_user_mode); ++i) {
@@ -158,7 +158,7 @@ t_channel_mode __get_channel_mode(char mode) {
 void __send_info(User& user,
                  irc::IrcServer::t_channel_list::iterator ch,
                  std::string comm_name,
-                 std::string& msg) {
+                 std::string msg) {
 
   std::string full_msg = user.get_prefix_msg() + comm_name + " " + ch->get_name() + " " + msg;
   ch->send_to_channel(user, full_msg);
@@ -251,11 +251,12 @@ void __change_limit_in_channel(Command* command,
     else if (!plus)
       new_limit = DEFAULT_USERS;
 
-    std::string msg = (plus ? ("+l " + std::to_string(new_limit)) : "-l ");
+    std::stringstream msg(plus ? "+l " : "-l");
+    if (plus) msg << limit;
 
     ch->set_limit_users(new_limit);
     if (new_limit)
-      __send_info(user, ch, command->get_command_name(), msg);
+      __send_info(user, ch, command->get_command_name(), msg.str());
 }
 
 
@@ -333,6 +334,7 @@ void channel_mode(Command* command) {
   }
 }
 
+// TODO NEED TESTS WITH CLIENT
 void MODE(Command* command) {
   if (is_channel(command->get_arguments()[0]))
     channel_mode(command);

@@ -23,5 +23,8 @@ void QUIT(Command* command) {
         channels.erase(ch);
     }
   }
-  command->get_server().delete_client(user);
+  // TODO refactor
+  typedef irc::IrcServer::t_userlist::iterator user_iter;
+  user_iter it = command->get_server().get_user_by_fd(user.get_fd());
+  command->get_server().delete_client(it);
 }

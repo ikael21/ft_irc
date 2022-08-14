@@ -87,6 +87,7 @@ class User {
   void add_mode(t_user_mode mode);
   void remove_mode(t_user_mode mode);
   bool is_invisible();
+  bool receive_notice();
 
   std::string get_modes_as_str();
 

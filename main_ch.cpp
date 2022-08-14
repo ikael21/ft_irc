@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
   std::cout << "Channel #ch1 is private: " << channel.is_private() << std::endl;
   assert(channel.is_private() == false);
 
-  channel.add_channel_mode("p");
+  channel.add_channel_mode(CH_PRIVATE);
   std::cout << "Channel #ch1 is private: " << channel.is_private() << std::endl;
   assert(channel.is_private() == true);
 
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
   std::cout << "Users on channel " << channel.get_users().size() << std::endl;
 
 
-  channel.remove_channel_mode("p");
+  channel.remove_channel_mode(CH_PRIVATE);
   std::cout << "Channel #ch2 is private: " << channel.is_private() << std::endl;
   assert(channel.is_private() == false);
 

@@ -50,11 +50,12 @@ public:
 
   void run();
 
-  bool            is_password_correct(std::string pass);
-  void            add_channel(Channel& channel);
-  t_channel_list& get_channels();
-  User&           get_user_by_nickname(const std::string& nickname);
-  void            delete_client(User& user);
+  bool                 is_password_correct(std::string pass);
+  void                 add_channel(Channel& channel);
+  t_channel_list&      get_channels();
+  User&                get_user_by_nickname(const std::string& nickname);
+  t_userlist::iterator get_user_by_fd(const int fd);
+  void                 delete_client(t_userlist::iterator user);
 
   /* Propose to create next methods
 
@@ -105,7 +106,6 @@ private:
   // helpers
 
   User& _find_or_create_user(int fd);
-  bool _delete_client_if_true(bool result, User& user);
   void _ping_client(User& user);
   void _ping_by_nickname(const User& user);
 

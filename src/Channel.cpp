@@ -1,5 +1,3 @@
-
-#include <chrono>
 #include "Channel.hpp"
 
 #define DEBUG_LOG(x) do { if (DEBUG) { std::cerr << x << std::endl; } } while (0)
@@ -155,9 +153,10 @@ std::vector<std::string> Channel::get_ban_list() {
   std::vector<std::string> ban_list = std::vector<std::string>();
 
   for (size_t i = 0; i < _banned.size(); ++i) {
-    std::string ban_id = _banned[i].user->get_nick() + "!*@* " \
-      + _banned[i].who->get_nick() + " " + std::to_string(_banned[i].when);
-    ban_list.push_back(ban_id);
+    std::stringstream ban_id;
+    ban_id << _banned[i].user->get_nick() << "!*@* " \
+      << _banned[i].who->get_nick() << " " << _banned[i].when;
+    ban_list.push_back(ban_id.str());
   }
   return ban_list;
 }
@@ -177,6 +176,10 @@ void Channel::remove_channel_mode(t_channel_mode mode) {
 
 bool Channel::is_private() {
   return have_mode(CH_PRIVATE);
+}
+
+bool Channel::is_secret() {
+  return have_mode(CH_SECRET);
 }
 
 
