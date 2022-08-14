@@ -145,6 +145,12 @@ bool User::is_invisible() {
   return has_mode(U_INVISIBLE);
 }
 
+
+bool User::receive_notice() {
+  return has_mode(U_S_NOTICE);
+}
+
+
 std::string User::get_modes_as_str() {
   std::string modes("+");
   for (size_t i = 0; i < _modes.size(); ++i)

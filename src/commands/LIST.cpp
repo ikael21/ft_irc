@@ -1,36 +1,39 @@
 #include "commands.hpp"
 
-// TODO
-//
-// секретные каналы не приводятся в списке,
-// если, конечно, клиент не является членом подобного канала.
-//  402     ERR_NOSUCHSERVER
-//                "<server name> :No such server"
+//TODO NEED TEST
+void check_and_return_channels(Command *command, irc::IrcServer::t_channel_list::iterator& ch) {
 
-//        - Используется для сообщения, что сервер, указанный в
-//          строке параметров, не найден.
-//if (!server)
-//   return command->reply(ERR_NOSUCHSERVER);
+  if(!ch->is_private() || \
+    ((ch->is_private() || ch->is_secret()) && ch->user_on_channel(command->get_user()))) {
+
+    std::stringstream num_visible_users;
+    num_visible_users << ch->get_visible_users().size();
+
+    command->reply(RPL_LIST, ch->get_name(), num_visible_users.str(), ch->get_topic());
+  }
+}
+
 void LIST(Command *command) {
 
   std::vector<std::string> args = command->get_arguments();
-  irc::IrcServer& server = command->get_server();
-  irc::IrcServer::t_channel_list& channels = server.get_channels();
-
+  irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();
 
   command->reply(RPL_LISTSTART);
 
-  if (!args.size()){
-    for( irc::IrcServer::t_channel_list::iterator channel = channels.begin(); channel != channels.end(); ++channel) {
-      if(!channel->is_private()){
-          std::cout <<  channel->get_name() << std::endl;
-          command->reply(RPL_LIST, channel->get_name(), channel->get_topic());
+  if (args.size()) {
+    std::vector<std::string> channel_list = split(args[0], ',');
+
+    for (size_t i = 0; i < channel_list.size(); ++i) {
+      irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), channel_list[i]);
+      if (ch != channels.end()) {
+        check_and_return_channels(command, ch);
       }
     }
   }
   else {
-    irc::IrcServer::t_channel_list::iterator channel = std::find(channels.begin(), channels.end(), args[0]);
-    command->reply(RPL_LIST, channel->get_topic());
+    for (irc::IrcServer::t_channel_list::iterator ch = channels.begin(); ch != channels.end(); ++ch) {
+      check_and_return_channels(command, ch);
+    }
   }
   command->reply(RPL_LISTEND);
 }

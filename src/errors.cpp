@@ -129,8 +129,8 @@ std::string __RPL_NOWAWAY() { return ":You have been marked as being away"; }
 std::string __RPL_LISTSTART() { return "Channel :Users  Name"; }
 
 // 322
-std::string __RPL_LIST(std::string channel, std::string visible, std::string topic) {
-   return channel + " " + visible + " :" + topic;
+std::string __RPL_LIST(std::string channel, std::string num_visible_users, std::string topic) {
+   return channel + " " + num_visible_users + " :" + topic;
 }
 
 // 323

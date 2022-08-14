@@ -22,10 +22,10 @@
  *   i - флаг канала invite-only;
  *   t - при установке этого флага, менять топик могут только операторы;
  *   n - запрещает сообщения на канал от посторонних клиентов;
- *   m - модерируемый канал;
+ * - m - модерируемый канал;
  *   l - установка ограничения на количество пользователей;
  *   b - установка маски бана;
- *   v - брать/давать возможность голоса при модерируемом режиме;
+ * - v - брать/давать возможность голоса при модерируемом режиме;
  *   k - установка на канал ключа (пароля).
  */
 
@@ -64,6 +64,7 @@ class Channel
   ~Channel();
 
   bool is_private();
+  bool is_secret();
 
   void add_user(User& user);
   void remove_user(User& user);
@@ -115,23 +116,19 @@ class Channel
   friend bool operator==(const Channel& left, const std::string& channel_name);
 
  private:
-  std::string        _name;
-  std::string        _operator;
-  std::string        _topic;
-  std::string        _key;
-  size_t             _limit_users;
-
-  std::vector<User*>      _users;
-  std::vector<User*>      _operators;
-  std::vector<User*>      _invited;
-  std::vector<BannedUser> _banned;
-
+  std::string                 _name;
+  std::string                 _operator;
+  std::string                 _topic;
+  std::string                 _key;
+  size_t                      _limit_users;
+  std::vector<User*>          _users;
+  std::vector<User*>          _operators;
+  std::vector<User*>          _invited;
+  std::vector<BannedUser>     _banned;
   std::vector<t_channel_mode> _modes;
 
   std::string _log_message(std::string message);
   void _log(std::string message);
-
-  void _change_channel_mode(const std::string& user, bool remove);
 };
 
 #endif

@@ -47,7 +47,13 @@ void NOTICE(Command *command) {
         std::string fullmessage = user.get_prefix_msg() + \
             command->get_command_name() + " " + ch->get_name() + " :" + message;
 
-        ch->send_to_channel(user, fullmessage);
+        //TODO TEST
+        std::vector<User*> channel_users = ch->get_users();
+        for (size_t i = 0; i < channel_users.size(); ++i) {
+          User& to = *channel_users[i];
+          if (to.receive_notice())
+            user.send_msg_to_user(to, fullmessage);
+        }
       }
     }
   } else {
@@ -59,7 +65,8 @@ void NOTICE(Command *command) {
       std::string fullmessage = user.get_prefix_msg() + \
         command->get_command_name() + " " + user.get_nick() + " :" + message;
 
-      user.send_msg_to_user(to, fullmessage);
+      if (user.receive_notice())
+        user.send_msg_to_user(to, fullmessage);
 
     } catch (UserNotFound& e) { }
   }

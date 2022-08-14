@@ -32,7 +32,14 @@ void INVITE(Command *command) {
     notice << ":" << irc::IrcServer::DEFAULT_IP << " NOTICE @" << channel_name \
       << " :" << user.get_nick() << " invited " << nick << " into the channel.";
     std::string msg = notice.str();
-    ch->send_to_channel(invited_user, msg);
+
+    //TODO TEST
+    std::vector<User*> channel_users = ch->get_users();
+    for (size_t i = 0; i < channel_users.size(); ++i) {
+      User& to = *channel_users[i];
+      if (to.receive_notice())
+        user.send_msg_to_user(to, msg);
+    }
 
     if (invited_user.is_away()) {
       command->reply(RPL_AWAY, nick, invited_user.get_afk_msg());

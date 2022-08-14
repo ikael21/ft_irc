@@ -178,6 +178,10 @@ bool Channel::is_private() {
   return have_mode(CH_PRIVATE);
 }
 
+bool Channel::is_secret() {
+  return have_mode(CH_SECRET);
+}
+
 
 bool Channel::have_mode(t_channel_mode mode) {
   return std::find(_modes.begin(), _modes.end(), mode) != _modes.end();
