@@ -67,14 +67,13 @@ void irc::IrcServer::_read_handler(t_event& event) {
 
 void irc::IrcServer::_write_handler(t_event& event) {
   User* user = (User*)event.udata;
-  if (user->get_state() == SEND_PING) {
+  if (user->get_state() == SEND_PING)
     _ping_client(*user);
-    return;
-  }
-  if (user->has_msg()) {
+  else if (user->has_msg())
     Command(*this, *user, user->get_next_msg()).execute();
-    _disable_event(user->get_fd(), EVFILT_WRITE); // TODO add check if all data sent
-  }
+
+  // TODO add check if all data sent
+  _disable_event(user->get_fd(), EVFILT_WRITE);
 }
 
 
