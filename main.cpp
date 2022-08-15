@@ -25,14 +25,6 @@ static void validate_arguments(int argc, char* argv[]) {
 }
 
 
-/** Might wanna add something like this
- * ./ircserv PORT PASSWORD [ OPTIONS ]
- * --kevent-timeout - sets timeout for kevent sys. call to wait for events (default 1 minute)
- * --ping-after - sets timeout for server to wait before send PING to client (default 1 minute)
- * --pong-delay - sets timeout for server to wait PONG from client (default 1 minute)
-**/
-
-
 int main(int argc, char* argv[]) {
   try {
     validate_arguments(argc, argv);

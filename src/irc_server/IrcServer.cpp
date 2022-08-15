@@ -103,26 +103,21 @@ void irc::IrcServer::_execute_handler(t_event& event) {
 }
 
 
-// TODO refactor
 void irc::IrcServer::_check_users_activity() {
   const time_t half_minute = 30;
-  t_userlist::iterator it = _users.begin();
-  while (it != _users.end()) {
+  for (t_userlist::iterator it = _users.begin(); it != _users.end(); ++it) {
     const time_t time_passed = time(NULL) - it->get_last_activity();
     if (time_passed >= half_minute) {
       bool should_be_deleted = (it->get_status() == AUTHENTICATION ||
                                 it->get_state() == WAIT_PONG);
-      if (should_be_deleted) {
-        delete_client(it++);
-        continue;
-      }
+
+      if (should_be_deleted) { delete_client(it); continue; }
 
       if (it->get_state() == ACTIVE) {
         it->set_state(SEND_PING);
         _enable_event(*it, EVFILT_WRITE);
       }
     }
-    ++it;
   }
 }
 
