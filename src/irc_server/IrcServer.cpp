@@ -42,8 +42,6 @@ void irc::IrcServer::_accept_handler() {
 
   _add_read_event(_users.back());
   _add_write_event(_users.back());
-
-  // disable to avoid handling of unnecessary events
   _disable_event(new_fd, EVFILT_WRITE);
 
   #ifdef DEBUG
@@ -72,7 +70,7 @@ void irc::IrcServer::_write_handler(t_event& event) {
   else if (user->has_msg())
     Command(*this, *user, user->get_next_msg()).execute();
 
-  // TODO add check if all data sent
+  // TODO if all data sent -> disable
   _disable_event(user->get_fd(), EVFILT_WRITE);
 }
 
@@ -96,7 +94,6 @@ void irc::IrcServer::_execute_handler(t_event& event) {
   if (conds[0])
     return _accept_handler();
 
-  // based on the rest conditions call the suitable handler
   for (int i = 1; i < conds_num; ++i)
     if (conds[i])
       return (this->*event_handlers[i])(event);

@@ -109,6 +109,7 @@ class User {
   std::string              _afkMessage;
   std::vector<t_user_mode> _modes;
   std::string              _buffer;
+  bool                     _is_message_sent;
 };
 
 # endif

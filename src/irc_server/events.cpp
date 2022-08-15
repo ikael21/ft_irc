@@ -89,6 +89,10 @@ int irc::IrcServer::_wait_for_events() {
                               _events.data(), events_num,
                               &timeout);
   delete [] changes_arr;
-  throw_if_true<ErrnoBase>(new_events_num == -1);
+
+  try { throw_if_true<ErrnoBase>(new_events_num == -1); }
+  catch (const ErrnoBase& e)
+  { std::cerr << e.what() << std::endl; }
+
   return new_events_num;
 }
