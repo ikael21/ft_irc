@@ -67,7 +67,7 @@ void PRIVMSG(Command *command) {
           command->reply(RPL_AWAY, to.get_afk_msg());
 
         std::string fullmessage = user.get_prefix_msg() + \
-          command->get_command_name() + " " + user.get_nick() + " :" + message;
+          command->get_command_name() + " " + to.get_nick() + " :" + message;
 
         user.send_msg_to_user(to, fullmessage);
       } catch (UserNotFound& e) {

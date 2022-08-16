@@ -63,7 +63,7 @@ void NOTICE(Command *command) {
       User& to = server.get_user_by_nickname(recipients[0]);
 
       std::string fullmessage = user.get_prefix_msg() + \
-        command->get_command_name() + " " + user.get_nick() + " :" + message;
+        command->get_command_name() + " " + to.get_nick() + " :" + message;
 
       if (user.receive_notice())
         user.send_msg_to_user(to, fullmessage);
