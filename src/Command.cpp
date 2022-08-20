@@ -22,7 +22,7 @@ Command::t_command_struct command_arr[] = {
   { "PRIVMSG", &PRIVMSG, 0L },
   { "QUIT",    &QUIT,    0L },
   { "TIME",    &TIME,    0L },
-  { "TOPIC",   &TOPIC,   1L },
+  { "TOPIC",   &TOPIC,   0L },
   { "USER",    &USER,    4L },
   { "USERS",   &USERS,   0L }
 };

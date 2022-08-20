@@ -56,7 +56,7 @@ void Channel::remove_user(User &user) {
   _users.erase(std::find(_users.begin(), _users.end(), &user));
 
   if (is_oper(user))
-    _operators.erase(std::find(_users.begin(), _users.end(), &user));
+    _operators.erase(std::find(_operators.begin(), _operators.end(), &user));
 
   _log("User " +  user.get_nick() + " remove from channel");
 }
@@ -240,5 +240,4 @@ std::string Channel::get_modes_as_str() {
   }
 
   return modes.str() + values.str();
-
 }

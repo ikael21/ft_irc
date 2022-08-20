@@ -1,19 +1,5 @@
 #include "commands.hpp"
 
-/*
- * RPL_CHANNELMODEIS
- * ERR_CHANOPRIVSNEEDED
- * ERR_NOSUCHNICK
- * ERR_NOTONCHANNEL
- * ERR_KEYSET
- * RPL_BANLIST
- * RPL_ENDOFBANLIST
- * ERR_UNKNOWNMODE
- * ERR_NOSUCHCHANNEL
- * ERR_USERSDONTMATCH
- * RPL_UMODEIS
- * ERR_UMODEUNKNOWNFLAG
- */
 
 template<typename T>
 std::string __cast_modes_to_str(std::vector<T>& plus_modes, std::vector<T>& minus_modes) {
@@ -237,6 +223,7 @@ void __change_key_in_channel(Command* command,
     }
 }
 
+
 void __change_limit_in_channel(Command* command,
                              User& user,
                              irc::IrcServer::t_channel_list::iterator ch,
@@ -334,7 +321,7 @@ void channel_mode(Command* command) {
   }
 }
 
-// TODO NEED TESTS WITH CLIENT
+
 void MODE(Command* command) {
   if (is_channel(command->get_arguments()[0]))
     channel_mode(command);

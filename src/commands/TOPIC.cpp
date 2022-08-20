@@ -1,11 +1,15 @@
 #include "commands.hpp"
 
-//TODO NEED TEST
+
 void TOPIC(Command *command) {
 
   User& user = command->get_user();
   irc::IrcServer& server = command->get_server();
-  std::vector<std::string> args = command->get_arguments();
+
+  if (!command->num_args())
+    return command->reply(ERR_NEEDMOREPARAMS, command->get_command_name());
+
+  std::vector<std::string> args = split(command->get_arguments()[0], ' ', 1);
 
   std::string& channel_name = args[0];
   irc::IrcServer::t_channel_list& channels = server.get_channels();

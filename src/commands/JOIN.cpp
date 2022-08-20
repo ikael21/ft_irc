@@ -3,7 +3,7 @@
 
 void send_channel_info(Command* command, Channel& channel)
 {
-  if (!channel.get_topic().empty())
+  if (channel.get_topic().length())
     command->reply(RPL_TOPIC, channel.get_name(), channel.get_topic());
 
   std::vector<User*> users = channel.get_visible_users();
@@ -44,6 +44,9 @@ void JOIN(Command *command) {
 
     if (it != channels.end()) {
       Channel& channel = *it;
+
+      if (channel.user_on_channel(user))
+        return;
 
       bool user_has_incorrect_key = channel.has_key() && (i >= keys.size() || channel.get_key() != keys[i]);
 

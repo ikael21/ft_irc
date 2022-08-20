@@ -1,6 +1,6 @@
 #include "commands.hpp"
 
-//TODO NEED TEST
+
 void check_and_return_channels(Command *command, irc::IrcServer::t_channel_list::iterator& ch) {
 
   if(!ch->is_private() || \
@@ -12,6 +12,7 @@ void check_and_return_channels(Command *command, irc::IrcServer::t_channel_list:
     command->reply(RPL_LIST, ch->get_name(), num_visible_users.str(), ch->get_topic());
   }
 }
+
 
 void LIST(Command *command) {
 

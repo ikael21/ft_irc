@@ -26,7 +26,7 @@ void KICK(Command* command) {
     std::string kick_msg = user.get_prefix_msg() + command->get_command_name() + " " \
       + channel->get_name() + " " + kicked_user.get_nick();
 
-    if (args.size() == 3)
+    if (args.size() >= 3)
       kick_msg = kick_msg + " " + (args[2][0] == ':' ? "" : ":") + args[2];
 
     channel->send_to_channel(user, kick_msg);
