@@ -47,7 +47,6 @@ void NOTICE(Command *command) {
         std::string fullmessage = user.get_prefix_msg() + \
             command->get_command_name() + " " + ch->get_name() + " :" + message;
 
-        //TODO TEST
         std::vector<User*> channel_users = ch->get_users();
         for (size_t i = 0; i < channel_users.size(); ++i) {
           User& to = *channel_users[i];
@@ -65,7 +64,7 @@ void NOTICE(Command *command) {
       std::string fullmessage = user.get_prefix_msg() + \
         command->get_command_name() + " " + to.get_nick() + " :" + message;
 
-      if (user.receive_notice())
+      if (to.receive_notice())
         user.send_msg_to_user(to, fullmessage);
 
     } catch (UserNotFound& e) { }

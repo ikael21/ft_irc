@@ -63,7 +63,7 @@ class User {
 
   void set_afk_msg(std::string message) { _afkMessage = message; }
   std::string get_afk_msg() { return _afkMessage; }
-  bool is_away() { return !_afkMessage.empty(); }
+  bool is_away();
 
   void set_status(t_user_status status) { _status = status; }
   t_user_status get_status() { return _status; }

@@ -8,7 +8,7 @@ void TOPIC(Command *command) {
   std::vector<std::string> args = command->get_arguments();
 
   std::string& channel_name = args[0];
-  irc::IrcServer::t_channel_list channels = server.get_channels();
+  irc::IrcServer::t_channel_list& channels = server.get_channels();
   irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), channel_name);
 
   if (ch == channels.end())

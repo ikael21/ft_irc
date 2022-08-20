@@ -157,3 +157,8 @@ std::string User::get_modes_as_str() {
     modes += static_cast<char>(_modes[i]);
   return modes;
 }
+
+
+bool User::is_away() {
+  return _afkMessage.length();
+}

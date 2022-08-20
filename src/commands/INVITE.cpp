@@ -1,6 +1,6 @@
 #include "commands.hpp"
 
-// TODO NEED TESTS
+
 void INVITE(Command *command) {
 
   User& user = command->get_user();
@@ -8,12 +8,12 @@ void INVITE(Command *command) {
   std::vector<std::string> args = command->get_arguments();
 
   std::string& nick = args[0];
-  std::string& channel_name = args[0];
+  std::string& channel_name = args[1];
 
   try {
     User& invited_user = server.get_user_by_nickname(nick);
 
-    irc::IrcServer::t_channel_list channels = server.get_channels();
+    irc::IrcServer::t_channel_list& channels = server.get_channels();
     irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), channel_name);
 
     if (ch == channels.end())
@@ -34,7 +34,6 @@ void INVITE(Command *command) {
       << " invited " << nick << " into the channel.";
     std::string msg = notice.str();
 
-    //TODO TEST
     std::vector<User*> channel_users = ch->get_users();
     for (size_t i = 0; i < channel_users.size(); ++i) {
       User& to = *channel_users[i];
@@ -43,7 +42,7 @@ void INVITE(Command *command) {
     }
 
     if (invited_user.is_away()) {
-      command->reply(RPL_AWAY, nick, invited_user.get_afk_msg());
+      command->reply(RPL_AWAY, invited_user.get_nick(), invited_user.get_afk_msg());
     } else {
       std::string invite_msg = user.get_prefix_msg() + command->get_command_name() \
         + " " + nick + " :" + channel_name;
