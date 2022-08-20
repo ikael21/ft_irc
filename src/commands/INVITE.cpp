@@ -4,16 +4,15 @@
 void INVITE(Command *command) {
 
   User& user = command->get_user();
-  irc::IrcServer& server = command->get_server();
   std::vector<std::string> args = command->get_arguments();
 
   std::string& nick = args[0];
   std::string& channel_name = args[1];
 
   try {
-    User& invited_user = server.get_user_by_nickname(nick);
+    User& invited_user = command->get_server().get_user_by_nickname(nick);
 
-    irc::IrcServer::t_channel_list& channels = server.get_channels();
+    irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();
     irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), channel_name);
 
     if (ch == channels.end())

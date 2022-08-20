@@ -4,7 +4,6 @@
 void TOPIC(Command *command) {
 
   User& user = command->get_user();
-  irc::IrcServer& server = command->get_server();
 
   if (!command->num_args())
     return command->reply(ERR_NEEDMOREPARAMS, command->get_command_name());
@@ -12,7 +11,7 @@ void TOPIC(Command *command) {
   std::vector<std::string> args = split(command->get_arguments()[0], ' ', 1);
 
   std::string& channel_name = args[0];
-  irc::IrcServer::t_channel_list& channels = server.get_channels();
+  irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();
   irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), channel_name);
 
   if (ch == channels.end())

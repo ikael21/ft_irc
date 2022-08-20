@@ -3,7 +3,6 @@
 void NOTICE(Command *command) {
 
   User& user = command->get_user();
-  irc::IrcServer& server = command->get_server();
   std::vector<std::string>& args = command->get_arguments();
   std::vector<std::string> recipients;
   std::string message;
@@ -36,7 +35,7 @@ void NOTICE(Command *command) {
     return;
 
   if (is_channel(recipients[0])) {
-    irc::IrcServer::t_channel_list& channels = server.get_channels();
+    irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();
     irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), recipients[0]);
 
     if (ch != channels.end()) {
@@ -59,7 +58,7 @@ void NOTICE(Command *command) {
 
     try {
 
-      User& to = server.get_user_by_nickname(recipients[0]);
+      User& to = command->get_server().get_user_by_nickname(recipients[0]);
 
       std::string fullmessage = user.get_prefix_msg() + \
         command->get_command_name() + " " + to.get_nick() + " :" + message;

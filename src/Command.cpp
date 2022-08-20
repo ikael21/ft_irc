@@ -23,8 +23,7 @@ Command::t_command_struct command_arr[] = {
   { "QUIT",    &QUIT,    0L },
   { "TIME",    &TIME,    0L },
   { "TOPIC",   &TOPIC,   0L },
-  { "USER",    &USER,    4L },
-  { "USERS",   &USERS,   0L }
+  { "USER",    &USER,    4L }
 };
 
 

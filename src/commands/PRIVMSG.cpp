@@ -4,7 +4,6 @@
 void PRIVMSG(Command *command) {
 
   User& user = command->get_user();
-  irc::IrcServer& server = command->get_server();
   std::vector<std::string>& args = command->get_arguments();
   std::vector<std::string> recipients;
   std::string message;
@@ -40,7 +39,7 @@ void PRIVMSG(Command *command) {
     }
 
     if (is_channel(*recipient)) {
-      irc::IrcServer::t_channel_list& channels = server.get_channels();
+      irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();
       irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), *recipient);
 
       if (ch == channels.end()) {
@@ -61,7 +60,7 @@ void PRIVMSG(Command *command) {
     } else {
 
       try {
-        User& to = server.get_user_by_nickname(*recipient);
+        User& to = command->get_server().get_user_by_nickname(*recipient);
 
         if (to.is_away())
           command->reply(RPL_AWAY, to.get_nick(), to.get_afk_msg());

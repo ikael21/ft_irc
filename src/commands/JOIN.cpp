@@ -23,8 +23,7 @@ bool user_not_invite(Channel& channel, User& user) {
 void JOIN(Command *command) {
 
   User& user = command->get_user();
-  irc::IrcServer& server = command->get_server();
-  irc::IrcServer::t_channel_list& channels = server.get_channels();
+  irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();
 
   std::vector<std::string> args = command->get_arguments();
   std::vector<std::string> channels_names = split(args[0], ',');
@@ -73,7 +72,7 @@ void JOIN(Command *command) {
 
       channel.add_user(user);
       channel.add_oper(user);
-      server.add_channel(channel);
+      command->get_server().add_channel(channel);
       send_channel_info(command, channel);
     }
   }

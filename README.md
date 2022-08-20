@@ -56,7 +56,6 @@ nc -c <hostname> 6666
 - `TIME <server>`
 - `TOPIC <channel> [<topic>]`
 - `USER <username> <hostname> <servername> <realname>`
-- `USERS [<server>]`
 
 For `Linux` please install [libkqueue](https://github.com/mheily/libkqueue).
 

@@ -31,8 +31,6 @@ void KICK(Command *command);
 
 void TIME(Command *command);
 
-void USERS(Command *command);
-
 void JOIN(Command *command);
 
 void PONG(Command *command);
