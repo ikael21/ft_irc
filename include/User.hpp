@@ -75,8 +75,8 @@ class User {
   bool has_msg();
   std::string get_next_msg();
 
-  void send_msg(int fd, std::string message);
-  void send_msg_to_user(User& user, std::string message);
+  void send_msg(int fd, const std::string& message);
+  void send_msg_to_user(User& user, const std::string& message);
 
   std::string get_prefix_msg();
 
@@ -109,7 +109,6 @@ class User {
   std::string              _afkMessage;
   std::vector<t_user_mode> _modes;
   std::string              _buffer;
-  bool                     _is_message_sent;
 };
 
 # endif

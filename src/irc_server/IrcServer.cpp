@@ -79,11 +79,13 @@ void irc::IrcServer::_execute_handler(t_event& event) {
   static const int conds_num = 4;
   static bool conds[conds_num];
 
+  // order matters
   conds[0] = static_cast<int>(event.ident) == _socket;
   conds[1] = event.flags & EV_EOF;
   conds[2] = event.filter == EVFILT_READ;
   conds[3] = event.filter == EVFILT_WRITE;
 
+  // order the same as for conds
   static const handler event_handlers[] = {
     NULL,
     &IrcServer::_delete_client,
