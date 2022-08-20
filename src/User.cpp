@@ -8,8 +8,7 @@
 User::User()
   : _status(AUTHENTICATION),
     _state(ACTIVE),
-    _last_activity(time(NULL)),
-    _is_message_sent(true) {}
+    _last_activity(time(NULL)) {}
 
 
 User::User(int fd)
@@ -17,8 +16,7 @@ User::User(int fd)
     _status(AUTHENTICATION),
     _nick("*"),
     _state(ACTIVE),
-    _last_activity(time(NULL)),
-    _is_message_sent(true) {}
+    _last_activity(time(NULL)) {}
 
 
 User::User(int fd, std::string username,
@@ -33,8 +31,7 @@ User::User(int fd, std::string username,
     _realname(realname),
     _nick("*"),
     _state(ACTIVE),
-    _last_activity(time(NULL)),
-    _is_message_sent(true) {}
+    _last_activity(time(NULL)) {}
 
 
 User::User(const User& other)
@@ -48,8 +45,7 @@ User::User(const User& other)
     _state(other._state),
     _last_activity(other._last_activity),
     _afkMessage(other._afkMessage),
-    _buffer(other._buffer),
-    _is_message_sent(true) {}
+    _buffer(other._buffer) {}
 
 
 User::~User() {}
@@ -91,32 +87,25 @@ std::string User::get_next_msg() {
 }
 
 
-void User::send_msg_to_user(User& user, std::string message) {
+void User::send_msg_to_user(User& user, const std::string& message) {
   send_msg(user.get_fd(), message + END_OF_MESSAGE);
 }
 
 
-void User::send_msg(int fd, std::string message) {
-  ssize_t bytes_sent = send(fd, message.c_str(), message.size(), 0);
+void User::send_msg(int fd, const std::string& message) {
+  static std::string remains;
 
-  /*
-  TODO check if all data sent
+  const std::string& what_to_send = (remains.size() == 0) ? message : remains;
+  ssize_t bytes_sent = send(fd, what_to_send.c_str(), what_to_send.size(), 0);
 
-  ssize_t bytes_left = bytes_sent - static_cast<ssize_t>(message.size());
-  if (bytes_left == 0) {
-    _is_message_sent = true;
-    return;
-  }
-
-  message.assign(message.begin() + bytes_sent, message.end());
-  _is_message_sent = false;
-
-  */
+  // save in case something left after sending
+  remains.assign(what_to_send.begin() + bytes_sent, what_to_send.end());
 
   #ifdef DEBUG
     std::cout << YELLOW "Reply for User(FD: "
       << fd << ")" RESET << std::endl;
-    std::cout << GREEN "\t|" << message
+    std::cout << GREEN "\t|"
+      << std::string(what_to_send.begin(), what_to_send.begin() + bytes_sent)
       << RESET << std::endl;
   #endif
 }

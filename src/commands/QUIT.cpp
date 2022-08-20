@@ -1,5 +1,6 @@
 #include "commands.hpp"
 
+typedef irc::IrcServer::t_userlist::iterator user_iter;
 
 void QUIT(Command* command) {
 
@@ -23,8 +24,6 @@ void QUIT(Command* command) {
         channels.erase(ch);
     }
   }
-  // TODO refactor
-  typedef irc::IrcServer::t_userlist::iterator user_iter;
-  user_iter it = command->get_server().get_user_by_fd(user.get_fd());
-  command->get_server().delete_client(it);
+  shutdown(user.get_fd(), SHUT_WR);
+  user.get_buffer().clear();
 }
