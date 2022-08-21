@@ -2,10 +2,12 @@
 
 #define DEBUG_LOG(x) do { if (DEBUG) { std::cerr << x << std::endl; } } while (0)
 
-t_channel_mode DEFAULT_CHANNEL_MODES[] = { CH_TOPIC_MODIFIERS, CH_FORBID_OUT_MSG };
+irc::t_channel_mode DEFAULT_CHANNEL_MODES[] = {
+  irc::CH_TOPIC_MODIFIERS, irc::CH_FORBID_OUT_MSG
+};
 
 
-Channel::Channel() :
+irc::Channel::Channel() :
     _limit_users(DEFAULT_USERS) {
 
   _modes = std::vector<t_channel_mode>(DEFAULT_CHANNEL_MODES, DEFAULT_CHANNEL_MODES \
@@ -13,23 +15,27 @@ Channel::Channel() :
 }
 
 
-Channel::~Channel() {}
+irc::Channel::~Channel() {}
 
 
-std::string Channel ::_log_message(std::string message) {
+std::string irc::Channel::_log_message(std::string message) {
   return "Channel " + _name + ": " + message;
 }
 
-void Channel::_log(std::string message) {
+void irc::Channel::_log(std::string message) {
   DEBUG_LOG(_log_message(message));
 }
 
 
-bool Channel::user_on_channel(User& user) {
-  return std::find(_users.begin(), _users.end(), &user) != _users.end();
+bool irc::Channel::user_on_channel(irc::User& user) {
+  for (std::vector<irc::User*>::iterator u = _users.begin(); u != _users.end(); ++u) {
+    if ((*u)->get_fd() == user.get_fd())
+      return true;
+  }
+  return false;
 }
 
-void Channel::add_user(User &user) {
+void irc::Channel::add_user(irc::User& user) {
 
   if (_users.size() == _limit_users) {
     return _log("Channel is full");
@@ -47,7 +53,7 @@ void Channel::add_user(User &user) {
   _log("User " +  user.get_nick() + " added to channel");
 }
 
-void Channel::remove_user(User &user) {
+void irc::Channel::remove_user(irc::User& user) {
 
   if (!user_on_channel(user)) {
     return _log("User " + user.get_nick() + " not in the channel");
@@ -61,7 +67,7 @@ void Channel::remove_user(User &user) {
   _log("User " +  user.get_nick() + " remove from channel");
 }
 
-std::vector<User *> Channel::get_visible_users() {
+std::vector<irc::User*> irc::Channel::get_visible_users() {
 
   std::vector<User *> users;
 
@@ -76,7 +82,7 @@ std::vector<User *> Channel::get_visible_users() {
   return users;
 }
 
-void Channel::set_name(std::string name) {
+void irc::Channel::set_name(std::string name) {
 
   if (name.empty() && name[0] != '#') {
     return _log("Channel name must starts with '#' symbol");
@@ -90,21 +96,21 @@ void Channel::set_name(std::string name) {
 }
 
 
-void Channel::set_key(std::string key) { _key = key; }
+void irc::Channel::set_key(std::string key) { _key = key; }
 
 
-void Channel::set_limit_users(int new_limit) { _limit_users = new_limit; }
+void irc::Channel::set_limit_users(int new_limit) { _limit_users = new_limit; }
 
 
-void Channel::set_topic(std::string topic) { _topic = topic; }
+void irc::Channel::set_topic(std::string topic) { _topic = topic; }
 
 
-bool Channel::is_invited(User& user) {
+bool irc::Channel::is_invited(irc::User& user) {
   return std::find(_invited.begin(), _invited.end(), &user) != _invited.end();
 }
 
 
-void Channel::add_to_invite_list(User& user) {
+void irc::Channel::add_to_invite_list(irc::User& user) {
   if (!is_invited(user)) {
     _invited.push_back(&user);
     _log("User " + user.get_nick() + " added to invite list");
@@ -114,13 +120,13 @@ void Channel::add_to_invite_list(User& user) {
 }
 
 
-void Channel::remove_from_invite_list(User& user) {
+void irc::Channel::remove_from_invite_list(irc::User& user) {
   if (is_invited(user))
     _invited.erase(std::find(_invited.begin(), _invited.end(), &user));
 }
 
 
-bool Channel::is_banned(User& user) {
+bool irc::Channel::is_banned(irc::User& user) {
   for (std::vector<BannedUser>::iterator it = _banned.begin(); it != _banned.end(); ++it) {
     if (it->user == &user)
       return true;
@@ -129,7 +135,7 @@ bool Channel::is_banned(User& user) {
 }
 
 
-void Channel::add_to_ban_list(User& user, User& who) {
+void irc::Channel::add_to_ban_list(irc::User& user, irc::User& who) {
   if (!is_banned(user)) {
     _banned.push_back(BannedUser(&user, &who));
     _log("User " + user.get_nick() + " added to ban list");
@@ -139,7 +145,7 @@ void Channel::add_to_ban_list(User& user, User& who) {
 }
 
 
-void Channel::remove_from_ban_list(User& user) {
+void irc::Channel::remove_from_ban_list(irc::User& user) {
   for (std::vector<BannedUser>::iterator it = _banned.begin(); it != _banned.end(); ++it) {
     if (it->user == &user) {
       _banned.erase(it);
@@ -148,7 +154,7 @@ void Channel::remove_from_ban_list(User& user) {
   }
 }
 
-std::vector<std::string> Channel::get_ban_list() {
+std::vector<std::string> irc::Channel::get_ban_list() {
 
   std::vector<std::string> ban_list = std::vector<std::string>();
 
@@ -162,68 +168,68 @@ std::vector<std::string> Channel::get_ban_list() {
 }
 
 
-void Channel::add_channel_mode(t_channel_mode mode) {
+void irc::Channel::add_channel_mode(t_channel_mode mode) {
   if (!have_mode(mode))
     _modes.push_back(mode);
 }
 
 
-void Channel::remove_channel_mode(t_channel_mode mode) {
+void irc::Channel::remove_channel_mode(t_channel_mode mode) {
   if (have_mode(mode))
     _modes.erase(std::find(_modes.begin(), _modes.end(), mode));
 }
 
 
-bool Channel::is_private() {
+bool irc::Channel::is_private() {
   return have_mode(CH_PRIVATE);
 }
 
-bool Channel::is_secret() {
+bool irc::Channel::is_secret() {
   return have_mode(CH_SECRET);
 }
 
 
-bool Channel::have_mode(t_channel_mode mode) {
+bool irc::Channel::have_mode(t_channel_mode mode) {
   return std::find(_modes.begin(), _modes.end(), mode) != _modes.end();
 }
 
 
-void Channel::add_oper(User& user) {
+void irc::Channel::add_oper(irc::User& user) {
   if (!is_oper(user))
     _operators.push_back(&user);
 }
 
 
-void Channel::remove_oper(User& user) {
+void irc::Channel::remove_oper(irc::User& user) {
   _operators.erase(std::find(_operators.begin(), _operators.end(), &user));
 }
 
 
-bool Channel::is_oper(User& user) {
+bool irc::Channel::is_oper(irc::User& user) {
   return std::find(_operators.begin(), _operators.end(), &user) != _operators.end();
 }
 
 
-void Channel::send_to_channel(User& user, std::string& msg) {
+void irc::Channel::send_to_channel(irc::User&user, std::string& msg, bool include_myself) {
   for (size_t i = 0; i < _users.size(); ++i) {
-    if (user == *_users[i])
+    if (!include_myself && user == *_users[i])
       continue;
     user.send_msg_to_user(*_users[i], msg);
   }
 }
 
 
-bool operator==(const Channel& left, const Channel& right) {
+bool irc::operator==(const irc::Channel& left, const irc::Channel& right) {
   return left._name == right._name;
 }
 
 
-bool operator==(const Channel& left, const std::string& channel_name) {
+bool irc::operator==(const irc::Channel& left, const std::string& channel_name) {
   return left._name == channel_name;
 }
 
 
-std::string Channel::get_modes_as_str() {
+std::string irc::Channel::get_modes_as_str() {
 
   std::stringstream modes;
   std::stringstream values;

@@ -6,7 +6,7 @@
 #include "commands.hpp"
 
 
-Command::t_command_struct command_arr[] = {
+irc::Command::t_command_struct command_arr[] = {
   { "AWAY",    &AWAY,    0L },
   { "INVITE",  &INVITE,  2L },
   { "JOIN",    &JOIN,    1L },
@@ -27,7 +27,7 @@ Command::t_command_struct command_arr[] = {
 };
 
 
-Command::Command(irc::IrcServer &server, User& user, std::string command)
+irc::Command::Command(irc::IrcServer &server, User& user, std::string command)
   : _server(server), _user(user), _full_message(command), _command_name("") {
 
   bzero(&_command, sizeof(t_command_struct));
@@ -54,7 +54,7 @@ Command::Command(irc::IrcServer &server, User& user, std::string command)
 }
 
 
-void Command::execute() {
+void irc::Command::execute() {
 
   // check if User Registered
   if (_user.get_status() != ONLINE) {
@@ -79,7 +79,7 @@ void Command::execute() {
 }
 
 
-void Command::reply(t_irc_error err_code, std::string a1, std::string a2, std::string a3,
+void irc::Command::reply(t_irc_error err_code, std::string a1, std::string a2, std::string a3,
                       std::string a4, std::string a5, std::string a6, std::string a7) {
 
   std::stringstream msg;
@@ -91,5 +91,7 @@ void Command::reply(t_irc_error err_code, std::string a1, std::string a2, std::s
   // all messages send from User class, but I think that it must be sent something like that
   // _server.sendMsgToUser(_user, msg.str());
   _user.send_msg_to_user(_user, msg.str());
-  _user.get_buffer().clear();
+
+  // закоментил, т.к. если от клиента несколько команд приходит, он удаляет все кроме первой
+  // _user.get_buffer().clear();
 }

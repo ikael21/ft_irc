@@ -1,16 +1,16 @@
 #include "commands.hpp"
 
 
-void INVITE(Command *command) {
+void INVITE(irc::Command* command) {
 
-  User& user = command->get_user();
+  irc::User& user = command->get_user();
   std::vector<std::string> args = command->get_arguments();
 
   std::string& nick = args[0];
   std::string& channel_name = args[1];
 
   try {
-    User& invited_user = command->get_server().get_user_by_nickname(nick);
+    irc::User& invited_user = command->get_server().get_user_by_nickname(nick);
 
     irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();
     irc::IrcServer::t_channel_list::iterator ch = std::find(channels.begin(), channels.end(), channel_name);
@@ -33,9 +33,9 @@ void INVITE(Command *command) {
       << " invited " << nick << " into the channel.";
     std::string msg = notice.str();
 
-    std::vector<User*> channel_users = ch->get_users();
+    std::vector<irc::User*> channel_users = ch->get_users();
     for (size_t i = 0; i < channel_users.size(); ++i) {
-      User& to = *channel_users[i];
+      irc::User& to = *channel_users[i];
       if (to.receive_notice())
         user.send_msg_to_user(to, msg);
     }

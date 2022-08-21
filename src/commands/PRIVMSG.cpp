@@ -1,9 +1,9 @@
 #include "commands.hpp"
-#include "utils.hpp"
 
-void PRIVMSG(Command *command) {
 
-  User& user = command->get_user();
+void PRIVMSG(irc::Command* command) {
+
+  irc::User& user = command->get_user();
   std::vector<std::string>& args = command->get_arguments();
   std::vector<std::string> recipients;
   std::string message;
@@ -48,11 +48,12 @@ void PRIVMSG(Command *command) {
 
         if (ch->is_banned(user)) {
           command->reply(ERR_CANNOTSENDTOCHAN, *recipient);
-        } else if ((ch->have_mode(CH_FORBID_OUT_MSG) && ch->user_on_channel(user)) || !ch->have_mode(CH_FORBID_OUT_MSG)) {
+        } else if ((ch->have_mode(irc::CH_FORBID_OUT_MSG) && ch->user_on_channel(user)) \
+            || !ch->have_mode(irc::CH_FORBID_OUT_MSG)) {
           std::string fullmessage = user.get_prefix_msg() + \
             command->get_command_name() + " " + ch->get_name() + " :" + message;
 
-          ch->send_to_channel(user, fullmessage);
+          ch->send_to_channel(user, fullmessage, false);
         } else {
           command->reply(ERR_CANNOTSENDTOCHAN, *recipient);
         }
@@ -60,7 +61,7 @@ void PRIVMSG(Command *command) {
     } else {
 
       try {
-        User& to = command->get_server().get_user_by_nickname(*recipient);
+        irc::User& to = command->get_server().get_user_by_nickname(*recipient);
 
         if (to.is_away())
           command->reply(RPL_AWAY, to.get_nick(), to.get_afk_msg());

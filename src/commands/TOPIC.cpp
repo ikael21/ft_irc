@@ -1,9 +1,9 @@
 #include "commands.hpp"
 
 
-void TOPIC(Command *command) {
+void TOPIC(irc::Command* command) {
 
-  User& user = command->get_user();
+  irc::User& user = command->get_user();
 
   if (!command->num_args())
     return command->reply(ERR_NEEDMOREPARAMS, command->get_command_name());
@@ -34,6 +34,5 @@ void TOPIC(Command *command) {
       + " " + channel_name + " :" + new_topic;
 
     ch->send_to_channel(user, notice);
-    user.send_msg_to_user(user, notice);
   }
 }

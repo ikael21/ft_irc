@@ -1,28 +1,27 @@
 #include "commands.hpp"
 
 
-void check_and_return_names(Command *command, irc::IrcServer::t_channel_list::iterator& ch) {
+void check_and_return_names(irc::Command *command, irc::IrcServer::t_channel_list::iterator& ch) {
 
   if(!ch->is_private() || \
     ((ch->is_private() || ch->is_secret()) && ch->user_on_channel(command->get_user()))) {
 
-    std::vector<User*> channel_users = ch->get_users();
+    std::vector<irc::User*> channel_users = ch->get_users();
     std::stringstream users_str;
 
     for (size_t i = 0; i < channel_users.size(); ++i) {
       if (channel_users[i]->is_invisible())
         continue;
-      users_str << (ch->is_oper(*channel_users[i]) ? "@" : "+") << channel_users[i]->get_nick() << " ";
+      users_str << (ch->is_oper(*channel_users[i]) ? "@" : "") << channel_users[i]->get_nick() << " ";
     }
 
     if (channel_users.size())
-      command->reply(RPL_NAMREPLY, ch->get_name(), users_str.str());
-    command->reply(RPL_ENDOFNAMES, ch->get_name());
+      command->reply(RPL_NAMREPLY, "= " + ch->get_name(), users_str.str());
   }
 }
 
 
-void NAMES(Command *command) {
+void NAMES(irc::Command* command) {
 
   std::vector<std::string> args = command->get_arguments();
   irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();
@@ -65,9 +64,8 @@ void NAMES(Command *command) {
 
     std::string users_not_on_channels = s_users_not_on_channels.str();
     if (users_not_on_channels.length())
-      command->reply(RPL_NAMREPLY, "*", users_not_on_channels);
+      command->reply(RPL_NAMREPLY, "* *", users_not_on_channels);
 
-    if (!channels.size() || users_not_on_channels.length())
-      command->reply(RPL_ENDOFNAMES, "*");
+    command->reply(RPL_ENDOFNAMES, "*");
   }
 }

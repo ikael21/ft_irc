@@ -9,6 +9,8 @@
 # include "User.hpp"
 # include "errors.hpp"
 
+namespace irc {
+
 class Command {
 
  public:
@@ -49,5 +51,7 @@ class Command {
   t_command_struct          _command;
   std::vector<std::string>  _arguments;
 };
+
+} // namespace irc
 
 # endif

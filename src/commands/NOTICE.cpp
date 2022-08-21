@@ -1,8 +1,8 @@
 #include "commands.hpp"
 
-void NOTICE(Command *command) {
+void NOTICE(irc::Command* command) {
 
-  User& user = command->get_user();
+  irc::User& user = command->get_user();
   std::vector<std::string>& args = command->get_arguments();
   std::vector<std::string> recipients;
   std::string message;
@@ -40,15 +40,16 @@ void NOTICE(Command *command) {
 
     if (ch != channels.end()) {
       bool user_may_send_to_channel = !ch->is_banned(user) \
-        || (ch->have_mode(CH_FORBID_OUT_MSG) && ch->user_on_channel(user)) || !ch->have_mode(CH_FORBID_OUT_MSG);
+        || (ch->have_mode(irc::CH_FORBID_OUT_MSG) && ch->user_on_channel(user)) \
+        || !ch->have_mode(irc::CH_FORBID_OUT_MSG);
 
       if (user_may_send_to_channel) {
         std::string fullmessage = user.get_prefix_msg() + \
             command->get_command_name() + " " + ch->get_name() + " :" + message;
 
-        std::vector<User*> channel_users = ch->get_users();
+        std::vector<irc::User*> channel_users = ch->get_users();
         for (size_t i = 0; i < channel_users.size(); ++i) {
-          User& to = *channel_users[i];
+          irc::User& to = *channel_users[i];
           if (to.receive_notice())
             user.send_msg_to_user(to, fullmessage);
         }
@@ -58,7 +59,7 @@ void NOTICE(Command *command) {
 
     try {
 
-      User& to = command->get_server().get_user_by_nickname(recipients[0]);
+      irc::User& to = command->get_server().get_user_by_nickname(recipients[0]);
 
       std::string fullmessage = user.get_prefix_msg() + \
         command->get_command_name() + " " + to.get_nick() + " :" + message;

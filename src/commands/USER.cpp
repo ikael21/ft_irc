@@ -11,7 +11,7 @@ std::string logo[] = {
   ""
 };
 
-void __print_logo(Command *command) {
+void __print_logo(irc::Command* command) {
   command->reply(RPL_MOTDSTART, command->get_server().get_server_name());
   for (size_t i = 0; i < sizeof(logo) / sizeof(std::string); ++i) {
     command->reply(RPL_MOTD, logo[i]);
@@ -19,15 +19,20 @@ void __print_logo(Command *command) {
   command->reply(RPL_ENDOFMOTD);
 }
 
-void USER(Command *command) {
+void USER(irc::Command* command) {
 
-  User &user = command->get_user();
+  irc::User &user = command->get_user();
 
-  if (command->get_user().get_status() == ONLINE)
+  if (command->get_user().get_status() == irc::ONLINE)
 		return command->reply(ERR_ALREADYREGISTRED);
 
   user.set_username(command->get_arguments()[0]);
   user.set_realname(command->get_arguments()[3]);
+
+  std::vector<std::string> args = command->get_arguments();
+
+  for (size_t i = 0; i < args.size(); ++i)
+    std::cout << args[i] << std::endl;
 
   /* Servername and Hostname sets when user is connecting to Server
    * user.setServername(command->getArguments()[2]);
@@ -36,7 +41,7 @@ void USER(Command *command) {
 
   // if User has Nick and Username - ONLINE
   if (user.get_nick() != "*") {
-    user.set_status(ONLINE);
+    user.set_status(irc::ONLINE);
     __print_logo(command);
   }
 }

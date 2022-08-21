@@ -1,8 +1,8 @@
 #include "commands.hpp"
 
-void AWAY(Command *command) {
+void AWAY(irc::Command* command) {
 
-  User& user = command->get_user();
+  irc::User& user = command->get_user();
   std::vector<std::string>& args = command->get_arguments();
   std::string message;
 

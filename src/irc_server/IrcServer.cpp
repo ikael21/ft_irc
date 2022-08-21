@@ -162,7 +162,7 @@ void irc::IrcServer::add_channel(Channel& channel) {
 /**
  * throws UserNotFound if User is not found in the list
 **/
-User& irc::IrcServer::get_user_by_nickname(const std::string& nickname) {
+irc::User& irc::IrcServer::get_user_by_nickname(const std::string& nickname) {
   for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
     if (i->get_nick() == nickname)
       return *i;
