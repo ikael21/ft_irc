@@ -120,7 +120,6 @@ class Channel
 
  private:
   std::string                 _name;
-  // std::string                 _operator;
   std::string                 _topic;
   std::string                 _key;
   size_t                      _limit_users;
