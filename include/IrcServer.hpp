@@ -56,36 +56,18 @@ public:
   t_userlist&          get_users();
   const std::string    get_server_name() const;
 
-  /* Propose to create next methods
-
-  bool isUserOnServer(std::string nick);
-
-  TODO
-  возможно лучше создать поле внутри юзера (state/status/is_online)
-  сервер будет пинговать юзеров и выставлять поле в зависимости от ответа
-
-
-  bool isChannelOnServer(std::string channel_name);
-  канал автоматически удаляется когда все юзеры покидают данный канал
-
-
-  Channel& getChannel(std::string channel_name);
-
-  void sendToUser(User& from, User& to, std::string msg);
-  void sendToUser(User& from, std::string to_nick, std::string msg);
-
-  void sendToChannel(User& from, Channel& to, std::string msg);
-  void sendToChannel(User& from, std::string to_channel, std::string msg);
-  */
-
 private:
 
   IrcServer(const IrcServer&);
   IrcServer& operator=(const IrcServer&);
 
+  // initialization
+
   void _create_socket();
   void _initialize_socket(port_type port);
   void _initialize_kqueue();
+
+  // events
 
   int  _wait_for_events();
   void _add_socket_event();
@@ -94,19 +76,20 @@ private:
   void _enable_event(User& user, int type);
   void _disable_event(int fd, int type);
 
+  // event handlers
+
   void _execute_handler(t_event& event);
   void _accept_handler();
   void _read_handler(t_event& event);
   void _write_handler(t_event& event);
   void _delete_client(t_event& event);
 
-  void _check_users_activity();
-
   // helpers
 
   User& _find_or_create_user(int fd);
   void _ping_client(User& user);
   void _ping_by_nickname(const User& user);
+  void _check_users_activity();
 
   // methods for debug (if DEBUG defined)
 

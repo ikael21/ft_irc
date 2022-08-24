@@ -12,6 +12,7 @@ void irc::IrcServer::_print_new_user_info(const User& user) {
 void irc::IrcServer::_print_message_from_user(User& user) {
   std::cout << YELLOW "Message from User(FD: "
     << user.get_fd() << ")" RESET << std::endl;
+
   std::string tmp(user.get_buffer());
   while (tmp.find(END_OF_MESSAGE) != std::string::npos) {
     std::cout << GREEN "\t|"
@@ -49,14 +50,16 @@ void irc::IrcServer::_print_event_changes(t_event* changes, size_t size) {
     std::string filter(MAGENTA);
     filter += changes[i].filter == EVFILT_WRITE ? "WRITE" : "READ";
     filter += RESET;
+
     std::string flags(BLUE);
     if (changes[i].flags & EV_ADD) flags += "EV_ADD ";
     if (changes[i].flags & EV_ENABLE) flags += "EV_ENABLE ";
     if (changes[i].flags & EV_DISABLE) flags += "EV_DISABLE ";
     flags += " " RESET;
+
     User* u = (User*)changes[i].udata;
     std::stringstream ss;
-    if (u) {
+    if (u != NULL) {
       ss << "User(" << GREEN << u << RESET << ", FD: "
         << RED << u->get_fd() << RESET ")";
     }

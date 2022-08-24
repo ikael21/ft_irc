@@ -8,6 +8,6 @@ void TIME(irc::Command* command) {
 
   const time_t t = time(NULL);
   std::string tmp(ctime(&t));
-  std::string current_time(tmp.substr(0, tmp.size() - 1));
+  std::string current_time(tmp.begin(), tmp.end() - 1);
   command->reply(RPL_TIME, current_time);
 }

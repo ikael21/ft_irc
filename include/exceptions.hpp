@@ -24,7 +24,11 @@ struct BindError : public ErrnoBase {};
 struct ListenError : public ErrnoBase {};
 
 
-struct UserNotFound {};
+struct UserNotFound : public std::exception {
+  virtual const char* what() const throw() {
+    return "User is not found in the users list";
+  }
+};
 
 
 #endif // EXCEPTIONS_H_

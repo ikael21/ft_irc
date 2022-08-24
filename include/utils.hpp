@@ -18,16 +18,13 @@
 # define RESET   "\033[0m"
 
 
-/**
- * throws an exception if result equals true
-**/
 template<class Exception>
 void  throw_if_true(bool result)
 { if (result) throw Exception(); }
 
 
 /**
- * returned array should be freed via delete [] arr_ptr;
+ * returned array should be freed via delete []
 **/
 template<class T>
 T* list_to_array(const std::list<T>& list) {

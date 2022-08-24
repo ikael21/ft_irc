@@ -92,23 +92,24 @@ void irc::User::send_msg_to_user(irc::User& user, std::string message) {
 }
 
 
-void irc::User::send_msg(int fd, std::string message) {
+void User::send_msg(int fd, const std::string& message) {
+  static std::string remains;
   ssize_t bytes_sent = send(fd, message.c_str(), message.size(), 0);
   (void)bytes_sent;
 
-#ifdef DEBUG
-  std::cout << YELLOW "Reply for User(FD: "
-    << fd << ")" RESET << std::endl;
-  std::cout << GREEN "\t|" << message
-    << RESET << std::endl;
-#endif
+  const std::string& what_to_send = (remains.size() == 0) ? message : remains;
+  ssize_t bytes_sent = send(fd, what_to_send.c_str(), what_to_send.size(), 0);
 
-  /*
-  TODO check if all data sent
-  size_t left_bytes =
-    (!bytes_sent || bytes_sent == -1) ?
-      0 : message.size() - static_cast<size_t>(bytes_sent);
-  */
+  // save in case something left after sending
+  remains.assign(what_to_send.begin() + bytes_sent, what_to_send.end());
+
+  #ifdef DEBUG
+    std::cout << YELLOW "Reply for User(FD: "
+      << fd << ")" RESET << std::endl;
+    std::cout << GREEN "\t|"
+      << std::string(what_to_send.begin(), what_to_send.begin() + bytes_sent)
+      << RESET << std::endl;
+  #endif
 }
 
 /**

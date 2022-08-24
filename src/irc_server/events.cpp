@@ -73,7 +73,6 @@ void irc::IrcServer::delete_client(t_userlist::iterator user) {
 
 
 int irc::IrcServer::_wait_for_events() {
-  struct timespec timeout = { .tv_sec = 30, .tv_nsec = 0 };
   int changes_num = static_cast<int>(_changes.size());
   int events_num = static_cast<int>(_enabled_events_num);
   t_event* changes_arr = list_to_array<t_event>(_changes);
@@ -84,11 +83,15 @@ int irc::IrcServer::_wait_for_events() {
     _print_event_changes(changes_arr, _changes.size());
   #endif
 
+  struct timespec timeout = { .tv_sec = 30, .tv_nsec = 0 };
   int new_events_num = kevent(_kq,
                               changes_arr, changes_num,
                               _events.data(), events_num,
                               &timeout);
   delete [] changes_arr;
-  throw_if_true<ErrnoBase>(new_events_num == -1);
+
+  if (new_events_num == -1)
+    std::cerr << ErrnoBase().what() << std::endl;
+
   return new_events_num;
 }

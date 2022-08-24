@@ -42,8 +42,6 @@ void irc::IrcServer::_accept_handler() {
 
   _add_read_event(_users.back());
   _add_write_event(_users.back());
-
-  // disable to avoid handling of unnecessary events
   _disable_event(new_fd, EVFILT_WRITE);
 
   #ifdef DEBUG
@@ -75,7 +73,7 @@ void irc::IrcServer::_write_handler(t_event& event) {
     }
   }
 
-  // TODO add check if all data sent
+  // TODO if all data sent -> disable
   _disable_event(user->get_fd(), EVFILT_WRITE);
 }
 
@@ -84,11 +82,13 @@ void irc::IrcServer::_execute_handler(t_event& event) {
   static const int conds_num = 4;
   static bool conds[conds_num];
 
+  // order matters
   conds[0] = static_cast<int>(event.ident) == _socket;
   conds[1] = event.flags & EV_EOF;
   conds[2] = event.filter == EVFILT_READ;
   conds[3] = event.filter == EVFILT_WRITE;
 
+  // order the same as for conds
   static const handler event_handlers[] = {
     NULL,
     &IrcServer::_delete_client,
@@ -99,33 +99,27 @@ void irc::IrcServer::_execute_handler(t_event& event) {
   if (conds[0])
     return _accept_handler();
 
-  // based on the rest conditions call the suitable handler
   for (int i = 1; i < conds_num; ++i)
     if (conds[i])
       return (this->*event_handlers[i])(event);
 }
 
 
-// TODO refactor
 void irc::IrcServer::_check_users_activity() {
   const time_t half_minute = 30;
-  t_userlist::iterator it = _users.begin();
-  while (it != _users.end()) {
+  for (t_userlist::iterator it = _users.begin(); it != _users.end(); ++it) {
     const time_t time_passed = time(NULL) - it->get_last_activity();
     if (time_passed >= half_minute) {
       bool should_be_deleted = (it->get_status() == AUTHENTICATION ||
                                 it->get_state() == WAIT_PONG);
-      if (should_be_deleted) {
-        delete_client(it++);
-        continue;
-      }
+
+      if (should_be_deleted) { delete_client(it); continue; }
 
       if (it->get_state() == ACTIVE) {
         it->set_state(SEND_PING);
         _enable_event(*it, EVFILT_WRITE);
       }
     }
-    ++it;
   }
 }
 

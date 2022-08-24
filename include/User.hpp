@@ -78,8 +78,8 @@ class User {
   bool has_msg();
   std::string get_next_msg();
 
-  void send_msg(int fd, std::string message);
-  void send_msg_to_user(User& user, std::string message);
+  void send_msg(int fd, const std::string& message);
+  void send_msg_to_user(User& user, const std::string& message);
 
   std::string get_prefix_msg();
 
