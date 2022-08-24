@@ -1,7 +1,7 @@
 #include "IrcServer.hpp"
 
 
-User& irc::IrcServer::_find_or_create_user(int fd) {
+irc::User& irc::IrcServer::_find_or_create_user(int fd) {
   for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
     if (i->get_fd() == fd)
       return *i;

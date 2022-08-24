@@ -1,7 +1,7 @@
 #include "commands.hpp"
 
-//TODO NEED TEST
-void check_and_return_channels(Command *command, irc::IrcServer::t_channel_list::iterator& ch) {
+
+void check_and_return_channels(irc::Command *command, irc::IrcServer::t_channel_list::iterator& ch) {
 
   if(!ch->is_private() || \
     ((ch->is_private() || ch->is_secret()) && ch->user_on_channel(command->get_user()))) {
@@ -13,7 +13,8 @@ void check_and_return_channels(Command *command, irc::IrcServer::t_channel_list:
   }
 }
 
-void LIST(Command *command) {
+
+void LIST(irc::Command* command) {
 
   std::vector<std::string> args = command->get_arguments();
   irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();

@@ -5,13 +5,13 @@
 #include "utils.hpp"
 #include "User.hpp"
 
-User::User()
+irc::User::User()
   : _status(AUTHENTICATION),
     _state(ACTIVE),
     _last_activity(time(NULL)) {}
 
 
-User::User(int fd)
+irc::User::User(int fd)
   : _fd(fd),
     _status(AUTHENTICATION),
     _nick("*"),
@@ -19,10 +19,10 @@ User::User(int fd)
     _last_activity(time(NULL)) {}
 
 
-User::User(int fd, std::string username,
-                   std::string hostname,
-                   std::string servername,
-                   std::string realname)
+irc::User::User(int fd, std::string username,
+                std::string hostname,
+                std::string servername,
+                std::string realname)
   : _fd(fd),
     _status(AUTHENTICATION),
     _username(username),
@@ -34,7 +34,7 @@ User::User(int fd, std::string username,
     _last_activity(time(NULL)) {}
 
 
-User::User(const User& other)
+irc::User::User(const irc::User& other)
   : _fd(other._fd),
     _status(other._status),
     _username(other._username),
@@ -48,20 +48,20 @@ User::User(const User& other)
     _buffer(other._buffer) {}
 
 
-User::~User() {}
+irc::User::~User() {}
 
 
-bool operator==(const User& left, const User& right) {
+bool irc::operator==(const irc::User& left, const irc::User& right) {
   return left._fd == right._fd;
 }
 
 
-bool operator!=(const User& left, const User& right) {
+bool irc::operator!=(const irc::User& left, const irc::User& right) {
     return left._fd != right._fd;
 }
 
 
-void User::receive(ssize_t size) {
+void irc::User::receive(ssize_t size) {
   char* buff = new char[size + 1];
 
   size = recv(_fd, buff, size, 0);
@@ -72,12 +72,12 @@ void User::receive(ssize_t size) {
 }
 
 
-bool User::has_msg() {
+bool irc::User::has_msg() {
   return _buffer.find(END_OF_MESSAGE) != std::string::npos;
 }
 
 
-std::string User::get_next_msg() {
+std::string irc::User::get_next_msg() {
 
   size_t eol = _buffer.find(END_OF_MESSAGE);
   std::string line = _buffer.substr(0, eol);
@@ -87,13 +87,15 @@ std::string User::get_next_msg() {
 }
 
 
-void User::send_msg_to_user(User& user, const std::string& message) {
+void irc::User::send_msg_to_user(irc::User& user, std::string message) {
   send_msg(user.get_fd(), message + END_OF_MESSAGE);
 }
 
 
 void User::send_msg(int fd, const std::string& message) {
   static std::string remains;
+  ssize_t bytes_sent = send(fd, message.c_str(), message.size(), 0);
+  (void)bytes_sent;
 
   const std::string& what_to_send = (remains.size() == 0) ? message : remains;
   ssize_t bytes_sent = send(fd, what_to_send.c_str(), what_to_send.size(), 0);
@@ -114,7 +116,7 @@ void User::send_msg(int fd, const std::string& message) {
  * @brief Prefix of User's message that must be sent to other users/channels
  * :nick!username@hostname(?)
  */
-std::string User::get_prefix_msg() {
+std::string irc::User::get_prefix_msg() {
   return ":" + _nick + "!" + _username + "@" + _hostname + " ";
 }
 
@@ -122,37 +124,42 @@ std::string User::get_prefix_msg() {
 /**
  * state must be one of [ACTIVE, SEND_PING, WAIT_PONG]
 **/
-void User::set_state(int8_t state) { _state = state; }
-bool User::has_mode(t_user_mode mode) {
+void irc::User::set_state(int8_t state) { _state = state; }
+bool irc::User::has_mode(t_user_mode mode) {
   return std::find(_modes.begin(), _modes.end(), mode) != _modes.end();
 }
 
 
-void User::add_mode(t_user_mode mode) {
+void irc::User::add_mode(t_user_mode mode) {
   if (!has_mode(mode))
     _modes.push_back(mode);
 }
 
 
-void User::remove_mode(t_user_mode mode) {
+void irc::User::remove_mode(t_user_mode mode) {
   if (has_mode(mode))
     _modes.erase(std::find(_modes.begin(), _modes.end(), mode));
 }
 
 
-bool User::is_invisible() {
+bool irc::User::is_invisible() {
   return has_mode(U_INVISIBLE);
 }
 
 
-bool User::receive_notice() {
+bool irc::User::receive_notice() {
   return has_mode(U_S_NOTICE);
 }
 
 
-std::string User::get_modes_as_str() {
+std::string irc::User::get_modes_as_str() {
   std::string modes("+");
   for (size_t i = 0; i < _modes.size(); ++i)
     modes += static_cast<char>(_modes[i]);
   return modes;
+}
+
+
+bool irc::User::is_away() {
+  return _afkMessage.length();
 }

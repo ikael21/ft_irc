@@ -8,6 +8,9 @@
 # include <vector>
 # include <ctime>
 
+namespace irc {
+
+
 typedef enum    s_user_status {
   AUTHENTICATION,
   REGISTRATION,
@@ -15,11 +18,11 @@ typedef enum    s_user_status {
 }               t_user_status;
 
 
-typedef enum s_user_state {
+typedef enum    s_user_state {
   ACTIVE,
   SEND_PING,
   WAIT_PONG
-}            t_user_state;
+}               t_user_state;
 
 
 /* Список доступных режимов пользователя:
@@ -63,7 +66,7 @@ class User {
 
   void set_afk_msg(std::string message) { _afkMessage = message; }
   std::string get_afk_msg() { return _afkMessage; }
-  bool is_away() { return !_afkMessage.empty(); }
+  bool is_away();
 
   void set_status(t_user_status status) { _status = status; }
   t_user_status get_status() { return _status; }
@@ -110,5 +113,7 @@ class User {
   std::vector<t_user_mode> _modes;
   std::string              _buffer;
 };
+
+} // namespace irc
 
 # endif

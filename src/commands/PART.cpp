@@ -1,9 +1,9 @@
 #include "commands.hpp"
 
 
-void PART(Command* command) {
+void PART(irc::Command* command) {
 
-  User& user = command->get_user();
+  irc::User& user = command->get_user();
   irc::IrcServer::t_channel_list& channels =  command->get_server().get_channels();
 
   std::string prefix_quit_msg = user.get_prefix_msg() + "PART ";
@@ -17,6 +17,9 @@ void PART(Command* command) {
     } else if (!ch->user_on_channel(user)) {
       command->reply(ERR_USERNOTINCHANNEL, user.get_nick(), ch->get_name());
     } else {
+
+      assign_new_operator(command, user, ch);
+
       std::string full_msg = prefix_quit_msg + ch->get_name();
       ch->send_to_channel(user, full_msg);
       ch->remove_user(user);

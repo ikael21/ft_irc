@@ -15,6 +15,8 @@
   # define DEBUG 0
 # endif
 
+namespace irc {
+
 /* Список доступных режимов канала:
  *   o - брать/давать привилегии операторов канала
  *   p - флаг приватности канала;
@@ -52,10 +54,10 @@ class Channel
 {
   struct BannedUser
   {
-    User*       user;
-    User*       who;
+    irc::User*  user;
+    irc::User*  who;
     time_t      when;
-    BannedUser(User* user, User* who)
+    BannedUser(irc::User* user, irc::User* who)
       : user(user), who(who), when(std::time(NULL)) {};
   };
 
@@ -66,11 +68,11 @@ class Channel
   bool is_private();
   bool is_secret();
 
-  void add_user(User& user);
-  void remove_user(User& user);
+  void add_user(irc::User& user);
+  void remove_user(irc::User& user);
 
-  std::vector<User*> get_users() { return _users; }
-  std::vector<User*> get_visible_users();
+  std::vector<irc::User*> get_users() { return _users; }
+  std::vector<irc::User*> get_visible_users();
 
   void set_name(std::string channelName);
   std::string get_name() { return _name; }
@@ -84,13 +86,13 @@ class Channel
   std::vector<t_channel_mode> get_channel_modes() { return _modes; }
   bool have_mode(t_channel_mode mode);
 
-  void add_to_invite_list(User& user);
-  void remove_from_invite_list(User& user);
-  bool is_invited(User& user);
+  void add_to_invite_list(irc::User& user);
+  void remove_from_invite_list(irc::User& user);
+  bool is_invited(irc::User& user);
 
-  void add_to_ban_list(User& user, User& who);
-  void remove_from_ban_list(User& user);
-  bool is_banned(User& user);
+  void add_to_ban_list(irc::User& user, irc::User& who);
+  void remove_from_ban_list(irc::User& user);
+  bool is_banned(irc::User& user);
   std::vector<std::string> get_ban_list();
 
   void set_key(std::string key);
@@ -102,33 +104,35 @@ class Channel
   bool is_full() { return _users.size() >= _limit_users; }
   bool is_empty() { return !_users.size(); }
 
-  bool user_on_channel(User& user);
+  bool user_on_channel(irc::User& user);
 
-  void add_oper(User& user);
-  void remove_oper(User& user);
-  bool is_oper(User& user);
+  void add_oper(irc::User& user);
+  void remove_oper(irc::User& user);
+  bool is_oper(irc::User& user);
+  size_t get_num_opers() { return _operators.size(); }
 
   std::string get_modes_as_str();
 
-  void send_to_channel(User& user, std::string& msg);
+  void send_to_channel(irc::User& user, std::string& msg, bool include_myself = true);
 
-  friend bool operator==(const Channel& left, const Channel& right);
-  friend bool operator==(const Channel& left, const std::string& channel_name);
+  friend bool operator==(const irc::Channel& left, const irc::Channel& right);
+  friend bool operator==(const irc::Channel& left, const std::string& channel_name);
 
  private:
   std::string                 _name;
-  std::string                 _operator;
   std::string                 _topic;
   std::string                 _key;
   size_t                      _limit_users;
-  std::vector<User*>          _users;
-  std::vector<User*>          _operators;
-  std::vector<User*>          _invited;
+  std::vector<irc::User*>     _users;
+  std::vector<irc::User*>     _operators;
+  std::vector<irc::User*>     _invited;
   std::vector<BannedUser>     _banned;
   std::vector<t_channel_mode> _modes;
 
   std::string _log_message(std::string message);
   void _log(std::string message);
 };
+
+}  // namespace irc
 
 #endif

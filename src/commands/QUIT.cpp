@@ -1,11 +1,24 @@
 #include "commands.hpp"
 
+
 typedef irc::IrcServer::t_userlist::iterator user_iter;
 
-void QUIT(Command* command) {
+void assign_new_operator(irc::Command* command,
+                         irc::User& user,
+                         irc::IrcServer::t_channel_list::iterator ch) {
 
-  User& user = command->get_user();
-  irc::IrcServer& server = command->get_server();
+  if (ch->get_users().size() > 1 && ch->get_num_opers() == 1 && ch->is_oper(user)) {
+    irc::User* next_oper = ch->get_users()[1];
+
+    std::string mode_command =  "MODE " + ch->get_name() + " +o " + next_oper->get_nick();
+    irc::Command(command->get_server(), user, mode_command).execute();
+  }
+}
+
+
+void QUIT(irc::Command* command) {
+
+  irc::User& user = command->get_user();
 
   std::string prefix_quit_msg = user.get_prefix_msg() + "PART ";
   std::string suffix_quit_msg;
@@ -13,15 +26,19 @@ void QUIT(Command* command) {
   if (command->num_args())
     suffix_quit_msg = (command->get_arguments()[0][0] == ':' ? " " : " :") + command->get_arguments()[0];
 
-  irc::IrcServer::t_channel_list& channels = server.get_channels();
-  for (irc::IrcServer::t_channel_list::iterator ch = channels.begin(); ch != channels.end(); ++ch) {
+  irc::IrcServer::t_channel_list& channels = command->get_server().get_channels();
+  irc::IrcServer::t_channel_list::iterator ch = channels.begin();
+
+  while (ch != channels.end()) {
     if (ch->user_on_channel(user)) {
+
+      assign_new_operator(command, user, ch);
+
       std::string full_msg = prefix_quit_msg + ch->get_name() + suffix_quit_msg;
-      ch->send_to_channel(user, full_msg);
+      ch->send_to_channel(user, full_msg, false);
       ch->remove_user(user);
 
-      if (ch->is_empty())
-        channels.erase(ch);
+      ch = ch->is_empty() ? channels.erase(ch) : ++ch;
     }
   }
   shutdown(user.get_fd(), SHUT_WR);
