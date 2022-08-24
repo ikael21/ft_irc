@@ -78,17 +78,22 @@ int irc::IrcServer::_wait_for_events() {
   int events_num = static_cast<int>(_enabled_events_num);
   t_event* changes_arr = list_to_array<t_event>(_changes);
 
-  #ifdef DEBUG
-    std::cout << "waiting for new events(enabled: " RED
-      << events_num << RESET ")..." << std::endl;
-    _print_event_changes(changes_arr, _changes.size());
-  #endif
+  static struct timespec half_minite = { .tv_sec = 30, .tv_nsec = 0 };
+  struct timespec* timeout = &half_minite;
 
-  struct timespec timeout = { .tv_sec = 30, .tv_nsec = 0 };
+#ifdef DEBUG
+  std::cout << "waiting for new events(enabled: " RED
+    << events_num << RESET ")..." << std::endl;
+  _print_event_changes(changes_arr, _changes.size());
+
+  timeout = NULL; // wait until something happens
+  (void)half_minite;
+#endif
+
   int new_events_num = kevent(_kq,
                               changes_arr, changes_num,
                               _events.data(), events_num,
-                              &timeout);
+                              timeout);
   delete [] changes_arr;
 
   if (new_events_num == -1)
