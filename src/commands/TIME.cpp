@@ -1,7 +1,7 @@
 #include "commands.hpp"
 
 
-void TIME(Command *command) {
+void TIME(irc::Command* command) {
   std::vector<std::string>& args = command->get_arguments();
   if (args.size() > 0 && args[0] != command->get_server().get_server_name())
     return command->reply(ERR_NOSUCHSERVER);

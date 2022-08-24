@@ -56,11 +56,20 @@ nc -c <hostname> 6666
 - `TIME <server>`
 - `TOPIC <channel> [<topic>]`
 - `USER <username> <hostname> <servername> <realname>`
-- `USERS [<server>]`
 
 For `Linux` please install [libkqueue](https://github.com/mheily/libkqueue).
 
 ```bash
 sudo apt update
 sudo apt install libkqueue-dev
+```
+
+## BUGS
+
+### 1 Когда все пользователи выходят, замечено в LimeChat
+```text
+ircserv(4155,0x116cd9600) malloc: Heap corruption detected, free list is damaged at 0x6000020640a0
+*** Incorrect guard value: 0
+ircserv(4155,0x116cd9600) malloc: *** set a breakpoint in malloc_error_break to debug
+[1]    4155 abort      ./ircserv 6667 1234
 ```

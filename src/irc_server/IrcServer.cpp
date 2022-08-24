@@ -69,8 +69,11 @@ void irc::IrcServer::_write_handler(t_event& event) {
   User* user = (User*)event.udata;
   if (user->get_state() == SEND_PING)
     _ping_client(*user);
-  else if (user->has_msg())
-    Command(*this, *user, user->get_next_msg()).execute();
+  else {
+    while (user->has_msg()) {
+      Command(*this, *user, user->get_next_msg()).execute();
+    }
+  }
 
   // TODO add check if all data sent
   _disable_event(user->get_fd(), EVFILT_WRITE);
@@ -159,7 +162,7 @@ void irc::IrcServer::add_channel(Channel& channel) {
 /**
  * throws UserNotFound if User is not found in the list
 **/
-User& irc::IrcServer::get_user_by_nickname(const std::string& nickname) {
+irc::User& irc::IrcServer::get_user_by_nickname(const std::string& nickname) {
   for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
     if (i->get_nick() == nickname)
       return *i;

@@ -1,14 +1,17 @@
 #include "commands.hpp"
 
-void PASS(Command *command) {
+void PASS(irc::Command* command) {
 
-  User& user = command->get_user();
+  irc::User& user = command->get_user();
   std::string pass = command->get_arguments()[0];
 
-  if (user.get_status() == ONLINE || user.get_status() == REGISTRATION) {
+  if (pass[0] == ':')
+    pass.erase(0, 1);
+
+  if (user.get_status() == irc::ONLINE || user.get_status() == irc::REGISTRATION) {
     command->reply(ERR_ALREADYREGISTRED);
   } else if (command->get_server().is_password_correct(pass)) {
-    user.set_status(REGISTRATION);
+    user.set_status(irc::REGISTRATION);
   } else {
     command->reply(ERR_PASSWDMISMATCH);
   }
