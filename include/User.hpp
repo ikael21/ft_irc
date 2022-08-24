@@ -98,6 +98,7 @@ class User {
 
   time_t get_last_activity() { return _last_activity; }
   void set_last_activity(time_t t) { _last_activity = t; }
+  bool is_data_sent();
 
  private:
   int                      _fd;
@@ -112,6 +113,7 @@ class User {
   std::string              _afkMessage;
   std::vector<t_user_mode> _modes;
   std::string              _buffer;
+  bool                     _is_data_sent;
 };
 
 } // namespace irc

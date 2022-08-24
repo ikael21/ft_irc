@@ -8,7 +8,8 @@
 irc::User::User()
   : _status(AUTHENTICATION),
     _state(ACTIVE),
-    _last_activity(time(NULL)) {}
+    _last_activity(time(NULL)),
+    _is_data_sent(true) {}
 
 
 irc::User::User(int fd)
@@ -16,7 +17,8 @@ irc::User::User(int fd)
     _status(AUTHENTICATION),
     _nick("*"),
     _state(ACTIVE),
-    _last_activity(time(NULL)) {}
+    _last_activity(time(NULL)),
+    _is_data_sent(true) {}
 
 
 irc::User::User(int fd, std::string username,
@@ -31,7 +33,8 @@ irc::User::User(int fd, std::string username,
     _realname(realname),
     _nick("*"),
     _state(ACTIVE),
-    _last_activity(time(NULL)) {}
+    _last_activity(time(NULL)),
+    _is_data_sent(true) {}
 
 
 irc::User::User(const irc::User& other)
@@ -45,7 +48,8 @@ irc::User::User(const irc::User& other)
     _state(other._state),
     _last_activity(other._last_activity),
     _afkMessage(other._afkMessage),
-    _buffer(other._buffer) {}
+    _buffer(other._buffer),
+    _is_data_sent(true) {}
 
 
 irc::User::~User() {}
@@ -100,6 +104,7 @@ void irc::User::send_msg(int fd, const std::string& message) {
 
   // save in case something left after sending
   remains.assign(what_to_send.begin() + bytes_sent, what_to_send.end());
+  _is_data_sent = (remains.size() == 0);
 
   #ifdef DEBUG
     std::cout << YELLOW "Reply for User(FD: "
@@ -160,4 +165,8 @@ std::string irc::User::get_modes_as_str() {
 
 bool irc::User::is_away() {
   return _afkMessage.length();
+}
+
+bool irc::User::is_data_sent() {
+  return _is_data_sent;
 }

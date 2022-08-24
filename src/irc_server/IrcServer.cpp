@@ -73,8 +73,8 @@ void irc::IrcServer::_write_handler(t_event& event) {
     }
   }
 
-  // TODO if all data sent -> disable
-  _disable_event(user->get_fd(), EVFILT_WRITE);
+  if (user->is_data_sent())
+    _disable_event(user->get_fd(), EVFILT_WRITE);
 }
 
 
