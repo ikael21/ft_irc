@@ -23,7 +23,8 @@ irc::Command::t_command_struct command_arr[] = {
   { "QUIT",    &QUIT,    0L },
   { "TIME",    &TIME,    0L },
   { "TOPIC",   &TOPIC,   0L },
-  { "USER",    &USER,    4L }
+  { "USER",    &USER,    4L },
+  { "WHOIS",   &WHOIS,   1L }
 };
 
 

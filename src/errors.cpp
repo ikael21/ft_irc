@@ -125,6 +125,29 @@ std::string __RPL_UNAWAY() { return ":You are no longer marked as being away"; }
 // 306
 std::string __RPL_NOWAWAY() { return ":You have been marked as being away"; }
 
+// 311
+std::string __RPL_WHOISUSER(std::string nick, std::string username, std::string hostname, std::string realname) {
+  return nick + " " + username + " " + hostname + " * :" + realname;
+}
+
+// 312
+std::string __RPL_WHOISSERVER(std::string nick, std::string server, std::string server_info) {
+  return nick + " " + server + " :" + server_info;
+}
+
+// 317
+std::string __RPL_WHOISIDLE(std::string nick, std::string integer) {
+  return nick + " " + integer + " :seconds idle";
+}
+
+// 319
+std::string __RPL_WHOISCHANNELS(std::string nick, std::string channel) {
+  return nick + " :" + channel;
+}
+
+// 318
+std::string __RPL_ENDOFWHOIS(std::string nick) { return nick + " :End of /WHOIS list"; }
+
 // 321
 std::string __RPL_LISTSTART() { return "Channel :Users  Name"; }
 
@@ -261,6 +284,10 @@ static t_err __error_arr[] = {
   { RPL_AWAY,              (void*)&__RPL_AWAY,             2L },
   { RPL_UNAWAY,            (void*)&__RPL_UNAWAY,           0L },
   { RPL_NOWAWAY,           (void*)&__RPL_NOWAWAY,          0L },
+  { RPL_WHOISUSER,         (void*)&__RPL_WHOISUSER,        4L },
+  { RPL_WHOISSERVER,       (void*)&__RPL_WHOISSERVER,      3L },
+  { RPL_WHOISIDLE,         (void*)&__RPL_WHOISIDLE,        3L },
+  { RPL_WHOISCHANNELS,     (void*)&__RPL_WHOISCHANNELS,    2L },
   { RPL_LISTSTART,         (void*)&__RPL_LISTSTART,        0L },
   { RPL_LIST,              (void*)&__RPL_LIST,             3L },
   { RPL_LISTEND,           (void*)&__RPL_LISTEND,          0L },

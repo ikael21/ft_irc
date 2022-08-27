@@ -19,6 +19,7 @@ void assign_new_operator(irc::Command* command,
 void QUIT(irc::Command* command) {
 
   irc::User& user = command->get_user();
+  irc::IrcServer& server = command->get_server();
 
   std::string prefix_quit_msg = user.get_prefix_msg() + "PART ";
   std::string suffix_quit_msg;
