@@ -48,6 +48,7 @@ void irc::IrcServer::_delete_client(t_event& event) {
   while (it != _users.end() && it->get_fd() != fd)
     ++it;
   _remove_user_from_channels(*it);
+  _users.erase(it);
   close(fd);
   if (_enabled_events_num > 0)
     _enabled_events_num--;
@@ -62,6 +63,7 @@ void irc::IrcServer::_delete_client(t_event& event) {
 void irc::IrcServer::delete_client(t_userlist::iterator user) {
   int fd = user->get_fd();
   _remove_user_from_channels(*user);
+  _users.erase(user);
   close(fd);
   if (_enabled_events_num > 0)
     _enabled_events_num--;

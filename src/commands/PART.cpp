@@ -18,7 +18,7 @@ void PART(irc::Command* command) {
       command->reply(ERR_USERNOTINCHANNEL, user.get_nick(), ch->get_name());
     } else {
 
-      assign_new_operator(command, user, ch);
+      assign_new_operator(command->get_server(), user, ch);
 
       std::string full_msg = prefix_quit_msg + ch->get_name();
       ch->send_to_channel(user, full_msg);

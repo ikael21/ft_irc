@@ -1,5 +1,5 @@
 #include "IrcServer.hpp"
-
+#include "Command.hpp"
 
 irc::User& irc::IrcServer::_find_or_create_user(int fd) {
   for (t_userlist::iterator i = _users.begin(); i != _users.end(); ++i) {
@@ -29,20 +29,27 @@ void irc::IrcServer::_ping_by_nickname(const User& user) {
   #endif
 }
 
+
 void irc::IrcServer::_remove_user_from_channels(User& user) {
 
   irc::IrcServer::t_channel_list::iterator ch = _channels.begin();
   std::string prefix_quit_msg = user.get_prefix_msg() + "PART ";
 
   while (ch != _channels.end()) {
-
     if (ch->user_on_channel(user)) {
-      std::string full_msg = prefix_quit_msg + ch->get_name();;
 
+      // assign new operator
+      if (ch->get_users().size() > 1 && ch->get_num_opers() == 1 && ch->is_oper(user)) {
+        irc::User* next_oper = ch->get_users()[1];
+
+        std::string mode_command =  "MODE " + ch->get_name() + " +o " + next_oper->get_nick();
+        irc::Command(*this, user, mode_command).execute();
+      }
+
+      std::string full_msg = prefix_quit_msg + ch->get_name();
       ch->send_to_channel(user, full_msg, false);
       ch->remove_user(user);
-      ch = ch->is_empty() ? _channels.erase(ch) : ++ch;
     }
+    ch = ch->is_empty() ? _channels.erase(ch) : ++ch;
   }
-  _users.erase(std::find(_users.begin(), _users.end(), user));
 }
