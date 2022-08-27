@@ -110,12 +110,7 @@ void irc::IrcServer::_check_users_activity() {
   for (t_userlist::iterator it = _users.begin(); it != _users.end(); ++it) {
     const time_t time_passed = time(NULL) - it->get_last_activity();
 
-    static bool __is_not_debug = true;
-#ifdef DEBUG
-    __is_not_debug = false; // not send PONG, for convenience
-#endif
-
-    if (time_passed >= half_minute && __is_not_debug) {
+    if (time_passed >= half_minute) {
       bool should_be_deleted = (it->get_status() == AUTHENTICATION ||
                                 it->get_state() == WAIT_PONG);
 
@@ -140,7 +135,9 @@ void irc::IrcServer::run() {
     for (int i = 0; i < new_events_num; ++i)
       _execute_handler(_events[i]);
 
-    _check_users_activity();
+    #ifndef DEBUG
+      _check_users_activity();
+    #endif
 
     if (!new_events_num) continue;
 

@@ -13,7 +13,7 @@ void irc::IrcServer::_create_socket() {
   int res = 0;
   const int y = 1;
   res = setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &y, sizeof(int));
-  throw_if_true<TcpSocketError>(_socket == -1);
+  throw_if_true<TcpSocketError>(res == -1);
 
   res = fcntl(_socket, F_SETFL, O_NONBLOCK);
   throw_if_true<TcpSocketError>(res == -1);
