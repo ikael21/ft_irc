@@ -93,7 +93,6 @@ void irc::User::send_msg_to_user(irc::User& user, const std::string& message) {
 
 
 void irc::User::send_msg(int fd, const std::string& message) {
-
   static std::string remains;
   const std::string& what_to_send = (remains.size() == 0) ? message : remains;
 
