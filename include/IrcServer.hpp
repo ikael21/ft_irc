@@ -15,6 +15,7 @@
 # include <fcntl.h>
 # include <unistd.h>
 # include <stdlib.h>
+# include <csignal>
 # include <vector>
 # include <list>
 # include "EventsVector.hpp"

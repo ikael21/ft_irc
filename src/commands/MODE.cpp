@@ -168,7 +168,7 @@ void __change_oper_in_channel(irc::Command* command,
     } else if (plus && !ch->is_oper(new_op_user)) {
       ch->add_oper(new_op_user);
       __send_info(user, ch, command->get_command_name(), msg);
-    } else if (!plus && ch->is_oper(new_op_user)) {
+    } else if (!plus && ch->is_oper(new_op_user) && user != new_op_user) {
       ch->remove_oper(new_op_user);
       __send_info(user, ch, command->get_command_name(), msg);
     }

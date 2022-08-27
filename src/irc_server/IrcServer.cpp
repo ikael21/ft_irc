@@ -9,6 +9,7 @@ irc::IrcServer::IrcServer(const char* port, const char* password)
     : _password(password),
       _name("ircserv.school21"),
       _enabled_events_num(0) {
+  signal(SIGPIPE, SIG_IGN);
   _create_socket();
   _initialize_socket(static_cast<irc::port_type>(atoi(port)));
   _initialize_kqueue();
