@@ -73,7 +73,8 @@ void irc::IrcServer::_write_handler(t_event& event) {
     }
   }
 
-  _disable_event(user->get_fd(), EVFILT_WRITE);
+  if (user->is_data_sent())
+    _disable_event(user->get_fd(), EVFILT_WRITE);
 }
 
 
@@ -108,6 +109,7 @@ void irc::IrcServer::_check_users_activity() {
   const time_t half_minute = 30;
   for (t_userlist::iterator it = _users.begin(); it != _users.end(); ++it) {
     const time_t time_passed = time(NULL) - it->get_last_activity();
+
     if (time_passed >= half_minute) {
       bool should_be_deleted = (it->get_status() == AUTHENTICATION ||
                                 it->get_state() == WAIT_PONG);
@@ -133,7 +135,9 @@ void irc::IrcServer::run() {
     for (int i = 0; i < new_events_num; ++i)
       _execute_handler(_events[i]);
 
-    _check_users_activity();
+    #ifndef DEBUG
+      _check_users_activity();
+    #endif
 
     if (!new_events_num) continue;
 
