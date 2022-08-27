@@ -44,6 +44,6 @@ void MODE(irc::Command* command);
 
 void WHOIS(irc::Command* command);
 
-void assign_new_operator(irc::Command* command,
+void assign_new_operator(irc::IrcServer& server,
                          irc::User& user,
                          irc::IrcServer::t_channel_list::iterator ch);

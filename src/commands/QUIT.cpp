@@ -1,9 +1,7 @@
 #include "commands.hpp"
 
 
-typedef irc::IrcServer::t_userlist::iterator user_iter;
-
-void assign_new_operator(irc::Command* command,
+void assign_new_operator(irc::IrcServer& server,
                          irc::User& user,
                          irc::IrcServer::t_channel_list::iterator ch) {
 
@@ -11,7 +9,7 @@ void assign_new_operator(irc::Command* command,
     irc::User* next_oper = ch->get_users()[1];
 
     std::string mode_command =  "MODE " + ch->get_name() + " +o " + next_oper->get_nick();
-    irc::Command(command->get_server(), user, mode_command).execute();
+    irc::Command(server, user, mode_command).execute();
   }
 }
 
@@ -32,14 +30,13 @@ void QUIT(irc::Command* command) {
   while (ch != channels.end()) {
     if (ch->user_on_channel(user)) {
 
-      assign_new_operator(command, user, ch);
+      assign_new_operator(command->get_server(), user, ch);
 
       std::string full_msg = prefix_quit_msg + ch->get_name() + suffix_quit_msg;
       ch->send_to_channel(user, full_msg, false);
       ch->remove_user(user);
-
-      ch = ch->is_empty() ? channels.erase(ch) : ++ch;
     }
+    ch = ch->is_empty() ? channels.erase(ch) : ++ch;
   }
   shutdown(user.get_fd(), SHUT_WR);
   user.get_buffer().clear();
