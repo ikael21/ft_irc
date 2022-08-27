@@ -87,17 +87,16 @@ std::string irc::User::get_next_msg() {
 }
 
 
-void irc::User::send_msg_to_user(irc::User& user, std::string message) {
+void irc::User::send_msg_to_user(irc::User& user, const std::string& message) {
   send_msg(user.get_fd(), message + END_OF_MESSAGE);
 }
 
 
-void User::send_msg(int fd, const std::string& message) {
-  static std::string remains;
-  ssize_t bytes_sent = send(fd, message.c_str(), message.size(), 0);
-  (void)bytes_sent;
+void irc::User::send_msg(int fd, const std::string& message) {
 
+  static std::string remains;
   const std::string& what_to_send = (remains.size() == 0) ? message : remains;
+
   ssize_t bytes_sent = send(fd, what_to_send.c_str(), what_to_send.size(), 0);
 
   // save in case something left after sending

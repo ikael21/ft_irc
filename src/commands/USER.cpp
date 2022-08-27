@@ -29,11 +29,6 @@ void USER(irc::Command* command) {
   user.set_username(command->get_arguments()[0]);
   user.set_realname(command->get_arguments()[3]);
 
-  std::vector<std::string> args = command->get_arguments();
-
-  for (size_t i = 0; i < args.size(); ++i)
-    std::cout << args[i] << std::endl;
-
   /* Servername and Hostname sets when user is connecting to Server
    * user.setServername(command->getArguments()[2]);
    * user.setHostname(command->getArguments()[1]);
