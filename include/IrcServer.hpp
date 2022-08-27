@@ -90,6 +90,7 @@ private:
   void _ping_client(User& user);
   void _ping_by_nickname(const User& user);
   void _check_users_activity();
+  void _remove_user_from_channels(User& user);
 
   // methods for debug (if DEBUG defined)
 

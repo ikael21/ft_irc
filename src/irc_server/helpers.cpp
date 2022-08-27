@@ -28,3 +28,21 @@ void irc::IrcServer::_ping_by_nickname(const User& user) {
     _print_message_for_user(user, message);
   #endif
 }
+
+void irc::IrcServer::_remove_user_from_channels(User& user) {
+
+  irc::IrcServer::t_channel_list::iterator ch = _channels.begin();
+  std::string prefix_quit_msg = user.get_prefix_msg() + "PART ";
+
+  while (ch != _channels.end()) {
+
+    if (ch->user_on_channel(user)) {
+      std::string full_msg = prefix_quit_msg + ch->get_name();;
+
+      ch->send_to_channel(user, full_msg, false);
+      ch->remove_user(user);
+      ch = ch->is_empty() ? _channels.erase(ch) : ++ch;
+    }
+  }
+  _users.erase(std::find(_users.begin(), _users.end(), user));
+}
